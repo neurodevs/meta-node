@@ -6,7 +6,7 @@ import AbstractSpruceTest, {
 import NpmAutopackage, {
     Autopackage,
     AutopackageOptions,
-} from '../modules/NpmAutopackage'
+} from '../../modules/NpmAutopackage'
 
 export default class NpmAutopackageTest extends AbstractSpruceTest {
     private static instance: Autopackage
