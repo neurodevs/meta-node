@@ -1,5 +1,5 @@
 {
-  "name": "meta-node",
+  "name": "@neurodevs/meta-node",
   "version": "0.0.1",
   "description": "Meta-layer utilities for maintaining Node.js package ecosystems.",
   "repository": "https://github.com/neurodevs/meta-node.git",
