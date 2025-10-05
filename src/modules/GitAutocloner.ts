@@ -32,12 +32,16 @@ export default class GitAutocloner implements Autocloner {
 
     private throwIfDirPathDoesNotExist() {
         if (!this.dirPathExists) {
-            throw new Error(this.dirPathDoesNotExistMessage)
+            this.throwDirPathDoesNotExist()
         }
     }
 
-    private get dirPathDoesNotExistMessage() {
-        return `dirPath does not exist: ${this.dirPath}!`
+    private get dirPathExists() {
+        return this.existsSync(this.dirPath)
+    }
+
+    private throwDirPathDoesNotExist() {
+        throw new Error(`dirPath does not exist: ${this.dirPath}!`)
     }
 
     private changeDirectoryToDirPath() {
@@ -55,9 +59,19 @@ export default class GitAutocloner implements Autocloner {
         if (!this.currentRepoExists) {
             this.tryToCloneRepo()
         } else {
-            this.log.info(this.repoExistsMessage)
+            this.log.info(`Repo exists, skipping: ${this.currentRepoName}!`)
         }
     }
+
+    private get currentRepoExists() {
+        return this.existsSync(this.currentRepoName)
+    }
+
+    private get currentRepoName() {
+        return this.currentUrl.match(this.regexForRepoName)![1]
+    }
+
+    private readonly regexForRepoName = /\/([a-zA-Z0-9_.-]+)\.git/
 
     private tryToCloneRepo() {
         try {
@@ -76,22 +90,6 @@ export default class GitAutocloner implements Autocloner {
         return `Git clone failed for repo: ${this.currentUrl}!\n\n${this.currentError}\n\n`
     }
 
-    private get dirPathExists() {
-        return this.existsSync(this.dirPath)
-    }
-
-    private get currentRepoName() {
-        return this.currentUrl.match(this.regex)![1]
-    }
-
-    private get currentRepoExists() {
-        return this.existsSync(this.currentRepoName)
-    }
-
-    private get repoExistsMessage() {
-        return `Repo already exists, skipping: ${this.currentRepoName}!`
-    }
-
     private get existsSync() {
         return GitAutocloner.existsSync
     }
@@ -99,8 +97,6 @@ export default class GitAutocloner implements Autocloner {
     private get execSync() {
         return GitAutocloner.execSync
     }
-
-    private readonly regex = /\/([a-zA-Z0-9_.-]+)\.git/
 }
 
 export interface Autocloner {
