@@ -28,6 +28,7 @@ export default class NodeAutomodule implements Automodule {
         await this.throwIfModuleDirDoesNotExist()
 
         await this.createTestFile()
+        await this.createModuleFile()
     }
 
     private async throwIfTestDirDoesNotExist() {
@@ -54,6 +55,14 @@ export default class NodeAutomodule implements Automodule {
 
     private get testFileName() {
         return path.join(this.testSaveDir, `${this.implName}.test.ts`)
+    }
+
+    private async createModuleFile() {
+        await this.writeFile(this.moduleFileName, NodeAutomodule.modulePattern)
+    }
+
+    private get moduleFileName() {
+        return path.join(this.moduleSaveDir, `${this.implName}.ts`)
     }
 
     private get pathExists() {
@@ -86,6 +95,22 @@ export default class NodeAutomodule implements Automodule {
                 return YourClassImpl.Create()
             }
         }
+    `
+
+    private static readonly modulePattern = `
+        export default class YourClassImpl implements YourClass {
+            public static Class?: YourClassConstructor
+            
+            protected constructor() {}
+            
+            public static Create() {
+                return new (this.Class ?? this)()
+            }
+        }
+
+        export interface YourClass {}
+
+        export type YourClassConstructor = new () => YourClass
     `
 }
 

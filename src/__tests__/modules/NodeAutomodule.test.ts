@@ -70,6 +70,20 @@ export default class NodeAutomoduleTest extends AbstractSpruceTest {
         )
     }
 
+    @test()
+    protected static async createsModuleFileAsExpected() {
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToWriteFile[1],
+            {
+                file: `${this.moduleSaveDir}/${this.implName}.ts`,
+                data: this.modulePattern,
+            },
+            'Did not write expected module file!'
+        )
+    }
+
     private static async run() {
         return await this.instance.run()
     }
@@ -112,6 +126,22 @@ export default class NodeAutomoduleTest extends AbstractSpruceTest {
                 return YourClassImpl.Create()
             }
         }
+    `
+
+    private static readonly modulePattern = `
+        export default class YourClassImpl implements YourClass {
+            public static Class?: YourClassConstructor
+            
+            protected constructor() {}
+            
+            public static Create() {
+                return new (this.Class ?? this)()
+            }
+        }
+
+        export interface YourClass {}
+
+        export type YourClassConstructor = new () => YourClass
     `
 
     private static NodeAutomodule() {
