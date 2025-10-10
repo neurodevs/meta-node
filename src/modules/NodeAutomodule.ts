@@ -9,13 +9,15 @@ export default class NodeAutomodule implements Automodule {
 
     private testSaveDir: string
     private moduleSaveDir: string
+    private interfaceName: string
     private implName: string
 
     protected constructor(options: AutomoduleOptions) {
-        const { testSaveDir, moduleSaveDir, implName } = options
+        const { testSaveDir, moduleSaveDir, interfaceName, implName } = options
 
         this.testSaveDir = testSaveDir
         this.moduleSaveDir = moduleSaveDir
+        this.interfaceName = interfaceName
         this.implName = implName
     }
 
@@ -50,7 +52,7 @@ export default class NodeAutomodule implements Automodule {
     }
 
     private async createTestFile() {
-        await this.writeFile(this.testFileName, this.testPattern)
+        await this.writeFile(this.testFileName, this.testFilePattern)
     }
 
     private get testFileName() {
@@ -58,7 +60,7 @@ export default class NodeAutomodule implements Automodule {
     }
 
     private async createModuleFile() {
-        await this.writeFile(this.moduleFileName, NodeAutomodule.modulePattern)
+        await this.writeFile(this.moduleFileName, this.moduleFilePattern)
     }
 
     private get moduleFileName() {
@@ -73,45 +75,49 @@ export default class NodeAutomodule implements Automodule {
         return NodeAutomodule.writeFile
     }
 
-    private readonly testPattern = `
-        import AbstractSpruceTest, { test, assert } from '@sprucelabs/test-utils'
-        import YourClassImpl, { YourClass } from './YourClassImpl'
+    private get testFilePattern() {
+        return `
+            import AbstractSpruceTest, { test, assert } from '@sprucelabs/test-utils'
+            import ${this.implName}, { ${this.interfaceName} } from './${this.implName}'
 
-        export default class YourClassImplTest extends AbstractSpruceTest {
-            private static instance: YourClass
-            
-            protected static async beforeEach() {
-                await super.beforeEach()
+            export default class ${this.implName}Test extends AbstractSpruceTest {
+                private static instance: ${this.interfaceName}
                 
-                this.instance = this.YourClassImpl()
+                protected static async beforeEach() {
+                    await super.beforeEach()
+                    
+                    this.instance = this.${this.implName}()
+                }
+                
+                @test()
+                protected static async createsInstance() {
+                    assert.isTruthy(this.instance, 'Failed to create instance!')
+                }
+                
+                private static ${this.implName}() {
+                    return ${this.implName}.Create()
+                }
             }
-            
-            @test()
-            protected static async createsInstance() {
-                assert.isTruthy(this.instance, 'Failed to create instance!')
-            }
-            
-            private static YourClassImpl() {
-                return YourClassImpl.Create()
-            }
-        }
-    `
+        `
+    }
 
-    private static readonly modulePattern = `
-        export default class YourClassImpl implements YourClass {
-            public static Class?: YourClassConstructor
-            
-            protected constructor() {}
-            
-            public static Create() {
-                return new (this.Class ?? this)()
+    private get moduleFilePattern() {
+        return `
+            export default class ${this.implName} implements ${this.interfaceName} {
+                public static Class?: ${this.interfaceName}Constructor
+                
+                protected constructor() {}
+                
+                public static Create() {
+                    return new (this.Class ?? this)()
+                }
             }
-        }
 
-        export interface YourClass {}
+            export interface ${this.interfaceName} {}
 
-        export type YourClassConstructor = new () => YourClass
-    `
+            export type ${this.interfaceName}Constructor = new () => ${this.interfaceName}
+        `
+    }
 }
 
 export interface Automodule {
@@ -125,5 +131,6 @@ export type AutomoduleConstructor = new (
 export interface AutomoduleOptions {
     testSaveDir: string
     moduleSaveDir: string
+    interfaceName: string
     implName: string
 }

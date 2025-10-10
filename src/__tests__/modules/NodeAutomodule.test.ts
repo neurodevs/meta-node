@@ -64,7 +64,7 @@ export default class NodeAutomoduleTest extends AbstractSpruceTest {
             callsToWriteFile[0],
             {
                 file: `${this.testSaveDir}/${this.implName}.test.ts`,
-                data: this.testPattern,
+                data: this.testFilePattern,
             },
             'Did not write expected test file!'
         )
@@ -78,7 +78,7 @@ export default class NodeAutomoduleTest extends AbstractSpruceTest {
             callsToWriteFile[1],
             {
                 file: `${this.moduleSaveDir}/${this.implName}.ts`,
-                data: this.modulePattern,
+                data: this.moduleFilePattern,
             },
             'Did not write expected module file!'
         )
@@ -102,52 +102,58 @@ export default class NodeAutomoduleTest extends AbstractSpruceTest {
 
     private static readonly testSaveDir = generateId()
     private static readonly moduleSaveDir = generateId()
+    private static readonly interfaceName = generateId()
     private static readonly implName = generateId()
 
-    private static readonly testPattern = `
-        import AbstractSpruceTest, { test, assert } from '@sprucelabs/test-utils'
-        import YourClassImpl, { YourClass } from './YourClassImpl'
+    private static get testFilePattern() {
+        return `
+            import AbstractSpruceTest, { test, assert } from '@sprucelabs/test-utils'
+            import ${this.implName}, { ${this.interfaceName} } from './${this.implName}'
 
-        export default class YourClassImplTest extends AbstractSpruceTest {
-            private static instance: YourClass
-            
-            protected static async beforeEach() {
-                await super.beforeEach()
+            export default class ${this.implName}Test extends AbstractSpruceTest {
+                private static instance: ${this.interfaceName}
                 
-                this.instance = this.YourClassImpl()
+                protected static async beforeEach() {
+                    await super.beforeEach()
+                    
+                    this.instance = this.${this.implName}()
+                }
+                
+                @test()
+                protected static async createsInstance() {
+                    assert.isTruthy(this.instance, 'Failed to create instance!')
+                }
+                
+                private static ${this.implName}() {
+                    return ${this.implName}.Create()
+                }
             }
-            
-            @test()
-            protected static async createsInstance() {
-                assert.isTruthy(this.instance, 'Failed to create instance!')
-            }
-            
-            private static YourClassImpl() {
-                return YourClassImpl.Create()
-            }
-        }
-    `
+        `
+    }
 
-    private static readonly modulePattern = `
-        export default class YourClassImpl implements YourClass {
-            public static Class?: YourClassConstructor
-            
-            protected constructor() {}
-            
-            public static Create() {
-                return new (this.Class ?? this)()
+    private static get moduleFilePattern() {
+        return `
+            export default class ${this.implName} implements ${this.interfaceName} {
+                public static Class?: ${this.interfaceName}Constructor
+                
+                protected constructor() {}
+                
+                public static Create() {
+                    return new (this.Class ?? this)()
+                }
             }
-        }
 
-        export interface YourClass {}
+            export interface ${this.interfaceName} {}
 
-        export type YourClassConstructor = new () => YourClass
-    `
+            export type ${this.interfaceName}Constructor = new () => ${this.interfaceName}
+        `
+    }
 
     private static NodeAutomodule() {
         return NodeAutomodule.Create({
             testSaveDir: this.testSaveDir,
             moduleSaveDir: this.moduleSaveDir,
+            interfaceName: this.interfaceName,
             implName: this.implName,
         })
     }
