@@ -6,6 +6,11 @@ export * from './modules/GitAutocloner'
 export { default as FakeAutocloner } from './testDoubles/Autocloner/FakeAutocloner'
 export * from './testDoubles/Autocloner/FakeAutocloner'
 
+// Automodule
+
+export { default as NodeAutomodule } from './modules/NodeAutomodule'
+export * from './modules/NodeAutomodule'
+
 // Autopackage
 
 export { default as NpmAutopackage } from './modules/NpmAutopackage'
