@@ -11,6 +11,9 @@ export * from './testDoubles/Autocloner/FakeAutocloner'
 export { default as NodeAutomodule } from './modules/NodeAutomodule'
 export * from './modules/NodeAutomodule'
 
+export { default as FakeAutomodule } from './testDoubles/Automodule/FakeAutomodule'
+export * from './testDoubles/Automodule/FakeAutomodule'
+
 // Autopackage
 
 export { default as NpmAutopackage } from './modules/NpmAutopackage'
