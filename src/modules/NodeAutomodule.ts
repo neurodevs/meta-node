@@ -1,13 +1,42 @@
+import pathExists from './pathExists'
+
 export default class NodeAutomodule implements Automodule {
     public static Class?: AutomoduleConstructor
+    public static pathExists = pathExists
 
-    protected constructor() {}
+    private testSaveDir: string
 
-    public static Create() {
-        return new (this.Class ?? this)()
+    protected constructor(options: AutomoduleOptions) {
+        const { testSaveDir } = options
+
+        this.testSaveDir = testSaveDir
+    }
+
+    public static Create(options: AutomoduleOptions) {
+        return new (this.Class ?? this)(options)
+    }
+
+    public async run() {
+        const testDirExists = await this.checkIfTestDirExists()
+
+        if (!testDirExists) {
+            throw new Error(`testSaveDir does not exist: ${this.testSaveDir}!`)
+        }
+    }
+
+    private async checkIfTestDirExists() {
+        return await NodeAutomodule.pathExists(this.testSaveDir)
     }
 }
 
-export interface Automodule {}
+export interface Automodule {
+    run(): Promise<void>
+}
 
-export type AutomoduleConstructor = new () => Automodule
+export type AutomoduleConstructor = new (
+    options: AutomoduleOptions
+) => Automodule
+
+export interface AutomoduleOptions {
+    testSaveDir: string
+}

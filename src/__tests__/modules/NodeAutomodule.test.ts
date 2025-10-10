@@ -1,11 +1,20 @@
-import AbstractSpruceTest, { test, assert } from '@sprucelabs/test-utils'
+import AbstractSpruceTest, {
+    test,
+    assert,
+    generateId,
+} from '@sprucelabs/test-utils'
 import NodeAutomodule, { Automodule } from '../../modules/NodeAutomodule'
+import fakePathExists, {
+    setPathShouldExist,
+} from '../../testDoubles/fakePathExists'
 
 export default class NodeAutomoduleTest extends AbstractSpruceTest {
     private static instance: Automodule
 
     protected static async beforeEach() {
         await super.beforeEach()
+
+        this.setFakePathExists()
 
         this.instance = this.NodeAutomodule()
     }
@@ -15,7 +24,30 @@ export default class NodeAutomoduleTest extends AbstractSpruceTest {
         assert.isTruthy(this.instance, 'Failed to create instance!')
     }
 
+    @test()
+    protected static async runThrowsIfTestSaveDirMissing() {
+        setPathShouldExist(false)
+
+        const err = await assert.doesThrowAsync(
+            async () => await this.instance.run()
+        )
+
+        assert.isEqual(
+            err.message,
+            `testSaveDir does not exist: ${this.testSaveDir}!`,
+            'Did not receive the expected error!'
+        )
+    }
+
+    private static setFakePathExists() {
+        NodeAutomodule.pathExists = fakePathExists
+    }
+
+    private static readonly testSaveDir = generateId()
+
     private static NodeAutomodule() {
-        return NodeAutomodule.Create()
+        return NodeAutomodule.Create({
+            testSaveDir: this.testSaveDir,
+        })
     }
 }
