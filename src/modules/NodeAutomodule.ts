@@ -78,7 +78,7 @@ export default class NodeAutomodule implements Automodule {
     private get testFilePattern() {
         return `
             import AbstractSpruceTest, { test, assert } from '@sprucelabs/test-utils'
-            import ${this.implName}, { ${this.interfaceName} } from './${this.implName}'
+            import ${this.implName}, { ${this.interfaceName} } from '../../modules/${this.implName}'
 
             export default class ${this.implName}Test extends AbstractSpruceTest {
                 private static instance: ${this.interfaceName}
