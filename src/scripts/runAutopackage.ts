@@ -1,8 +1,8 @@
 import { execSync } from 'child_process'
 import NpmAutopackage from '../modules/NpmAutopackage'
 
-async function run() {
-    console.log('Running...')
+async function main() {
+    console.log('Running autopackage...')
 
     await NpmAutopackage.Create({
         name: 'node-xyz',
@@ -19,7 +19,7 @@ async function run() {
     process.exit(0)
 }
 
-run().catch((err) => {
+main().catch((err) => {
     console.error(err)
     process.exit(1)
 })
