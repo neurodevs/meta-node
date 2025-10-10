@@ -1,9 +1,9 @@
-export let pathShouldExist = true
+export let pathShouldExist: Record<string, boolean> = {}
 
-export function setPathShouldExist(shouldExist: boolean) {
-    pathShouldExist = shouldExist
+export function setPathShouldExist(path: string, shouldExist: boolean) {
+    pathShouldExist[path] = shouldExist
 }
 
-export default async function fakePathExists(_path: string) {
-    return pathShouldExist
+export default async function fakePathExists(path: string) {
+    return pathShouldExist[path]
 }

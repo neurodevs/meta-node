@@ -26,7 +26,7 @@ export default class NodeAutomoduleTest extends AbstractSpruceTest {
 
     @test()
     protected static async runThrowsIfTestSaveDirMissing() {
-        setPathShouldExist(false)
+        setPathShouldExist(this.testSaveDir, false)
 
         const err = await assert.doesThrowAsync(
             async () => await this.instance.run()
@@ -39,15 +39,35 @@ export default class NodeAutomoduleTest extends AbstractSpruceTest {
         )
     }
 
+    @test()
+    protected static async runThrowsIfModuleSaveDirMissing() {
+        setPathShouldExist(this.moduleSaveDir, false)
+
+        const err = await assert.doesThrowAsync(
+            async () => await this.instance.run()
+        )
+
+        assert.isEqual(
+            err.message,
+            `moduleSaveDir does not exist: ${this.moduleSaveDir}!`,
+            'Did not receive the expected error!'
+        )
+    }
+
     private static setFakePathExists() {
         NodeAutomodule.pathExists = fakePathExists
+
+        setPathShouldExist(this.testSaveDir, true)
+        setPathShouldExist(this.moduleSaveDir, true)
     }
 
     private static readonly testSaveDir = generateId()
+    private static readonly moduleSaveDir = generateId()
 
     private static NodeAutomodule() {
         return NodeAutomodule.Create({
             testSaveDir: this.testSaveDir,
+            moduleSaveDir: this.moduleSaveDir,
         })
     }
 }
