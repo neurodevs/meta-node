@@ -1,7 +1,7 @@
 import NodeAutomodule from '../modules/NodeAutomodule'
 
 async function main() {
-    console.log('\nRunning automodule...\n\n')
+    console.log('\nRunning automodule...')
 
     const instance = NodeAutomodule.Create({
         testSaveDir:
@@ -13,7 +13,7 @@ async function main() {
 
     await instance.run()
 
-    console.log('\nFinished running automodule!\n\n')
+    console.log('Finished running automodule!\n')
 }
 
 main().catch((err) => {
