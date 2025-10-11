@@ -46,6 +46,9 @@ export default class NpmAutopackage implements Autopackage {
         await this.createRepoInGithubOrg()
 
         this.chdirToInstallDir()
+
+        this.exec(this.gitCloneCmd)
+
         this.exec(this.createModuleCmd)
     }
 
@@ -113,6 +116,10 @@ export default class NpmAutopackage implements Autopackage {
 
     private chdirToInstallDir() {
         this.chdir(this.installDir)
+    }
+
+    private get gitCloneCmd() {
+        return `git clone "https://github.com/${this.gitNamespace}/${this.packageName}.git"`
     }
 
     private chdirToNewPackageDir() {

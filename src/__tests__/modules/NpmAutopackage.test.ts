@@ -78,9 +78,18 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async thenCallsSpruceCreateModule() {
+    protected static async thenCallsGitClone() {
         assert.isEqual(
             this.callsToExecSync[0],
+            this.gitCloneCmd,
+            `Should have called "${this.gitCloneCmd}"!`
+        )
+    }
+
+    @test()
+    protected static async thenCallsSpruceCreateModule() {
+        assert.isEqual(
+            this.callsToExecSync[1],
             this.createModuleCmd,
             'Should have called "spruce create.module"!'
         )
@@ -98,7 +107,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     @test()
     protected static async thenSetsUpNewGitRepo() {
         assert.isEqualDeep(
-            this.callsToExecSync.slice(1, 5),
+            this.callsToExecSync.slice(2, 6),
             [
                 'git init',
                 'git add .',
@@ -112,7 +121,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     @test()
     protected static async thenCallsSpruceSetupVscode() {
         assert.isEqual(
-            this.callsToExecSync[5],
+            this.callsToExecSync[6],
             'spruce setup.vscode --all true',
             'Should have called "spruce setup.vscode"!'
         )
@@ -121,7 +130,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     @test()
     protected static async thenGitCommitsVscodeChanges() {
         assert.isEqualDeep(
-            this.callsToExecSync.slice(6, 8),
+            this.callsToExecSync.slice(7, 9),
             ['git add .', 'git commit -m "patch: setup vscode"'],
             'Should have committed vscode changes!'
         )
@@ -160,6 +169,10 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     private static readonly installDir = generateId()
 
     private static readonly githubToken = generateId()
+
+    private static get gitCloneCmd() {
+        return `git clone "https://github.com/${this.gitNamespace}/${this.packageName}.git"`
+    }
 
     private static readonly createModuleCmd = `spruce create.module --name "${this.packageName}" --destination "${this.installDir}/${this.packageName}" --description "${this.packageDescription}"`
 
