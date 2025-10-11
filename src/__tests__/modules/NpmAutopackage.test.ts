@@ -31,6 +31,15 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
+    protected static async throwsIfGithubTokenNotSet() {
+        delete process.env.GITHUB_TOKEN
+
+        await assert.doesThrowAsync(async () => {
+            await this.NpmAutopackage()
+        }, 'Please set process.env.GITHUB_TOKEN!')
+    }
+
+    @test()
     protected static async firstCreatesRepoInGithubOrg() {
         assert.isEqualDeep(
             {

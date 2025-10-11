@@ -28,10 +28,18 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     public async createPackage() {
+        this.throwIfGithubTokenNotInEnv()
+
         await this.execCreateModule()
 
         this.execGitSetup()
         this.execSetupVscode()
+    }
+
+    private throwIfGithubTokenNotInEnv() {
+        if (!this.githubToken) {
+            throw new Error('Please set process.env.GITHUB_TOKEN!')
+        }
     }
 
     private async execCreateModule() {
