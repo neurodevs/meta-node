@@ -1,9 +1,11 @@
 import { execSync } from 'child_process'
+import fs from 'fs'
 
 export default class NpmAutopackage implements Autopackage {
     public static Class?: AutopackageConstructor
     public static chdir = process.chdir
     public static execSync = execSync
+    public static existsSync = fs.existsSync
     public static fetch = globalThis.fetch
 
     private packageName: string
@@ -33,7 +35,7 @@ export default class NpmAutopackage implements Autopackage {
         await this.createRepoInGithubOrg()
 
         this.chdirToInstallDir()
-        this.cloneGitRepo()
+        this.cloneGitRepoIfNotExists()
         this.chdirToPackageDir()
         this.installPackageBoilerplate()
         this.commitCreatePackage()
@@ -77,8 +79,18 @@ export default class NpmAutopackage implements Autopackage {
         this.chdir(this.installDir)
     }
 
-    private cloneGitRepo() {
-        this.exec(`git clone ${this.gitUrl}`)
+    private cloneGitRepoIfNotExists() {
+        if (!this.packageDirExists) {
+            this.exec(`git clone ${this.gitUrl}`)
+        }
+    }
+
+    private get packageDirExists() {
+        return this.existsSync(this.packageDir)
+    }
+
+    private get packageDir() {
+        return `${this.installDir}/${this.packageName}`
     }
 
     private get gitUrl() {
@@ -89,11 +101,11 @@ export default class NpmAutopackage implements Autopackage {
         this.chdir(this.packageDir)
     }
 
-    private get packageDir() {
-        return `${this.installDir}/${this.packageName}`
+    private installPackageBoilerplate() {
+        this.spruceCreateModule()
     }
 
-    private installPackageBoilerplate() {
+    private spruceCreateModule() {
         this.exec(
             `spruce create.module --name "${this.packageName}" --destination "${this.installDir}/${this.packageName}" --description "${this.packageDescription}"`
         )
@@ -137,6 +149,10 @@ export default class NpmAutopackage implements Autopackage {
 
     private get exec() {
         return NpmAutopackage.execSync
+    }
+
+    private get existsSync() {
+        return NpmAutopackage.existsSync
     }
 
     private get fetch() {

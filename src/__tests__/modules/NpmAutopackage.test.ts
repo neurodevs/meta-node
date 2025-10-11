@@ -11,11 +11,17 @@ import NpmAutopackage, {
 export default class NpmAutopackageTest extends AbstractSpruceTest {
     private static instance: Autopackage
 
+    private static callsToChdir: string[] = []
+    private static callsToExecSync: string[] = []
+    private static callsToExistsSync: string[] = []
+    private static callsToFetch: { url: string; init: RequestInit }[] = []
+
     protected static async beforeEach() {
         await super.beforeEach()
 
-        this.fakeExecToPreventActual()
-        this.fakeChdirToPreventActual()
+        this.fakeChdir()
+        this.fakeExecSync()
+        this.fakeExistsSync()
         this.fakeFetch()
 
         process.env.GITHUB_TOKEN = this.githubToken
@@ -134,7 +140,29 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
         )
     }
 
-    private static fakeExecToPreventActual() {
+    @test()
+    protected static async doesNotCloneRepoIfItExists() {
+        await this.NpmAutopackage()
+
+        assert.isEqual(
+            this.callsToExecSync.filter(
+                (cmd) =>
+                    cmd ===
+                    `git clone https://github.com/${this.gitNamespace}/${this.packageName}.git`
+            ).length,
+            1,
+            'Cloned repo more than once!'
+        )
+    }
+
+    private static fakeChdir() {
+        NpmAutopackage.chdir = (dir: string) => {
+            this.callsToChdir.push(dir)
+        }
+        this.callsToChdir = []
+    }
+
+    private static fakeExecSync() {
         // @ts-ignore
         NpmAutopackage.execSync = (cmd: string) => {
             this.callsToExecSync.push(cmd)
@@ -142,11 +170,17 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
         this.callsToExecSync = []
     }
 
-    private static fakeChdirToPreventActual() {
-        NpmAutopackage.chdir = (dir: string) => {
-            this.callsToChdir.push(dir)
+    private static fakeExistsSync() {
+        // @ts-ignore
+        NpmAutopackage.existsSync = (path: string) => {
+            this.callsToExistsSync.push(path)
+
+            if (path === `${this.installDir}/${this.packageName}`) {
+                return this.callsToExistsSync.length > 1
+            }
+            return false
         }
-        this.callsToChdir = []
+        this.callsToExistsSync = []
     }
 
     private static fakeFetch() {
@@ -154,11 +188,8 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
         NpmAutopackage.fetch = async (url: string, init: RequestInit) => {
             this.callsToFetch.push({ url, init })
         }
+        this.callsToFetch = []
     }
-
-    private static callsToExecSync: string[] = []
-    private static callsToChdir: string[] = []
-    private static callsToFetch: { url: string; init: RequestInit }[] = []
 
     private static readonly packageName = generateId()
     private static readonly packageDescription = generateId()

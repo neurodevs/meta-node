@@ -5,8 +5,8 @@ async function main() {
     console.log('Running autopackage...')
 
     await NpmAutopackage.Create({
-        name: 'node-xyz',
-        description: 'XYZ, yo',
+        name: 'node-osf',
+        description: 'Node.js client for the Open Science Framework (OSF) API',
         gitNamespace: 'neurodevs',
         npmNamespace: 'neurodevs',
         installDir: '/Users/ericthecurious/dev',
