@@ -32,6 +32,7 @@
     "@sprucelabs/test": "^10.0.24",
     "@sprucelabs/test-utils": "^6.0.94",
     "@types/node": "^24.6.2",
+    "@types/node-fetch": "^2.6.13",
     "chokidar-cli": "^3.0.0",
     "eslint": "^9.37.0",
     "eslint-config-spruce": "^11.2.26",
@@ -62,5 +63,8 @@
   },
   "skill": {
     "namespace": "meta-node"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
   }
 }

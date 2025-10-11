@@ -10,12 +10,17 @@ import NpmAutopackage, {
 
 export default class NpmAutopackageTest extends AbstractSpruceTest {
     private static instance: Autopackage
+    private static passedUrl?: string
+    private static passedInit?: RequestInit
 
     protected static async beforeEach() {
         await super.beforeEach()
 
         this.fakeExecToPreventActual()
         this.fakeChdirToPreventActual()
+        this.fakeFetch()
+
+        process.env.GITHUB_TOKEN = this.githubToken
 
         this.instance = await this.NpmAutopackage()
     }
@@ -26,7 +31,36 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async firstCallsChdirToInstallDir() {
+    protected static async firstCreatesRepoInGithubOrg() {
+        assert.isEqualDeep(
+            {
+                passedUrl: this.passedUrl,
+                passedInit: this.passedInit,
+            },
+            {
+                passedUrl: `https://api.github.com/orgs/${this.gitNamespace}/repos`,
+                passedInit: {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `token ${this.githubToken}`,
+                        Accept: 'application/vnd.github+json',
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        name: this.packageName,
+                        private: false,
+                        description: this.packageDescription,
+                        auto_init: true,
+                        gitignore_template: 'Node',
+                        license_template: 'mit',
+                    }),
+                },
+            }
+        )
+    }
+
+    @test()
+    protected static async thenCallsChdirToInstallDir() {
         assert.isEqual(
             this.callsToChdir[0],
             this.installDir,
@@ -99,6 +133,14 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
         this.callsToChdir = []
     }
 
+    private static fakeFetch() {
+        // @ts-ignore
+        NpmAutopackage.fetch = async (url: string, init: RequestInit) => {
+            this.passedUrl = url
+            this.passedInit = init
+        }
+    }
+
     private static callsToExecSync: string[] = []
     private static callsToChdir: string[] = []
 
@@ -107,6 +149,8 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     private static readonly gitNamespace = generateId()
     private static readonly npmNamespace = generateId()
     private static readonly installDir = generateId()
+
+    private static readonly githubToken = generateId()
 
     private static readonly createModuleCmd = `spruce create.module --name "${this.packageName}" --destination "${this.installDir}/${this.packageName}" --description "${this.packageDescription}"`
 

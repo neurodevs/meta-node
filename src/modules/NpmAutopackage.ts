@@ -4,6 +4,7 @@ export default class NpmAutopackage implements Autopackage {
     public static Class?: AutopackageConstructor
     public static chdir = process.chdir
     public static execSync = execSync
+    public static fetch = globalThis.fetch
 
     private packageName: string
     private packageDescription: string
@@ -27,14 +28,43 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     public async createPackage() {
-        this.execCreateModule()
+        await this.execCreateModule()
+
         this.execGitSetup()
         this.execSetupVscode()
     }
 
-    private execCreateModule() {
+    private async execCreateModule() {
+        await this.createRepoInGithubOrg()
+
         this.chdirToInstallDir()
         this.exec(this.createModuleCmd)
+    }
+
+    private async createRepoInGithubOrg() {
+        await this.fetch(
+            `https://api.github.com/orgs/${this.gitNamespace}/repos`,
+            {
+                method: 'POST',
+                headers: {
+                    Authorization: `token ${this.githubToken}`,
+                    Accept: 'application/vnd.github+json',
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: this.packageName,
+                    private: false,
+                    description: this.packageDescription,
+                    auto_init: true,
+                    gitignore_template: 'Node',
+                    license_template: 'mit',
+                }),
+            }
+        )
+    }
+
+    private get githubToken() {
+        return process.env.GITHUB_TOKEN
     }
 
     private execGitSetup() {
@@ -91,6 +121,10 @@ export default class NpmAutopackage implements Autopackage {
 
     private get exec() {
         return NpmAutopackage.execSync
+    }
+
+    private get fetch() {
+        return NpmAutopackage.fetch
     }
 
     private get createModuleCmd() {
