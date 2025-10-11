@@ -8,7 +8,7 @@ export default class FakeAutopackage implements Autopackage {
         FakeAutopackage.callsToConstructor.push(options)
     }
 
-    public async createPackage() {
+    public async run() {
         FakeAutopackage.numCallsToCreatePackage++
     }
 

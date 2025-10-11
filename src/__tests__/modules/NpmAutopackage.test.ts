@@ -35,6 +35,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
         process.env.GITHUB_TOKEN = this.githubToken
 
         this.instance = await this.NpmAutopackage()
+        await this.instance.run()
     }
 
     @test()
@@ -48,7 +49,8 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
 
         await assert.doesThrowAsync(
             async () => {
-                await this.NpmAutopackage()
+                const instance = await this.NpmAutopackage()
+                await instance.run()
             },
             'Please set process.env.GITHUB_TOKEN!',
             'Did not throw with missing process.env.GITHUB_TOKEN!'

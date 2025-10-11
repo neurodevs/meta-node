@@ -39,13 +39,10 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     public static async Create(options: AutopackageOptions) {
-        const instance = new (this.Class ?? this)(options)
-        await instance.createPackage()
-
-        return instance
+        return new (this.Class ?? this)(options)
     }
 
-    public async createPackage() {
+    public async run() {
         this.throwIfGithubTokenNotInEnv()
 
         await this.createRepoInGithubOrg()
@@ -337,7 +334,7 @@ export default class NpmAutopackage implements Autopackage {
 }
 
 export interface Autopackage {
-    createPackage(): Promise<void>
+    run(): Promise<void>
 }
 
 export interface AutopackageOptions {
@@ -351,4 +348,6 @@ export interface AutopackageOptions {
     author?: string
 }
 
-export type AutopackageConstructor = new () => Autopackage
+export type AutopackageConstructor = new (
+    options: AutopackageOptions
+) => Autopackage
