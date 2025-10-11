@@ -55,6 +55,7 @@ export default class NpmAutopackage implements Autopackage {
         this.chdirToPackageDir()
         this.spruceCreateModule()
         this.updatePackage()
+        this.updateGitignore()
         this.setupVscode()
     }
 
@@ -251,6 +252,17 @@ export default class NpmAutopackage implements Autopackage {
 
     private gitCommitUpdatePackage() {
         this.exec('git commit -m "patch: update package"')
+    }
+
+    private updateGitignore() {
+        this.writeFileSync(this.gitignorePath, '\nbuild\n', {
+            encoding: 'utf-8',
+            flag: 'a',
+        })
+    }
+
+    private get gitignorePath() {
+        return `${this.packageDir}/.gitignore`
     }
 
     private setupVscode() {

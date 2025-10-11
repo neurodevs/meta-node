@@ -189,7 +189,24 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async tenthCallSpruceSetupVscode() {
+    protected static async tenthAddBuildDirToGitignore() {
+        const actual = this.callsToWriteFileSync[1]
+
+        const expected = {
+            path: this.gitignorePath,
+            data: '\nbuild\n',
+            options: { encoding: 'utf-8', flag: 'a' },
+        }
+
+        assert.isEqualDeep(
+            actual,
+            expected,
+            'Did not update .gitignore as expected!'
+        )
+    }
+
+    @test()
+    protected static async eleventhSpruceSetupVscode() {
         assert.isEqual(
             this.callsToExecSync[8],
             NpmAutopackageTest.setupVscodeCmd,
@@ -198,7 +215,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async finallyCommitVscodeChanges() {
+    protected static async lastlyCommitVscodeChanges() {
         assert.isEqualDeep(
             this.callsToExecSync.slice(9, 12),
             ['git add .', 'git commit -m "patch: setup vscode"', 'git push'],
@@ -294,6 +311,10 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
 
     private static get packageJsonPath() {
         return `${this.packageDir}/package.json`
+    }
+
+    private static get gitignorePath() {
+        return `${this.packageDir}/.gitignore`
     }
 
     private static get createModuleCmd() {
