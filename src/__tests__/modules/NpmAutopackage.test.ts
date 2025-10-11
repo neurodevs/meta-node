@@ -15,6 +15,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     private static callsToExecSync: string[] = []
     private static callsToExistsSync: string[] = []
     private static callsToFetch: { url: string; init: RequestInit }[] = []
+    private static callsToReadFileSync: { path: string; options: any }[] = []
 
     protected static async beforeEach() {
         await super.beforeEach()
@@ -23,6 +24,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
         this.fakeExecSync()
         this.fakeExistsSync()
         this.fakeFetch()
+        this.fakeReadFileSync()
 
         process.env.GITHUB_TOKEN = this.githubToken
 
@@ -99,7 +101,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     protected static async fourthCallsSpruceCreateModule() {
         assert.isEqual(
             this.callsToExecSync[1],
-            `spruce create.module --name "${this.packageName}" --destination "${this.installDir}/${this.packageName}" --description "${this.packageDescription}"`,
+            this.createModuleCmd,
             'Did not call "spruce create.module"!'
         )
     }
@@ -108,13 +110,21 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     protected static async fifthCallsChdirToPackageDir() {
         assert.isEqual(
             this.callsToChdir[1],
-            `${this.installDir}/${this.packageName}`,
+            this.packageDir,
             'Did not change to packageDir!'
         )
     }
 
     @test()
-    protected static async sixthCommitsForCreatePackage() {
+    protected static async sixthReadsPackageJsonFile() {
+        assert.isEqualDeep(this.callsToReadFileSync[0], {
+            path: this.packageJsonPath,
+            options: { encoding: 'utf-8' },
+        })
+    }
+
+    @test()
+    protected static async seventhCommitsForCreatePackage() {
         assert.isEqualDeep(
             this.callsToExecSync.slice(2, 5),
             ['git add .', 'git commit -m "patch: create package"', 'git push'],
@@ -123,7 +133,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async seventhCallsSpruceSetupVscode() {
+    protected static async eighthCallsSpruceSetupVscode() {
         assert.isEqual(
             this.callsToExecSync[5],
             'spruce setup.vscode --all true',
@@ -132,7 +142,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async eighthGitCommitsVscodeChanges() {
+    protected static async ninthGitCommitsVscodeChanges() {
         assert.isEqualDeep(
             this.callsToExecSync.slice(6, 9),
             ['git add .', 'git commit -m "patch: setup vscode"', 'git push'],
@@ -155,6 +165,30 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
         )
     }
 
+    @test()
+    protected static async doesNotSpruceCreateModuleIfItExists() {
+        await this.NpmAutopackage()
+
+        assert.isEqual(
+            this.callsToExecSync.filter((cmd) => cmd === this.createModuleCmd)
+                .length,
+            1,
+            'Called spruce create.module more than once!'
+        )
+    }
+
+    private static get packageDir() {
+        return `${this.installDir}/${this.packageName}`
+    }
+
+    private static get packageJsonPath() {
+        return `${this.packageDir}/package.json`
+    }
+
+    private static get createModuleCmd() {
+        return `spruce create.module --name "${this.packageName}" --destination "${this.packageDir}" --description "${this.packageDescription}"`
+    }
+
     private static fakeChdir() {
         NpmAutopackage.chdir = (dir: string) => {
             this.callsToChdir.push(dir)
@@ -173,12 +207,13 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     private static fakeExistsSync() {
         // @ts-ignore
         NpmAutopackage.existsSync = (path: string) => {
-            this.callsToExistsSync.push(path)
-
-            if (path === `${this.installDir}/${this.packageName}`) {
-                return this.callsToExistsSync.length > 1
+            if (this.callsToExistsSync.includes(path)) {
+                this.callsToExistsSync.push(path)
+                return true
+            } else {
+                this.callsToExistsSync.push(path)
+                return false
             }
-            return false
         }
         this.callsToExistsSync = []
     }
@@ -189,6 +224,22 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
             this.callsToFetch.push({ url, init })
         }
         this.callsToFetch = []
+    }
+
+    private static fakeReadFileSync() {
+        // @ts-ignore
+        NpmAutopackage.readFileSync = (path: string, options: any) => {
+            this.callsToReadFileSync.push({ path, options })
+
+            if (path === this.packageJsonPath) {
+                return JSON.stringify({
+                    name: this.packageName,
+                    description: 'Old description',
+                })
+            }
+            return ''
+        }
+        this.callsToReadFileSync = []
     }
 
     private static readonly packageName = generateId()

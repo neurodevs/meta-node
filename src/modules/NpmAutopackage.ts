@@ -7,6 +7,7 @@ export default class NpmAutopackage implements Autopackage {
     public static execSync = execSync
     public static existsSync = fs.existsSync
     public static fetch = globalThis.fetch
+    public static readFileSync = fs.readFileSync
 
     private packageName: string
     private packageDescription: string
@@ -37,7 +38,8 @@ export default class NpmAutopackage implements Autopackage {
         this.chdirToInstallDir()
         this.cloneGitRepoIfNotExists()
         this.chdirToPackageDir()
-        this.installPackageBoilerplate()
+        this.spruceCreateModuleIfNotExists()
+        this.updatePackageJson()
         this.commitCreatePackage()
         this.setupVscode()
         this.commitSetupVscode()
@@ -101,14 +103,28 @@ export default class NpmAutopackage implements Autopackage {
         this.chdir(this.packageDir)
     }
 
-    private installPackageBoilerplate() {
-        this.spruceCreateModule()
+    private spruceCreateModuleIfNotExists() {
+        if (!this.packageJsonExists) {
+            this.spruceCreateModule()
+        }
+    }
+
+    private get packageJsonExists() {
+        return this.existsSync(this.packageJsonPath)
+    }
+
+    private get packageJsonPath() {
+        return `${this.packageDir}/package.json`
     }
 
     private spruceCreateModule() {
         this.exec(
             `spruce create.module --name "${this.packageName}" --destination "${this.installDir}/${this.packageName}" --description "${this.packageDescription}"`
         )
+    }
+
+    private updatePackageJson() {
+        this.readFileSync(this.packageJsonPath, { encoding: 'utf-8' })
     }
 
     private commitCreatePackage() {
@@ -157,6 +173,10 @@ export default class NpmAutopackage implements Autopackage {
 
     private get fetch() {
         return NpmAutopackage.fetch
+    }
+
+    private get readFileSync() {
+        return NpmAutopackage.readFileSync
     }
 }
 
