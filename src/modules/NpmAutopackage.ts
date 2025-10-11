@@ -11,7 +11,7 @@ export default class NpmAutopackage implements Autopackage {
     public static writeFileSync = fs.writeFileSync
 
     private packageName: string
-    private packageDescription: string
+    private description: string
     private gitNamespace: string
     private installDir: string
     private keywords?: string[]
@@ -32,7 +32,7 @@ export default class NpmAutopackage implements Autopackage {
         } = options
 
         this.packageName = name
-        this.packageDescription = description
+        this.description = description
         this.gitNamespace = gitNamespace
         this.installDir = installDir
         this.keywords = keywords
@@ -81,7 +81,7 @@ export default class NpmAutopackage implements Autopackage {
                 body: JSON.stringify({
                     name: this.packageName,
                     private: false,
-                    description: this.packageDescription,
+                    description: this.description,
                     auto_init: true,
                     gitignore_template: 'Node',
                     license_template: 'mit',
@@ -133,7 +133,7 @@ export default class NpmAutopackage implements Autopackage {
 
     private execSpruceCreateModule() {
         this.exec(
-            `spruce create.module --name "${this.packageName}" --destination "${this.installDir}/${this.packageName}" --description "${this.packageDescription}"`
+            `spruce create.module --name "${this.packageName}" --destination "${this.installDir}/${this.packageName}" --description "${this.description}"`
         )
     }
 
@@ -158,22 +158,28 @@ export default class NpmAutopackage implements Autopackage {
     private updatePackage() {
         this.originalJsonFile = this.loadOriginalJsonFile()
 
-        if (!this.packageUpdated) {
+        if (!this.isPackageUpToDate) {
             this.updatePackageJson()
             this.commitUpdatePackage()
         }
     }
 
-    private get packageUpdated() {
-        return this.originalJsonFile.name === `@${this.scopedPackage}`
+    private loadOriginalJsonFile() {
+        const raw = this.readFileSync(this.packageJsonPath, {
+            encoding: 'utf-8',
+        })
+        return JSON.parse(raw)
+    }
+
+    private get isPackageUpToDate() {
+        return (
+            JSON.stringify(this.originalJsonFile) ==
+            JSON.stringify(this.updatedJsonFile)
+        )
     }
 
     private updatePackageJson() {
-        const updated = {
-            ...this.originalJsonFile,
-            ...this.updatedJsonFile,
-        }
-        const ordered = this.orderJsonKeys(updated, [
+        const ordered = this.orderJsonKeys(this.updatedJsonFile, [
             'name',
             'version',
             'description',
@@ -200,17 +206,11 @@ export default class NpmAutopackage implements Autopackage {
         )
     }
 
-    private loadOriginalJsonFile() {
-        const raw = this.readFileSync(this.packageJsonPath, {
-            encoding: 'utf-8',
-        })
-        return JSON.parse(raw)
-    }
-
     private get updatedJsonFile() {
         return {
+            ...this.originalJsonFile,
             name: `@${this.scopedPackage}`,
-            description: this.packageDescription,
+            description: this.description,
             keywords: this.keywords ?? [],
             license: this.license,
             author: this.author,

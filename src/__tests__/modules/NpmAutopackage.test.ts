@@ -146,7 +146,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
 
         const expected = {
             path: this.packageJsonPath,
-            data: this.orderJsonKeys(JSON.parse(this.updatedPackageJson), [
+            data: this.orderJsonKeys(JSON.parse(this.updatedJsonFile), [
                 'name',
                 'version',
                 'description',
@@ -437,9 +437,9 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
                         ({ path }) => path === this.packageJsonPath
                     ).length > 1
                 ) {
-                    return this.updatedPackageJson
+                    return this.updatedJsonFile
                 }
-                return this.oldPackageJson
+                return this.originalJsonFile
             } else if (path === this.gitignorePath) {
                 if (
                     this.callsToReadFileSync.filter(
@@ -455,7 +455,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
         this.callsToReadFileSync = []
     }
 
-    private static get oldPackageJson() {
+    private static get originalJsonFile() {
         return JSON.stringify({
             name: this.packageName,
             description: 'Old description',
@@ -468,9 +468,9 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
         [generateId()]: generateId(),
     }
 
-    private static get updatedPackageJson() {
+    private static get updatedJsonFile() {
         return JSON.stringify({
-            ...JSON.parse(this.oldPackageJson),
+            ...JSON.parse(this.originalJsonFile),
             name: `@${this.scopedPackage}`,
             description: this.packageDescription,
             keywords: this.keywords,
