@@ -236,6 +236,19 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
         )
     }
 
+    @test()
+    protected static async doesNotCommitVscodeIfItExists() {
+        await this.NpmAutopackage()
+
+        assert.isEqual(
+            this.callsToExecSync.filter(
+                (cmd) => cmd === 'git commit -m "patch: setup vscode"'
+            ).length,
+            1,
+            'Did not commit vscode changes once!'
+        )
+    }
+
     private static get scopedPackage() {
         return `${this.gitNamespace}/${this.packageName}`
     }

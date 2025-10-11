@@ -57,7 +57,6 @@ export default class NpmAutopackage implements Autopackage {
         this.updatePackageJson()
         this.commitCreatePackage()
         this.setupVscodeIfNotExists()
-        this.commitSetupVscode()
     }
 
     private throwIfGithubTokenNotInEnv() {
@@ -233,12 +232,17 @@ export default class NpmAutopackage implements Autopackage {
 
     private setupVscodeIfNotExists() {
         if (!this.vscodeSettingsExists) {
-            this.exec('spruce setup.vscode --all true')
+            this.spruceSetupVscode()
+            this.commitSetupVscode()
         }
     }
 
     private get vscodeSettingsExists() {
         return this.existsSync(`${this.packageDir}/.vscode/settings.json`)
+    }
+
+    private spruceSetupVscode() {
+        this.exec('spruce setup.vscode --all true')
     }
 
     private commitSetupVscode() {
