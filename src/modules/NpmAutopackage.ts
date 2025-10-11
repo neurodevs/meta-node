@@ -14,17 +14,26 @@ export default class NpmAutopackage implements Autopackage {
     private packageDescription: string
     private gitNamespace: string
     private installDir: string
+    private keywords?: string[]
     private license?: string
     private author?: string
 
     protected constructor(options: AutopackageOptions) {
-        const { name, description, gitNamespace, installDir, license, author } =
-            options
+        const {
+            name,
+            description,
+            gitNamespace,
+            installDir,
+            license,
+            author,
+            keywords,
+        } = options
 
         this.packageName = name
         this.packageDescription = description
         this.gitNamespace = gitNamespace
         this.installDir = installDir
+        this.keywords = keywords
         this.license = license
         this.author = author
     }
@@ -136,10 +145,27 @@ export default class NpmAutopackage implements Autopackage {
 
         const original = JSON.parse(raw)
         const updated = { ...original, ...this.updatedJsonFile }
+        const ordered = this.orderJsonKeys(updated, [
+            'name',
+            'version',
+            'description',
+            'keywords',
+            'license',
+            'author',
+            'homepage',
+            'repository',
+            'bugs',
+            'main',
+            'scripts',
+            'dependencies',
+            'devDependencies',
+            'jest',
+            'skill',
+        ])
 
         this.writeFileSync(
             this.packageJsonPath,
-            JSON.stringify(updated, null, 2) + '\n',
+            JSON.stringify(ordered, null, 2) + '\n',
             { encoding: 'utf-8' }
         )
     }
@@ -147,6 +173,7 @@ export default class NpmAutopackage implements Autopackage {
     private get updatedJsonFile() {
         return {
             name: `@${this.scopedPackage}`,
+            keywords: this.keywords ?? [],
             license: this.license,
             author: this.author,
             main: 'build/index.js',
@@ -164,6 +191,26 @@ export default class NpmAutopackage implements Autopackage {
 
     private get scopedPackage() {
         return `${this.gitNamespace}/${this.packageName}`
+    }
+
+    private orderJsonKeys(json: Record<string, unknown>, keyOrder: string[]) {
+        const ordered: Record<string, any> = {}
+
+        for (const key of keyOrder) {
+            if (key in json) {
+                ordered[key] = json[key]
+            }
+        }
+
+        const remainingKeys = Object.keys(json)
+            .filter((k) => !keyOrder.includes(k))
+            .sort()
+
+        for (const key of remainingKeys) {
+            ordered[key] = json[key]
+        }
+
+        return ordered
     }
 
     private commitCreatePackage() {
@@ -233,6 +280,7 @@ export interface AutopackageOptions {
     gitNamespace: string
     npmNamespace: string
     installDir: string
+    keywords?: string[]
     license?: string
     author?: string
 }

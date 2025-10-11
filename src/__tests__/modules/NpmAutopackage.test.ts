@@ -135,7 +135,23 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
 
         const expected = {
             path: this.packageJsonPath,
-            data: this.updatedPackageJson,
+            data: this.orderJsonKeys(JSON.parse(this.updatedPackageJson), [
+                'name',
+                'version',
+                'description',
+                'keywords',
+                'license',
+                'author',
+                'homepage',
+                'repository',
+                'bugs',
+                'main',
+                'scripts',
+                'dependencies',
+                'devDependencies',
+                'jest',
+                'skill',
+            ]),
             options: { encoding: 'utf-8' },
         }
 
@@ -223,6 +239,29 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
         return `spruce create.module --name "${this.packageName}" --destination "${this.packageDir}" --description "${this.packageDescription}"`
     }
 
+    private static orderJsonKeys(
+        json: Record<string, unknown>,
+        keyOrder: string[]
+    ) {
+        const ordered: Record<string, any> = {}
+
+        for (const key of keyOrder) {
+            if (key in json) {
+                ordered[key] = json[key]
+            }
+        }
+
+        const remainingKeys = Object.keys(json)
+            .filter((k) => !keyOrder.includes(k))
+            .sort()
+
+        for (const key of remainingKeys) {
+            ordered[key] = json[key]
+        }
+
+        return JSON.stringify(ordered)
+    }
+
     private static fakeChdir() {
         NpmAutopackage.chdir = (dir: string) => {
             this.callsToChdir.push(dir)
@@ -287,6 +326,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
         return JSON.stringify({
             ...JSON.parse(this.oldPackageJson),
             name: `@${this.scopedPackage}`,
+            keywords: this.keywords,
             license: this.license,
             author: this.author,
             main: 'build/index.js',
@@ -298,6 +338,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
             bugs: {
                 url: `https://github.com/${this.scopedPackage}/issues`,
             },
+            dependencies: {},
         })
     }
 
@@ -318,6 +359,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     private static readonly gitNamespace = generateId()
     private static readonly npmNamespace = generateId()
     private static readonly installDir = generateId()
+    private static readonly keywords = [generateId(), generateId()]
     private static readonly license = generateId()
     private static readonly author = generateId()
 
@@ -329,6 +371,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
         gitNamespace: this.gitNamespace,
         npmNamespace: this.npmNamespace,
         installDir: this.installDir,
+        keywords: this.keywords,
         license: this.license,
         author: this.author,
     }
