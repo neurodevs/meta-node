@@ -210,6 +210,7 @@ export default class NpmAutopackage implements Autopackage {
     private get updatedJsonFile() {
         return {
             name: `@${this.scopedPackage}`,
+            description: this.packageDescription,
             keywords: this.keywords ?? [],
             license: this.license,
             author: this.author,

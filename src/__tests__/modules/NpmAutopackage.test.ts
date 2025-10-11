@@ -472,6 +472,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
         return JSON.stringify({
             ...JSON.parse(this.oldPackageJson),
             name: `@${this.scopedPackage}`,
+            description: this.packageDescription,
             keywords: this.keywords,
             license: this.license,
             author: this.author,
