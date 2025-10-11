@@ -113,7 +113,16 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async fifthCallsChdirToPackageDir() {
+    protected static async fifthCommitsForCreatePackage() {
+        assert.isEqualDeep(
+            this.callsToExecSync.slice(2, 5),
+            ['git add .', 'git commit -m "patch: create package"', 'git push'],
+            'Did not commit create package changes!'
+        )
+    }
+
+    @test()
+    protected static async sixthCallsChdirToPackageDir() {
         assert.isEqual(
             this.callsToChdir[1],
             this.packageDir,
@@ -122,7 +131,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async sixthReadsPackageJsonFile() {
+    protected static async seventhReadsPackageJsonFile() {
         assert.isEqualDeep(this.callsToReadFileSync[0], {
             path: this.packageJsonPath,
             options: { encoding: 'utf-8' },
@@ -130,7 +139,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async seventhUpdatesPackageJson() {
+    protected static async eighthUpdatesPackageJson() {
         const actual = this.callsToWriteFileSync[0]
 
         const expected = {
@@ -167,15 +176,6 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
                 data: normalize(expected.data),
             },
             'Did not update package.json as expected!'
-        )
-    }
-
-    @test()
-    protected static async eighthCommitsForCreatePackage() {
-        assert.isEqualDeep(
-            this.callsToExecSync.slice(2, 5),
-            ['git add .', 'git commit -m "patch: create package"', 'git push'],
-            'Did not commit create package changes!'
         )
     }
 
