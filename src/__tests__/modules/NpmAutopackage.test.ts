@@ -10,8 +10,6 @@ import NpmAutopackage, {
 
 export default class NpmAutopackageTest extends AbstractSpruceTest {
     private static instance: Autopackage
-    private static passedUrl?: string
-    private static passedInit?: RequestInit
 
     protected static async beforeEach() {
         await super.beforeEach()
@@ -26,25 +24,29 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async createsNpmAutopackageInstance() {
-        assert.isTruthy(this.instance, 'Should create an instance!')
+    protected static async createsInstance() {
+        assert.isTruthy(this.instance, 'Failed to create instance!')
     }
 
     @test()
     protected static async throwsIfGithubTokenNotSet() {
         delete process.env.GITHUB_TOKEN
 
-        await assert.doesThrowAsync(async () => {
-            await this.NpmAutopackage()
-        }, 'Please set process.env.GITHUB_TOKEN!')
+        await assert.doesThrowAsync(
+            async () => {
+                await this.NpmAutopackage()
+            },
+            'Please set process.env.GITHUB_TOKEN!',
+            'Did not throw with missing process.env.GITHUB_TOKEN!'
+        )
     }
 
     @test()
     protected static async firstCreatesRepoInGithubOrg() {
         assert.isEqualDeep(
             {
-                passedUrl: this.passedUrl,
-                passedInit: this.passedInit,
+                passedUrl: this.callsToFetch[0]?.url,
+                passedInit: this.callsToFetch[0]?.init,
             },
             {
                 passedUrl: `https://api.github.com/orgs/${this.gitNamespace}/repos`,
@@ -64,75 +66,71 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
                         license_template: 'mit',
                     }),
                 },
-            }
+            },
+            'Did not call fetch as expected!'
         )
     }
 
     @test()
-    protected static async thenCallsChdirToInstallDir() {
+    protected static async secondCallsChdirToInstallDir() {
         assert.isEqual(
             this.callsToChdir[0],
             this.installDir,
-            'Should have changed dir!'
+            'Did not change to installDir!'
         )
     }
 
     @test()
-    protected static async thenCallsGitClone() {
+    protected static async thirdCallsGitClone() {
         assert.isEqual(
             this.callsToExecSync[0],
-            this.gitCloneCmd,
-            `Should have called "${this.gitCloneCmd}"!`
+            `git clone https://github.com/${this.gitNamespace}/${this.packageName}.git`,
+            'Did not call git clone!'
         )
     }
 
     @test()
-    protected static async thenCallsSpruceCreateModule() {
+    protected static async fourthCallsSpruceCreateModule() {
         assert.isEqual(
             this.callsToExecSync[1],
-            this.createModuleCmd,
-            'Should have called "spruce create.module"!'
+            `spruce create.module --name "${this.packageName}" --destination "${this.installDir}/${this.packageName}" --description "${this.packageDescription}"`,
+            'Did not call "spruce create.module"!'
         )
     }
 
     @test()
-    protected static async thenCallsChdirToNewlyCreatedDir() {
+    protected static async fifthCallsChdirToPackageDir() {
         assert.isEqual(
             this.callsToChdir[1],
             `${this.installDir}/${this.packageName}`,
-            'Should have changed dir!'
+            'Did not change to packageDir!'
         )
     }
 
     @test()
-    protected static async thenSetsUpNewGitRepo() {
+    protected static async sixthCommitsForCreatePackage() {
         assert.isEqualDeep(
-            this.callsToExecSync.slice(2, 6),
-            [
-                'git init',
-                'git add .',
-                'git commit -m "patch: create module"',
-                `git remote add origin "https://github.com/${this.gitNamespace}/${this.packageName}.git"`,
-            ],
-            'Should have called "git init"!'
+            this.callsToExecSync.slice(2, 5),
+            ['git add .', 'git commit -m "patch: create package"', 'git push'],
+            'Did not commit create package changes!'
         )
     }
 
     @test()
-    protected static async thenCallsSpruceSetupVscode() {
+    protected static async seventhCallsSpruceSetupVscode() {
         assert.isEqual(
-            this.callsToExecSync[6],
+            this.callsToExecSync[5],
             'spruce setup.vscode --all true',
-            'Should have called "spruce setup.vscode"!'
+            'Did not call "spruce setup.vscode"!'
         )
     }
 
     @test()
-    protected static async thenGitCommitsVscodeChanges() {
+    protected static async eighthGitCommitsVscodeChanges() {
         assert.isEqualDeep(
-            this.callsToExecSync.slice(7, 9),
-            ['git add .', 'git commit -m "patch: setup vscode"'],
-            'Should have committed vscode changes!'
+            this.callsToExecSync.slice(6, 9),
+            ['git add .', 'git commit -m "patch: setup vscode"', 'git push'],
+            'Did not commit vscode changes!'
         )
     }
 
@@ -154,13 +152,13 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     private static fakeFetch() {
         // @ts-ignore
         NpmAutopackage.fetch = async (url: string, init: RequestInit) => {
-            this.passedUrl = url
-            this.passedInit = init
+            this.callsToFetch.push({ url, init })
         }
     }
 
     private static callsToExecSync: string[] = []
     private static callsToChdir: string[] = []
+    private static callsToFetch: { url: string; init: RequestInit }[] = []
 
     private static readonly packageName = generateId()
     private static readonly packageDescription = generateId()
@@ -169,12 +167,6 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     private static readonly installDir = generateId()
 
     private static readonly githubToken = generateId()
-
-    private static get gitCloneCmd() {
-        return `git clone "https://github.com/${this.gitNamespace}/${this.packageName}.git"`
-    }
-
-    private static readonly createModuleCmd = `spruce create.module --name "${this.packageName}" --destination "${this.installDir}/${this.packageName}" --description "${this.packageDescription}"`
 
     private static readonly defaultOptions = {
         name: this.packageName,

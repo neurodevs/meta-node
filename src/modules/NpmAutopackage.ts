@@ -30,10 +30,15 @@ export default class NpmAutopackage implements Autopackage {
     public async createPackage() {
         this.throwIfGithubTokenNotInEnv()
 
-        await this.execCreateModule()
+        await this.createRepoInGithubOrg()
 
-        this.execGitSetup()
-        this.execSetupVscode()
+        this.chdirToInstallDir()
+        this.cloneGitRepo()
+        this.chdirToPackageDir()
+        this.installPackageBoilerplate()
+        this.commitCreatePackage()
+        this.setupVscode()
+        this.commitSetupVscode()
     }
 
     private throwIfGithubTokenNotInEnv() {
@@ -42,14 +47,8 @@ export default class NpmAutopackage implements Autopackage {
         }
     }
 
-    private async execCreateModule() {
-        await this.createRepoInGithubOrg()
-
-        this.chdirToInstallDir()
-
-        this.exec(this.gitCloneCmd)
-
-        this.exec(this.createModuleCmd)
+    private get githubToken() {
+        return process.env.GITHUB_TOKEN
     }
 
     private async createRepoInGithubOrg() {
@@ -74,60 +73,62 @@ export default class NpmAutopackage implements Autopackage {
         )
     }
 
-    private get githubToken() {
-        return process.env.GITHUB_TOKEN
-    }
-
-    private execGitSetup() {
-        this.chdirToNewPackageDir()
-
-        this.gitInit()
-        this.gitAdd()
-        this.gitCommitCreateModule()
-        this.gitRemoteAddOrigin()
-    }
-
-    private gitInit() {
-        this.exec(this.initCmd)
-    }
-
-    private gitAdd() {
-        this.exec(this.addCmd)
-    }
-
-    private gitCommitCreateModule() {
-        this.exec(this.commitCreateCmd)
-    }
-
-    private gitRemoteAddOrigin() {
-        this.exec(this.addRemoteCmd)
-    }
-
-    private execSetupVscode() {
-        this.exec(this.setupVscodeCmd)
-
-        this.gitAdd()
-        this.gitCommitSetupVscode()
-    }
-
-    private gitCommitSetupVscode() {
-        this.exec(this.commitVscodeCmd)
-    }
-
     private chdirToInstallDir() {
         this.chdir(this.installDir)
     }
 
-    private get gitCloneCmd() {
-        return `git clone "https://github.com/${this.gitNamespace}/${this.packageName}.git"`
+    private cloneGitRepo() {
+        this.exec(`git clone ${this.gitUrl}`)
     }
 
-    private chdirToNewPackageDir() {
+    private get gitUrl() {
+        return `https://github.com/${this.gitNamespace}/${this.packageName}.git`
+    }
+
+    private chdirToPackageDir() {
         this.chdir(this.packageDir)
     }
 
     private get packageDir() {
         return `${this.installDir}/${this.packageName}`
+    }
+
+    private installPackageBoilerplate() {
+        this.exec(
+            `spruce create.module --name "${this.packageName}" --destination "${this.installDir}/${this.packageName}" --description "${this.packageDescription}"`
+        )
+    }
+
+    private commitCreatePackage() {
+        this.gitAddAll()
+        this.gitCommitCreatePackage()
+        this.gitPush()
+    }
+
+    private gitAddAll() {
+        this.exec('git add .')
+    }
+
+    private gitCommitCreatePackage() {
+        this.exec('git commit -m "patch: create package"')
+    }
+
+    private gitPush() {
+        this.exec('git push')
+    }
+
+    private setupVscode() {
+        this.exec('spruce setup.vscode --all true')
+    }
+
+    private commitSetupVscode() {
+        this.gitAddAll()
+        this.gitCommitSetup()
+        this.gitPush()
+    }
+
+    private gitCommitSetup() {
+        this.exec('git commit -m "patch: setup vscode"')
     }
 
     private get chdir() {
@@ -141,21 +142,6 @@ export default class NpmAutopackage implements Autopackage {
     private get fetch() {
         return NpmAutopackage.fetch
     }
-
-    private get createModuleCmd() {
-        return `spruce create.module --name "${this.packageName}" --destination "${this.installDir}/${this.packageName}" --description "${this.packageDescription}"`
-    }
-
-    private readonly initCmd = 'git init'
-    private readonly addCmd = 'git add .'
-    private readonly commitCreateCmd = 'git commit -m "patch: create module"'
-
-    private get addRemoteCmd() {
-        return `git remote add origin "https://github.com/${this.gitNamespace}/${this.packageName}.git"`
-    }
-
-    private readonly setupVscodeCmd = 'spruce setup.vscode --all true'
-    private readonly commitVscodeCmd = 'git commit -m "patch: setup vscode"'
 }
 
 export interface Autopackage {
