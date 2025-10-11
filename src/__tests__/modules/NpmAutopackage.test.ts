@@ -56,7 +56,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async firstCreatesRepoInGithubOrg() {
+    protected static async firstCreateRepoInGithubOrg() {
         assert.isEqualDeep(
             {
                 passedUrl: this.callsToFetch[0]?.url,
@@ -86,7 +86,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async secondCallsChdirToInstallDir() {
+    protected static async secondChdirToInstallDir() {
         assert.isEqual(
             this.callsToChdir[0],
             this.installDir,
@@ -95,7 +95,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async thirdCallsGitClone() {
+    protected static async thirdGitClone() {
         assert.isEqual(
             this.callsToExecSync[0],
             `git clone https://github.com/${this.gitNamespace}/${this.packageName}.git`,
@@ -104,7 +104,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async fourthCallsSpruceCreateModule() {
+    protected static async fourthSpruceCreateModule() {
         assert.isEqual(
             this.callsToExecSync[1],
             this.createModuleCmd,
@@ -113,7 +113,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async fifthCommitsForCreatePackage() {
+    protected static async fifthCommitCreatePackage() {
         assert.isEqualDeep(
             this.callsToExecSync.slice(2, 5),
             ['git add .', 'git commit -m "patch: create package"', 'git push'],
@@ -122,7 +122,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async sixthCallsChdirToPackageDir() {
+    protected static async sixthChdirToPackageDir() {
         assert.isEqual(
             this.callsToChdir[1],
             this.packageDir,
@@ -131,7 +131,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async seventhReadsPackageJsonFile() {
+    protected static async seventhReadPackageJson() {
         assert.isEqualDeep(this.callsToReadFileSync[0], {
             path: this.packageJsonPath,
             options: { encoding: 'utf-8' },
@@ -139,7 +139,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async eighthUpdatesPackageJson() {
+    protected static async eighthUpdatePackageJson() {
         const actual = this.callsToWriteFileSync[0]
 
         const expected = {
@@ -180,18 +180,27 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async ninthCallsSpruceSetupVscode() {
+    protected static async ninthCommitUpdatePackage() {
+        assert.isEqualDeep(
+            this.callsToExecSync.slice(5, 8),
+            ['git add .', 'git commit -m "patch: update package"', 'git push'],
+            'Did not commit update package changes!'
+        )
+    }
+
+    @test()
+    protected static async tenthCallSpruceSetupVscode() {
         assert.isEqual(
-            this.callsToExecSync[5],
+            this.callsToExecSync[8],
             NpmAutopackageTest.setupVscodeCmd,
             'Did not call "spruce setup.vscode"!'
         )
     }
 
     @test()
-    protected static async tenthGitCommitsVscodeChanges() {
+    protected static async finallyCommitVscodeChanges() {
         assert.isEqualDeep(
-            this.callsToExecSync.slice(6, 9),
+            this.callsToExecSync.slice(9, 12),
             ['git add .', 'git commit -m "patch: setup vscode"', 'git push'],
             'Did not commit vscode changes!'
         )

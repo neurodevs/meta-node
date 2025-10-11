@@ -55,6 +55,7 @@ export default class NpmAutopackage implements Autopackage {
         this.chdirToPackageDir()
         this.spruceCreateModuleIfNotExists()
         this.updatePackageJson()
+        this.commitUpdatePackage()
         this.setupVscodeIfNotExists()
     }
 
@@ -228,6 +229,16 @@ export default class NpmAutopackage implements Autopackage {
         }
 
         return ordered
+    }
+
+    private commitUpdatePackage() {
+        this.gitAddAll()
+        this.gitCommitUpdatePackage()
+        this.gitPush()
+    }
+
+    private gitCommitUpdatePackage() {
+        this.exec('git commit -m "patch: update package"')
     }
 
     private setupVscodeIfNotExists() {
