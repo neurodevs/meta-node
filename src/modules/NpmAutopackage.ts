@@ -55,7 +55,6 @@ export default class NpmAutopackage implements Autopackage {
         this.chdirToPackageDir()
         this.spruceCreateModuleIfNotExists()
         this.updatePackageJson()
-        this.commitCreatePackage()
         this.setupVscodeIfNotExists()
     }
 
@@ -120,6 +119,7 @@ export default class NpmAutopackage implements Autopackage {
     private spruceCreateModuleIfNotExists() {
         if (!this.packageJsonExists) {
             this.spruceCreateModule()
+            this.commitCreatePackage()
         }
     }
 
@@ -135,6 +135,24 @@ export default class NpmAutopackage implements Autopackage {
         this.exec(
             `spruce create.module --name "${this.packageName}" --destination "${this.installDir}/${this.packageName}" --description "${this.packageDescription}"`
         )
+    }
+
+    private commitCreatePackage() {
+        this.gitAddAll()
+        this.gitCommitCreatePackage()
+        this.gitPush()
+    }
+
+    private gitAddAll() {
+        this.exec('git add .')
+    }
+
+    private gitCommitCreatePackage() {
+        this.exec('git commit -m "patch: create package"')
+    }
+
+    private gitPush() {
+        this.exec('git push')
     }
 
     private updatePackageJson() {
@@ -210,24 +228,6 @@ export default class NpmAutopackage implements Autopackage {
         }
 
         return ordered
-    }
-
-    private commitCreatePackage() {
-        this.gitAddAll()
-        this.gitCommitCreatePackage()
-        this.gitPush()
-    }
-
-    private gitAddAll() {
-        this.exec('git add .')
-    }
-
-    private gitCommitCreatePackage() {
-        this.exec('git commit -m "patch: create package"')
-    }
-
-    private gitPush() {
-        this.exec('git push')
     }
 
     private setupVscodeIfNotExists() {

@@ -237,6 +237,19 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
+    protected static async doesNotCommitCreatePackageIfItExists() {
+        await this.NpmAutopackage()
+
+        assert.isEqual(
+            this.callsToExecSync.filter(
+                (cmd) => cmd === 'git commit -m "patch: create package"'
+            ).length,
+            1,
+            'Did not commit create package changes once!'
+        )
+    }
+
+    @test()
     protected static async doesNotCommitVscodeIfItExists() {
         await this.NpmAutopackage()
 
