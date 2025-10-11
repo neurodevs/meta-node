@@ -1,6 +1,6 @@
 {
   "name": "@neurodevs/meta-node",
-  "version": "0.4.4",
+  "version": "0.4.5",
   "description": "Meta-layer utilities for maintaining Node.js package ecosystems.",
   "repository": "https://github.com/neurodevs/meta-node.git",
   "main": "build/index.js",

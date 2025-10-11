@@ -96,6 +96,7 @@ export default class NpmAutopackage implements Autopackage {
 
     private cloneGitRepo() {
         if (!this.packageDirExists) {
+            console.log('Cloning git repository...')
             this.exec(`git clone ${this.gitUrl}`)
         }
     }
@@ -118,6 +119,7 @@ export default class NpmAutopackage implements Autopackage {
 
     private spruceCreateModule() {
         if (!this.packageJsonExists) {
+            console.log('Running spruce create.module...')
             this.execSpruceCreateModule()
             this.commitCreatePackage()
         }
@@ -159,6 +161,7 @@ export default class NpmAutopackage implements Autopackage {
         this.originalJsonFile = this.loadOriginalJsonFile()
 
         if (!this.isPackageUpToDate) {
+            console.log('Updating package.json...')
             this.updatePackageJson()
             this.commitUpdatePackage()
         }
@@ -263,6 +266,7 @@ export default class NpmAutopackage implements Autopackage {
 
     private updateGitignore() {
         if (!this.gitignoreUpdated) {
+            console.log('Updating .gitignore...')
             this.writeFileSync(this.gitignorePath, '\nbuild/\n', {
                 encoding: 'utf-8',
                 flag: 'a',
@@ -295,6 +299,7 @@ export default class NpmAutopackage implements Autopackage {
 
     private setupVscode() {
         if (!this.vscodeSettingsExists) {
+            console.log('Setting up VSCode...')
             this.spruceSetupVscode()
             this.commitSetupVscode()
         }
