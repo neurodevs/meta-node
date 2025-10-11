@@ -19,6 +19,9 @@ export * from './testDoubles/Automodule/FakeAutomodule'
 export { default as NpmAutopackage } from './modules/NpmAutopackage'
 export * from './modules/NpmAutopackage'
 
+export { default as FakeAutopackage } from './testDoubles/Autopackage/FakeAutopackage'
+export * from './testDoubles/Autopackage/FakeAutopackage'
+
 // PackageJsonUpdater
 
 export { default as PackageJsonUpdater } from './modules/PackageJsonUpdater'
