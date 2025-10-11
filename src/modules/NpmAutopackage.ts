@@ -51,12 +51,11 @@ export default class NpmAutopackage implements Autopackage {
         await this.createRepoInGithubOrg()
 
         this.chdirToInstallDir()
-        this.cloneGitRepoIfNotExists()
+        this.cloneGitRepoIfNotDone()
         this.chdirToPackageDir()
-        this.spruceCreateModuleIfNotExists()
-        this.updatePackageJson()
-        this.commitUpdatePackage()
-        this.setupVscodeIfNotExists()
+        this.spruceCreateModuleIfNotDone()
+        this.updatePackageIfNotDone()
+        this.setupVscodeIfNotDone()
     }
 
     private throwIfGithubTokenNotInEnv() {
@@ -95,7 +94,7 @@ export default class NpmAutopackage implements Autopackage {
         this.chdir(this.installDir)
     }
 
-    private cloneGitRepoIfNotExists() {
+    private cloneGitRepoIfNotDone() {
         if (!this.packageDirExists) {
             this.exec(`git clone ${this.gitUrl}`)
         }
@@ -117,7 +116,7 @@ export default class NpmAutopackage implements Autopackage {
         this.chdir(this.packageDir)
     }
 
-    private spruceCreateModuleIfNotExists() {
+    private spruceCreateModuleIfNotDone() {
         if (!this.packageJsonExists) {
             this.spruceCreateModule()
             this.commitCreatePackage()
@@ -156,13 +155,26 @@ export default class NpmAutopackage implements Autopackage {
         this.exec('git push')
     }
 
-    private updatePackageJson() {
+    private updatePackageIfNotDone() {
+        if (!this.packageUpdated) {
+            this.updatePackageJson()
+            this.commitUpdatePackage()
+        }
+    }
+
+    private get packageUpdated() {
+        return this.pkg.name === `@${this.scopedPackage}`
+    }
+
+    private get pkg() {
         const raw = this.readFileSync(this.packageJsonPath, {
             encoding: 'utf-8',
         })
+        return JSON.parse(raw)
+    }
 
-        const original = JSON.parse(raw)
-        const updated = { ...original, ...this.updatedJsonFile }
+    private updatePackageJson() {
+        const updated = { ...this.pkg, ...this.updatedJsonFile }
         const ordered = this.orderJsonKeys(updated, [
             'name',
             'version',
@@ -241,7 +253,7 @@ export default class NpmAutopackage implements Autopackage {
         this.exec('git commit -m "patch: update package"')
     }
 
-    private setupVscodeIfNotExists() {
+    private setupVscodeIfNotDone() {
         if (!this.vscodeSettingsExists) {
             this.spruceSetupVscode()
             this.commitSetupVscode()

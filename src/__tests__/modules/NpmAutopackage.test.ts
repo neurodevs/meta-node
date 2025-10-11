@@ -207,7 +207,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async doesNotCloneRepoIfItExists() {
+    protected static async doesNotCloneRepoIfDone() {
         await this.NpmAutopackage()
 
         assert.isEqual(
@@ -222,7 +222,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async doesNotSpruceCreateModuleIfItExists() {
+    protected static async doesNotSpruceCreateModuleIfDone() {
         await this.NpmAutopackage()
 
         assert.isEqual(
@@ -234,7 +234,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async doesNotRunSetupVscodeIfItExists() {
+    protected static async doesNotRunSetupVscodeIfDone() {
         await this.NpmAutopackage()
 
         assert.isEqual(
@@ -246,7 +246,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async doesNotCommitCreatePackageIfItExists() {
+    protected static async doesNotCommitCreatePackageIfDone() {
         await this.NpmAutopackage()
 
         assert.isEqual(
@@ -259,7 +259,20 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async doesNotCommitVscodeIfItExists() {
+    protected static async doesNotCommitUpdatePackageIfDone() {
+        await this.NpmAutopackage()
+
+        assert.isEqual(
+            this.callsToExecSync.filter(
+                (cmd) => cmd === 'git commit -m "patch: update package"'
+            ).length,
+            1,
+            'Did not commit update package changes once!'
+        )
+    }
+
+    @test()
+    protected static async doesNotCommitVscodeIfDone() {
         await this.NpmAutopackage()
 
         assert.isEqual(
