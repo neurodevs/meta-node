@@ -43,7 +43,7 @@ export default class NpmAutopackage implements Autopackage {
 
     private throwIfGithubTokenNotInEnv() {
         if (!this.githubToken) {
-            throw new Error('Please set process.env.GITHUB_TOKEN!')
+            throw new Error('\n\nPlease set process.env.GITHUB_TOKEN!\n')
         }
     }
 
