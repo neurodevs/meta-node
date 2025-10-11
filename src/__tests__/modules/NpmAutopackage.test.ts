@@ -157,6 +157,8 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
                 'repository',
                 'bugs',
                 'main',
+                'bin',
+                'files',
                 'scripts',
                 'dependencies',
                 'devDependencies',
@@ -328,6 +330,15 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
         )
     }
 
+    @test()
+    protected static async doesNotOverrideOriginalDependencies() {
+        assert.isEqualDeep(
+            JSON.parse(this.callsToWriteFileSync[0]?.data).dependencies,
+            this.dependencies,
+            'Did not update package.json as expected!'
+        )
+    }
+
     private static async createAndRunAutopackage() {
         const instance = this.NpmAutopackage()
         await instance.run()
@@ -448,7 +459,13 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
         return JSON.stringify({
             name: this.packageName,
             description: 'Old description',
+            dependencies: this.dependencies,
         })
+    }
+
+    private static readonly dependencies = {
+        [generateId()]: generateId(),
+        [generateId()]: generateId(),
     }
 
     private static get updatedPackageJson() {
@@ -467,7 +484,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
             bugs: {
                 url: `https://github.com/${this.scopedPackage}/issues`,
             },
-            dependencies: {},
+            dependencies: this.dependencies,
         })
     }
 

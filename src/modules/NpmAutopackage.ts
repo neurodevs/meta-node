@@ -18,6 +18,8 @@ export default class NpmAutopackage implements Autopackage {
     private license?: string
     private author?: string
 
+    private originalJsonFile!: Record<string, unknown>
+
     protected constructor(options: AutopackageOptions) {
         const {
             name,
@@ -154,6 +156,8 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private updatePackage() {
+        this.originalJsonFile = this.loadOriginalJsonFile()
+
         if (!this.packageUpdated) {
             this.updatePackageJson()
             this.commitUpdatePackage()
@@ -161,18 +165,14 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private get packageUpdated() {
-        return this.pkg.name === `@${this.scopedPackage}`
-    }
-
-    private get pkg() {
-        const raw = this.readFileSync(this.packageJsonPath, {
-            encoding: 'utf-8',
-        })
-        return JSON.parse(raw)
+        return this.originalJsonFile.name === `@${this.scopedPackage}`
     }
 
     private updatePackageJson() {
-        const updated = { ...this.pkg, ...this.updatedJsonFile }
+        const updated = {
+            ...this.originalJsonFile,
+            ...this.updatedJsonFile,
+        }
         const ordered = this.orderJsonKeys(updated, [
             'name',
             'version',
@@ -184,6 +184,8 @@ export default class NpmAutopackage implements Autopackage {
             'repository',
             'bugs',
             'main',
+            'bin',
+            'files',
             'scripts',
             'dependencies',
             'devDependencies',
@@ -196,6 +198,13 @@ export default class NpmAutopackage implements Autopackage {
             JSON.stringify(ordered, null, 2) + '\n',
             { encoding: 'utf-8' }
         )
+    }
+
+    private loadOriginalJsonFile() {
+        const raw = this.readFileSync(this.packageJsonPath, {
+            encoding: 'utf-8',
+        })
+        return JSON.parse(raw)
     }
 
     private get updatedJsonFile() {
@@ -213,7 +222,7 @@ export default class NpmAutopackage implements Autopackage {
             bugs: {
                 url: `https://github.com/${this.gitNamespace}/${this.packageName}/issues`,
             },
-            dependencies: {},
+            dependencies: this.originalJsonFile.dependencies ?? {},
         }
     }
 
