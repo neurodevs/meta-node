@@ -51,11 +51,11 @@ export default class NpmAutopackage implements Autopackage {
         await this.createRepoInGithubOrg()
 
         this.chdirToInstallDir()
-        this.cloneGitRepoIfNotDone()
+        this.cloneGitRepo()
         this.chdirToPackageDir()
-        this.spruceCreateModuleIfNotDone()
-        this.updatePackageIfNotDone()
-        this.setupVscodeIfNotDone()
+        this.spruceCreateModule()
+        this.updatePackage()
+        this.setupVscode()
     }
 
     private throwIfGithubTokenNotInEnv() {
@@ -94,7 +94,7 @@ export default class NpmAutopackage implements Autopackage {
         this.chdir(this.installDir)
     }
 
-    private cloneGitRepoIfNotDone() {
+    private cloneGitRepo() {
         if (!this.packageDirExists) {
             this.exec(`git clone ${this.gitUrl}`)
         }
@@ -116,9 +116,9 @@ export default class NpmAutopackage implements Autopackage {
         this.chdir(this.packageDir)
     }
 
-    private spruceCreateModuleIfNotDone() {
+    private spruceCreateModule() {
         if (!this.packageJsonExists) {
-            this.spruceCreateModule()
+            this.execSpruceCreateModule()
             this.commitCreatePackage()
         }
     }
@@ -131,7 +131,7 @@ export default class NpmAutopackage implements Autopackage {
         return `${this.packageDir}/package.json`
     }
 
-    private spruceCreateModule() {
+    private execSpruceCreateModule() {
         this.exec(
             `spruce create.module --name "${this.packageName}" --destination "${this.installDir}/${this.packageName}" --description "${this.packageDescription}"`
         )
@@ -155,7 +155,7 @@ export default class NpmAutopackage implements Autopackage {
         this.exec('git push')
     }
 
-    private updatePackageIfNotDone() {
+    private updatePackage() {
         if (!this.packageUpdated) {
             this.updatePackageJson()
             this.commitUpdatePackage()
@@ -253,7 +253,7 @@ export default class NpmAutopackage implements Autopackage {
         this.exec('git commit -m "patch: update package"')
     }
 
-    private setupVscodeIfNotDone() {
+    private setupVscode() {
         if (!this.vscodeSettingsExists) {
             this.spruceSetupVscode()
             this.commitSetupVscode()
