@@ -194,7 +194,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
 
         const expected = {
             path: this.gitignorePath,
-            data: '\nbuild\n',
+            data: '\nbuild/\n',
             options: { encoding: 'utf-8', flag: 'a' },
         }
 
@@ -302,6 +302,20 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
+    protected static async doesNotCommitUpdateGitignoreIfDone() {
+        await this.NpmAutopackage()
+
+        assert.isEqual(
+            this.callsToExecSync.filter(
+                (cmd) =>
+                    cmd === 'git commit -m "patch: add build dir to gitignore"'
+            ).length,
+            1,
+            'Did not commit gitignore changes once!'
+        )
+    }
+
+    @test()
     protected static async doesNotCommitVscodeIfDone() {
         await this.NpmAutopackage()
 
@@ -402,10 +416,23 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
             this.callsToReadFileSync.push({ path, options })
 
             if (path === this.packageJsonPath) {
-                if (this.callsToReadFileSync.length > 1) {
+                if (
+                    this.callsToReadFileSync.filter(
+                        ({ path }) => path === this.packageJsonPath
+                    ).length > 1
+                ) {
                     return this.updatedPackageJson
                 }
                 return this.oldPackageJson
+            } else if (path === this.gitignorePath) {
+                if (
+                    this.callsToReadFileSync.filter(
+                        ({ path }) => path === this.gitignorePath
+                    ).length > 1
+                ) {
+                    return 'node_modules/\n\nbuild/\n'
+                }
+                return 'node_modules/\n'
             }
             return ''
         }
