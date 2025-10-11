@@ -265,11 +265,11 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private get gitignoreUpdated() {
-        const gitignore = this.readFileSync(this.gitignorePath, {
+        const content = this.readFileSync(this.gitignorePath, {
             encoding: 'utf-8',
         })
-
-        return gitignore.includes('build/')
+        const lines = content.split(/\r?\n/).map((line) => line.trim())
+        return lines.includes('build/')
     }
 
     private get gitignorePath() {
