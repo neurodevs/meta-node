@@ -165,7 +165,8 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
             {
                 ...expected,
                 data: normalize(expected.data),
-            }
+            },
+            'Did not update package.json as expected!'
         )
     }
 
@@ -182,7 +183,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     protected static async ninthCallsSpruceSetupVscode() {
         assert.isEqual(
             this.callsToExecSync[5],
-            'spruce setup.vscode --all true',
+            NpmAutopackageTest.setupVscodeCmd,
             'Did not call "spruce setup.vscode"!'
         )
     }
@@ -207,7 +208,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
                     `git clone https://github.com/${this.gitNamespace}/${this.packageName}.git`
             ).length,
             1,
-            'Cloned repo more than once!'
+            'Did not clone repo once!'
         )
     }
 
@@ -219,7 +220,19 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
             this.callsToExecSync.filter((cmd) => cmd === this.createModuleCmd)
                 .length,
             1,
-            'Called spruce create.module more than once!'
+            'Did not call spruce create.module once!'
+        )
+    }
+
+    @test()
+    protected static async doesNotRunSetupVscodeIfItExists() {
+        await this.NpmAutopackage()
+
+        assert.isEqual(
+            this.callsToExecSync.filter((cmd) => cmd === this.setupVscodeCmd)
+                .length,
+            1,
+            'Did not call spruce setup.vscode once!'
         )
     }
 
@@ -238,6 +251,8 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     private static get createModuleCmd() {
         return `spruce create.module --name "${this.packageName}" --destination "${this.packageDir}" --description "${this.packageDescription}"`
     }
+
+    private static readonly setupVscodeCmd = 'spruce setup.vscode --all true'
 
     private static orderJsonKeys(
         json: Record<string, unknown>,

@@ -56,7 +56,7 @@ export default class NpmAutopackage implements Autopackage {
         this.spruceCreateModuleIfNotExists()
         this.updatePackageJson()
         this.commitCreatePackage()
-        this.setupVscode()
+        this.setupVscodeIfNotExists()
         this.commitSetupVscode()
     }
 
@@ -231,8 +231,14 @@ export default class NpmAutopackage implements Autopackage {
         this.exec('git push')
     }
 
-    private setupVscode() {
-        this.exec('spruce setup.vscode --all true')
+    private setupVscodeIfNotExists() {
+        if (!this.vscodeSettingsExists) {
+            this.exec('spruce setup.vscode --all true')
+        }
+    }
+
+    private get vscodeSettingsExists() {
+        return this.existsSync(`${this.packageDir}/.vscode/settings.json`)
     }
 
     private commitSetupVscode() {
