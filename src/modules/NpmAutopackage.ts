@@ -259,10 +259,21 @@ export default class NpmAutopackage implements Autopackage {
             encoding: 'utf-8',
             flag: 'a',
         })
+        this.commitUpdateGitignore()
     }
 
     private get gitignorePath() {
         return `${this.packageDir}/.gitignore`
+    }
+
+    private commitUpdateGitignore() {
+        this.gitAddAll()
+        this.gitCommitUpdateGitignore()
+        this.gitPush()
+    }
+
+    private gitCommitUpdateGitignore() {
+        this.exec('git commit -m "patch: add build dir to gitignore"')
     }
 
     private setupVscode() {

@@ -206,9 +206,22 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async eleventhSpruceSetupVscode() {
+    protected static async eleventhCommitUpdateGitignore() {
+        assert.isEqualDeep(
+            this.callsToExecSync.slice(8, 11),
+            [
+                'git add .',
+                'git commit -m "patch: add build dir to gitignore"',
+                'git push',
+            ],
+            'Did not commit .gitignore changes!'
+        )
+    }
+
+    @test()
+    protected static async twelfthSpruceSetupVscode() {
         assert.isEqual(
-            this.callsToExecSync[8],
+            this.callsToExecSync[11],
             NpmAutopackageTest.setupVscodeCmd,
             'Did not call "spruce setup.vscode"!'
         )
@@ -217,7 +230,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     @test()
     protected static async lastlyCommitVscodeChanges() {
         assert.isEqualDeep(
-            this.callsToExecSync.slice(9, 12),
+            this.callsToExecSync.slice(12, 15),
             ['git add .', 'git commit -m "patch: setup vscode"', 'git push'],
             'Did not commit vscode changes!'
         )
