@@ -2,7 +2,28 @@
   "name": "@neurodevs/meta-node",
   "version": "0.4.5",
   "description": "Meta-layer utilities for maintaining Node.js package ecosystems.",
-  "repository": "https://github.com/neurodevs/meta-node.git",
+  "keywords": [
+    "nodejs",
+    "typescript",
+    "tdd",
+    "git",
+    "npm",
+    "repositories",
+    "packages",
+    "modules",
+    "interfaces",
+    "implementations"
+  ],
+  "license": "MIT",
+  "author": "Eric Yates <hello@ericthecurious.com>",
+  "homepage": "https://github.com/neurodevs/meta-node",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/neurodevs/meta-node.git"
+  },
+  "bugs": {
+    "url": "https://github.com/neurodevs/meta-node/issues"
+  },
   "main": "build/index.js",
   "scripts": {
     "build.ci": "yarn run build.tsc && yarn run build.resolve-paths && yarn run lint",
@@ -25,6 +46,9 @@
     "watch.build.dev": "tsc-watch --sourceMap --onCompilationComplete 'yarn run post.watch.build'",
     "watch.rebuild": "yarn run clean.all && yarn install && yarn run watch.build.dev",
     "watch.tsc": "tsc -w"
+  },
+  "dependencies": {
+    "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "@sprucelabs/jest-json-reporter": "^9.0.61",
@@ -63,8 +87,5 @@
   },
   "skill": {
     "namespace": "meta-node"
-  },
-  "dependencies": {
-    "node-fetch": "^3.3.2"
   }
 }
