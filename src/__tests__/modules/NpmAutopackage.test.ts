@@ -16,6 +16,11 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     private static callsToExistsSync: string[] = []
     private static callsToFetch: { url: string; init: RequestInit }[] = []
     private static callsToReadFileSync: { path: string; options: any }[] = []
+    private static callsToWriteFileSync: {
+        path: string
+        data: any
+        options: any
+    }[] = []
 
     protected static async beforeEach() {
         await super.beforeEach()
@@ -25,6 +30,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
         this.fakeExistsSync()
         this.fakeFetch()
         this.fakeReadFileSync()
+        this.fakeWriteFileSync()
 
         process.env.GITHUB_TOKEN = this.githubToken
 
@@ -124,7 +130,31 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async seventhCommitsForCreatePackage() {
+    protected static async seventhUpdatesPackageJson() {
+        const actual = this.callsToWriteFileSync[0]
+
+        const expected = {
+            path: this.packageJsonPath,
+            data: this.updatedPackageJson,
+            options: { encoding: 'utf-8' },
+        }
+
+        const normalize = (s: string) => s.replace(/\s+/g, '').trim()
+
+        assert.isEqualDeep(
+            {
+                ...actual,
+                data: normalize(actual.data),
+            },
+            {
+                ...expected,
+                data: normalize(expected.data),
+            }
+        )
+    }
+
+    @test()
+    protected static async eighthCommitsForCreatePackage() {
         assert.isEqualDeep(
             this.callsToExecSync.slice(2, 5),
             ['git add .', 'git commit -m "patch: create package"', 'git push'],
@@ -133,7 +163,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async eighthCallsSpruceSetupVscode() {
+    protected static async ninthCallsSpruceSetupVscode() {
         assert.isEqual(
             this.callsToExecSync[5],
             'spruce setup.vscode --all true',
@@ -142,7 +172,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async ninthGitCommitsVscodeChanges() {
+    protected static async tenthGitCommitsVscodeChanges() {
         assert.isEqualDeep(
             this.callsToExecSync.slice(6, 9),
             ['git add .', 'git commit -m "patch: setup vscode"', 'git push'],
@@ -175,6 +205,10 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
             1,
             'Called spruce create.module more than once!'
         )
+    }
+
+    private static get scopedPackage() {
+        return `${this.gitNamespace}/${this.packageName}`
     }
 
     private static get packageDir() {
@@ -232,14 +266,51 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
             this.callsToReadFileSync.push({ path, options })
 
             if (path === this.packageJsonPath) {
-                return JSON.stringify({
-                    name: this.packageName,
-                    description: 'Old description',
-                })
+                if (this.callsToReadFileSync.length > 1) {
+                    return this.updatedPackageJson
+                }
+                return this.oldPackageJson
             }
             return ''
         }
         this.callsToReadFileSync = []
+    }
+
+    private static get oldPackageJson() {
+        return JSON.stringify({
+            name: this.packageName,
+            description: 'Old description',
+        })
+    }
+
+    private static get updatedPackageJson() {
+        return JSON.stringify({
+            ...JSON.parse(this.oldPackageJson),
+            name: `@${this.scopedPackage}`,
+            license: this.license,
+            author: this.author,
+            main: 'build/index.js',
+            homepage: `https://github.com/${this.scopedPackage}`,
+            repository: {
+                type: 'git',
+                url: `git+https://github.com/${this.scopedPackage}.git`,
+            },
+            bugs: {
+                url: `https://github.com/${this.scopedPackage}/issues`,
+            },
+        })
+    }
+
+    private static fakeWriteFileSync() {
+        // @ts-ignore
+        NpmAutopackage.writeFileSync = (
+            path: string,
+            data: any,
+            options: any
+        ) => {
+            this.callsToWriteFileSync.push({ path, data, options })
+        }
+        this.callsToWriteFileSync = []
     }
 
     private static readonly packageName = generateId()
@@ -247,6 +318,8 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
     private static readonly gitNamespace = generateId()
     private static readonly npmNamespace = generateId()
     private static readonly installDir = generateId()
+    private static readonly license = generateId()
+    private static readonly author = generateId()
 
     private static readonly githubToken = generateId()
 
@@ -256,6 +329,8 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
         gitNamespace: this.gitNamespace,
         npmNamespace: this.npmNamespace,
         installDir: this.installDir,
+        license: this.license,
+        author: this.author,
     }
 
     private static NpmAutopackage(options?: Partial<AutopackageOptions>) {

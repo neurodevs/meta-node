@@ -8,19 +8,25 @@ export default class NpmAutopackage implements Autopackage {
     public static existsSync = fs.existsSync
     public static fetch = globalThis.fetch
     public static readFileSync = fs.readFileSync
+    public static writeFileSync = fs.writeFileSync
 
     private packageName: string
     private packageDescription: string
     private gitNamespace: string
     private installDir: string
+    private license?: string
+    private author?: string
 
     protected constructor(options: AutopackageOptions) {
-        const { name, description, gitNamespace, installDir } = options
+        const { name, description, gitNamespace, installDir, license, author } =
+            options
 
         this.packageName = name
         this.packageDescription = description
         this.gitNamespace = gitNamespace
         this.installDir = installDir
+        this.license = license
+        this.author = author
     }
 
     public static async Create(options: AutopackageOptions) {
@@ -124,7 +130,40 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private updatePackageJson() {
-        this.readFileSync(this.packageJsonPath, { encoding: 'utf-8' })
+        const raw = this.readFileSync(this.packageJsonPath, {
+            encoding: 'utf-8',
+        })
+
+        const original = JSON.parse(raw)
+        const updated = { ...original, ...this.updatedJsonFile }
+
+        this.writeFileSync(
+            this.packageJsonPath,
+            JSON.stringify(updated, null, 2) + '\n',
+            { encoding: 'utf-8' }
+        )
+    }
+
+    private get updatedJsonFile() {
+        return {
+            name: `@${this.scopedPackage}`,
+            license: this.license,
+            author: this.author,
+            main: 'build/index.js',
+            homepage: `https://github.com/${this.gitNamespace}/${this.packageName}`,
+            repository: {
+                type: 'git',
+                url: `git+https://github.com/${this.gitNamespace}/${this.packageName}.git`,
+            },
+            bugs: {
+                url: `https://github.com/${this.gitNamespace}/${this.packageName}/issues`,
+            },
+            dependencies: {},
+        }
+    }
+
+    private get scopedPackage() {
+        return `${this.gitNamespace}/${this.packageName}`
     }
 
     private commitCreatePackage() {
@@ -178,6 +217,10 @@ export default class NpmAutopackage implements Autopackage {
     private get readFileSync() {
         return NpmAutopackage.readFileSync
     }
+
+    private get writeFileSync() {
+        return NpmAutopackage.writeFileSync
+    }
 }
 
 export interface Autopackage {
@@ -190,6 +233,8 @@ export interface AutopackageOptions {
     gitNamespace: string
     npmNamespace: string
     installDir: string
+    license?: string
+    author?: string
 }
 
 export type AutopackageConstructor = new () => Autopackage

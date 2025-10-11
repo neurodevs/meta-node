@@ -10,6 +10,8 @@ async function main() {
         gitNamespace: 'neurodevs',
         npmNamespace: 'neurodevs',
         installDir: '/Users/ericthecurious/dev',
+        license: 'MIT',
+        author: 'Eric Yates <hello@ericthecurious.com>',
     })
 
     console.log('Opening in VSCode...')
