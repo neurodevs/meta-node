@@ -34,7 +34,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
 
         process.env.GITHUB_TOKEN = this.githubToken
 
-        this.instance = await this.NpmAutopackage()
+        this.instance = this.NpmAutopackage()
         await this.instance.run()
     }
 
@@ -49,7 +49,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
 
         await assert.doesThrowAsync(
             async () => {
-                const instance = await this.NpmAutopackage()
+                const instance = this.NpmAutopackage()
                 await instance.run()
             },
             'Please set process.env.GITHUB_TOKEN!',
@@ -240,8 +240,6 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
 
     @test()
     protected static async doesNotCloneRepoIfDone() {
-        await this.NpmAutopackage()
-
         assert.isEqual(
             this.callsToExecSync.filter(
                 (cmd) =>
@@ -255,7 +253,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
 
     @test()
     protected static async doesNotSpruceCreateModuleIfDone() {
-        await this.NpmAutopackage()
+        await this.createAndRunAutopackage()
 
         assert.isEqual(
             this.callsToExecSync.filter((cmd) => cmd === this.createModuleCmd)
@@ -267,7 +265,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
 
     @test()
     protected static async doesNotRunSetupVscodeIfDone() {
-        await this.NpmAutopackage()
+        await this.createAndRunAutopackage()
 
         assert.isEqual(
             this.callsToExecSync.filter((cmd) => cmd === this.setupVscodeCmd)
@@ -279,7 +277,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
 
     @test()
     protected static async doesNotCommitCreatePackageIfDone() {
-        await this.NpmAutopackage()
+        await this.createAndRunAutopackage()
 
         assert.isEqual(
             this.callsToExecSync.filter(
@@ -292,7 +290,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
 
     @test()
     protected static async doesNotCommitUpdatePackageIfDone() {
-        await this.NpmAutopackage()
+        await this.createAndRunAutopackage()
 
         assert.isEqual(
             this.callsToExecSync.filter(
@@ -305,7 +303,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
 
     @test()
     protected static async doesNotCommitUpdateGitignoreIfDone() {
-        await this.NpmAutopackage()
+        await this.createAndRunAutopackage()
 
         assert.isEqual(
             this.callsToExecSync.filter(
@@ -319,7 +317,7 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
 
     @test()
     protected static async doesNotCommitVscodeIfDone() {
-        await this.NpmAutopackage()
+        await this.createAndRunAutopackage()
 
         assert.isEqual(
             this.callsToExecSync.filter(
@@ -328,6 +326,11 @@ export default class NpmAutopackageTest extends AbstractSpruceTest {
             1,
             'Did not commit vscode changes once!'
         )
+    }
+
+    private static async createAndRunAutopackage() {
+        const instance = this.NpmAutopackage()
+        await instance.run()
     }
 
     private static get scopedPackage() {

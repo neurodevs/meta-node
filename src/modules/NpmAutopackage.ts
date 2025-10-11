@@ -38,7 +38,7 @@ export default class NpmAutopackage implements Autopackage {
         this.author = author
     }
 
-    public static async Create(options: AutopackageOptions) {
+    public static Create(options: AutopackageOptions) {
         return new (this.Class ?? this)(options)
     }
 
