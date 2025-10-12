@@ -2,7 +2,7 @@ import { writeFile } from 'fs/promises'
 import path from 'path'
 import pathExists from './pathExists'
 
-export default class NodeAutomodule implements Automodule {
+export default class ImplAutomodule implements Automodule {
     public static Class?: AutomoduleConstructor
     public static pathExists = pathExists
     public static writeFile = writeFile
@@ -68,11 +68,11 @@ export default class NodeAutomodule implements Automodule {
     }
 
     private get pathExists() {
-        return NodeAutomodule.pathExists
+        return ImplAutomodule.pathExists
     }
 
     private get writeFile() {
-        return NodeAutomodule.writeFile
+        return ImplAutomodule.writeFile
     }
 
     private get testFilePattern() {

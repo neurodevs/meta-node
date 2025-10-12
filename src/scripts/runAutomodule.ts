@@ -1,9 +1,9 @@
-import NodeAutomodule from '../modules/NodeAutomodule'
+import ImplAutomodule from '../modules/ImplAutomodule'
 
 async function main() {
     console.log('\nRunning automodule...')
 
-    const instance = NodeAutomodule.Create({
+    const instance = ImplAutomodule.Create({
         testSaveDir:
             '/Users/ericthecurious/dev/meta-node/src/__tests__/modules',
         moduleSaveDir: '/Users/ericthecurious/dev/meta-node/src/modules',

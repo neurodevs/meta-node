@@ -4,7 +4,7 @@ import AbstractSpruceTest, {
     assert,
     generateId,
 } from '@sprucelabs/test-utils'
-import NodeAutomodule, { Automodule } from '../../modules/NodeAutomodule'
+import ImplAutomodule, { Automodule } from '../../modules/ImplAutomodule'
 import fakePathExists, {
     setPathShouldExist,
 } from '../../testDoubles/fs/fakePathExists'
@@ -13,7 +13,7 @@ import fakeWriteFile, {
     resetCallsToWriteFile,
 } from '../../testDoubles/fs/fakeWriteFile'
 
-export default class NodeAutomoduleTest extends AbstractSpruceTest {
+export default class ImplAutomoduleTest extends AbstractSpruceTest {
     private static instance: Automodule
 
     protected static async beforeEach() {
@@ -22,7 +22,7 @@ export default class NodeAutomoduleTest extends AbstractSpruceTest {
         this.setFakePathExists()
         this.setFakeWriteFile()
 
-        this.instance = this.NodeAutomodule()
+        this.instance = this.ImplAutomodule()
     }
 
     @test()
@@ -89,14 +89,14 @@ export default class NodeAutomoduleTest extends AbstractSpruceTest {
     }
 
     private static setFakePathExists() {
-        NodeAutomodule.pathExists = fakePathExists
+        ImplAutomodule.pathExists = fakePathExists
 
         setPathShouldExist(this.testSaveDir, true)
         setPathShouldExist(this.moduleSaveDir, true)
     }
 
     private static setFakeWriteFile() {
-        NodeAutomodule.writeFile = fakeWriteFile as typeof writeFile
+        ImplAutomodule.writeFile = fakeWriteFile as typeof writeFile
         resetCallsToWriteFile()
     }
 
@@ -149,8 +149,8 @@ export default class NodeAutomoduleTest extends AbstractSpruceTest {
         `
     }
 
-    private static NodeAutomodule() {
-        return NodeAutomodule.Create({
+    private static ImplAutomodule() {
+        return ImplAutomodule.Create({
             testSaveDir: this.testSaveDir,
             moduleSaveDir: this.moduleSaveDir,
             interfaceName: this.interfaceName,

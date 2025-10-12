@@ -1,4 +1,4 @@
-import { Automodule, AutomoduleOptions } from '../../modules/NodeAutomodule'
+import { Automodule, AutomoduleOptions } from '../../modules/ImplAutomodule'
 
 export default class FakeAutomodule implements Automodule {
     public static callsToConstructor: AutomoduleOptions[] = []

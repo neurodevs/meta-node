@@ -8,8 +8,8 @@ export * from './testDoubles/Autocloner/FakeAutocloner'
 
 // Automodule
 
-export { default as NodeAutomodule } from './modules/NodeAutomodule'
-export * from './modules/NodeAutomodule'
+export { default as ImplAutomodule } from './modules/ImplAutomodule'
+export * from './modules/ImplAutomodule'
 
 export { default as FakeAutomodule } from './testDoubles/Automodule/FakeAutomodule'
 export * from './testDoubles/Automodule/FakeAutomodule'
