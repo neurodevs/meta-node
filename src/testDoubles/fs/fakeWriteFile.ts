@@ -1,4 +1,7 @@
-export let callsToWriteFile: { file: string; data: string }[] = []
+export let callsToWriteFile: {
+    file: string
+    data: string
+}[] = []
 
 export function resetCallsToWriteFile() {
     callsToWriteFile = []

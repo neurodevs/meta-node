@@ -1,10 +1,11 @@
-import { writeFile } from 'fs/promises'
+import { readFile, writeFile } from 'fs/promises'
 import path from 'path'
 import pathExists from './pathExists'
 
 export default class ImplAutomodule implements Automodule {
     public static Class?: AutomoduleConstructor
     public static pathExists = pathExists
+    public static readFile = readFile
     public static writeFile = writeFile
 
     private testSaveDir: string
@@ -12,6 +13,8 @@ export default class ImplAutomodule implements Automodule {
     private fakeSaveDir: string
     private interfaceName: string
     private implName: string
+
+    private originalIndexFile!: string
 
     protected constructor(options: AutomoduleOptions) {
         const {
@@ -41,6 +44,8 @@ export default class ImplAutomodule implements Automodule {
         await this.createTestFile()
         await this.createModuleFile()
         await this.createFakeFile()
+
+        await this.updateIndexFileExports()
     }
 
     private async throwIfTestDirDoesNotExist() {
@@ -95,8 +100,23 @@ export default class ImplAutomodule implements Automodule {
         return path.join(this.fakeSaveDir, `Fake${this.interfaceName}.ts`)
     }
 
+    private async updateIndexFileExports() {
+        this.originalIndexFile = await this.loadOriginalIndexFile()
+        await this.writeFile(this.indexFilePath, this.indexFilePattern)
+    }
+
+    private async loadOriginalIndexFile() {
+        return await this.readFile(this.indexFilePath, 'utf-8')
+    }
+
+    private readonly indexFilePath = './src/index.ts'
+
     private get pathExists() {
         return ImplAutomodule.pathExists
+    }
+
+    private get readFile() {
+        return ImplAutomodule.readFile
     }
 
     private get writeFile() {
@@ -162,6 +182,20 @@ export default class ImplAutomodule implements Automodule {
                     Fake${this.interfaceName}.numCallsToConstructor = 0
                 }
             }
+        `
+    }
+
+    private get indexFilePattern() {
+        return `
+            ${this.originalIndexFile}
+
+            // ${this.interfaceName}
+
+            export { default as ${this.implName} } from './modules/${this.implName}'
+            export * from './modules/${this.implName}'
+
+            export { default as Fake${this.interfaceName} } from './testDoubles/${this.interfaceName}/Fake${this.interfaceName}'
+            export * from './testDoubles/${this.interfaceName}/Fake${this.interfaceName}'
         `
     }
 }

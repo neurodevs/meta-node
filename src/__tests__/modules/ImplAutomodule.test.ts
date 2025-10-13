@@ -1,4 +1,4 @@
-import { writeFile } from 'fs/promises'
+import { readFile, writeFile } from 'fs/promises'
 import AbstractSpruceTest, {
     test,
     assert,
@@ -8,6 +8,10 @@ import ImplAutomodule, { Automodule } from '../../modules/ImplAutomodule'
 import fakePathExists, {
     setPathShouldExist,
 } from '../../testDoubles/fs/fakePathExists'
+import fakeReadFile, {
+    fakeReadFileResult,
+    resetCallsToReadFile,
+} from '../../testDoubles/fs/fakeReadFile'
 import fakeWriteFile, {
     callsToWriteFile,
     resetCallsToWriteFile,
@@ -20,6 +24,7 @@ export default class ImplAutomoduleTest extends AbstractSpruceTest {
         await super.beforeEach()
 
         this.setFakePathExists()
+        this.setFakeReadFile()
         this.setFakeWriteFile()
 
         this.instance = this.ImplAutomodule()
@@ -111,6 +116,20 @@ export default class ImplAutomoduleTest extends AbstractSpruceTest {
         )
     }
 
+    @test()
+    protected static async updatesIndexFileExports() {
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToWriteFile[3],
+            {
+                file: this.indexFilePath,
+                data: this.indexFilePattern,
+            },
+            'Did not update index file as expected!'
+        )
+    }
+
     private static async run() {
         return await this.instance.run()
     }
@@ -121,6 +140,12 @@ export default class ImplAutomoduleTest extends AbstractSpruceTest {
         setPathShouldExist(this.testSaveDir, true)
         setPathShouldExist(this.moduleSaveDir, true)
         setPathShouldExist(this.fakeSaveDir, true)
+        setPathShouldExist(this.indexFilePath, true)
+    }
+
+    private static setFakeReadFile() {
+        ImplAutomodule.readFile = fakeReadFile as unknown as typeof readFile
+        resetCallsToReadFile()
     }
 
     private static setFakeWriteFile() {
@@ -193,6 +218,23 @@ export default class ImplAutomoduleTest extends AbstractSpruceTest {
                     Fake${this.interfaceName}.numCallsToConstructor = 0
                 }
             }
+        `
+    }
+
+    private static readonly indexFilePath = './src/index.ts'
+    private static readonly originalIndexFile = fakeReadFileResult
+
+    private static get indexFilePattern() {
+        return `
+            ${this.originalIndexFile}
+
+            // ${this.interfaceName}
+
+            export { default as ${this.implName} } from './modules/${this.implName}'
+            export * from './modules/${this.implName}'
+
+            export { default as Fake${this.interfaceName} } from './testDoubles/${this.interfaceName}/Fake${this.interfaceName}'
+            export * from './testDoubles/${this.interfaceName}/Fake${this.interfaceName}'
         `
     }
 
