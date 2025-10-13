@@ -1,23 +1,34 @@
-import { chdir } from 'process'
+import { exec as execSync } from 'child_process'
+import { promisify } from 'util'
 import { test, assert, generateId } from '@sprucelabs/test-utils'
+import {
+    callsToChdir,
+    callsToExec,
+    fakeChdir,
+    fakeExec,
+    fakePathExists,
+    resetCallsToChdir,
+    resetCallsToExec,
+    setPathShouldExist,
+} from '@neurodevs/fake-node-core'
+import { pathExists } from 'fs-extra'
 import GitAutocloner, {
     Autocloner,
     AutoclonerOptions,
 } from '../../modules/GitAutocloner'
 import AbstractPackageTest from '../AbstractPackageTest'
 
+const exec = promisify(execSync)
+
 export default class AutoclonerTest extends AbstractPackageTest {
     private static instance: Autocloner
-    private static originalDir = process.cwd()
-    private static originalExecSync = GitAutocloner.execSync
-    private static originalExistsSync = GitAutocloner.existsSync
 
     protected static async beforeEach() {
         await super.beforeEach()
 
-        this.resetFakes()
-        this.fakeExecSync()
-        this.chdirToOriginalDir()
+        this.setFakeChdir()
+        this.setFakeExec()
+        this.setFakePathExists()
 
         this.instance = this.GitAutocloner()
     }
@@ -44,10 +55,8 @@ export default class AutoclonerTest extends AbstractPackageTest {
     protected static async changesCurrentDirectoryToDirPath() {
         await this.run()
 
-        const actual = process.cwd().split('/').pop()
-
         assert.isEqual(
-            actual,
+            callsToChdir[0],
             this.validDirPath,
             'Should change current directory to the dirPath!'
         )
@@ -58,7 +67,7 @@ export default class AutoclonerTest extends AbstractPackageTest {
         await this.run()
 
         this.urls.forEach((url) => {
-            assert.doesInclude(this.callsToExecSync, `git clone ${url}`)
+            assert.doesInclude(callsToExec, `git clone ${url}`)
         })
     }
 
@@ -66,19 +75,20 @@ export default class AutoclonerTest extends AbstractPackageTest {
     protected static async doesNotCallGitCloneIfUrlExists() {
         await this.run()
 
-        this.callsToExecSync = []
-        this.chdirToOriginalDir()
+        this.urls.forEach((url) => {
+            setPathShouldExist(url.match(this.regexForRepoName)![1], true)
+        })
 
-        GitAutocloner.existsSync = () => true
+        resetCallsToExec()
 
         await this.run()
 
-        assert.isLength(this.callsToExecSync, 0)
+        assert.isLength(callsToExec, 0)
     }
 
     @test()
     protected static async throwsIfGitCloneFails() {
-        GitAutocloner.execSync = (_command: string) => {
+        GitAutocloner.exec = (_command: string) => {
             throw new Error(this.gitCloneFailedError)
         }
 
@@ -105,20 +115,26 @@ export default class AutoclonerTest extends AbstractPackageTest {
         })
     }
 
-    private static fakeExecSync() {
-        // @ts-ignore
-        GitAutocloner.execSync = (command: string) => {
-            this.callsToExecSync.push(command)
-        }
+    private static setFakeChdir() {
+        GitAutocloner.chdir = fakeChdir
+        resetCallsToChdir()
     }
 
-    private static resetFakes() {
-        GitAutocloner.execSync = this.originalExecSync
-        GitAutocloner.existsSync = this.originalExistsSync
+    private static setFakeExec() {
+        GitAutocloner.exec = fakeExec as unknown as typeof exec
+        resetCallsToExec()
     }
 
-    private static chdirToOriginalDir() {
-        chdir(this.originalDir)
+    private static setFakePathExists() {
+        GitAutocloner.pathExists =
+            fakePathExists as unknown as typeof pathExists
+        resetCallsToExec()
+
+        setPathShouldExist(this.validDirPath, true)
+
+        this.urls.forEach((url) => {
+            setPathShouldExist(url.match(this.regexForRepoName)![1], false)
+        })
     }
 
     private static generateUrl() {
@@ -129,12 +145,11 @@ export default class AutoclonerTest extends AbstractPackageTest {
         return `Git clone failed for repo: ${this.urls[0]}! Error: \n\n${this.gitCloneFailedError}\n\n`
     }
 
-    private static callsToExecSync: string[] = []
-
     private static readonly urls = [this.generateUrl(), this.generateUrl()]
-    private static readonly validDirPath = 'src'
+    private static readonly validDirPath = generateId()
     private static readonly invalidDirPath = generateId()
     private static readonly gitCloneFailedError = 'Failed to clone repo!'
+    private static readonly regexForRepoName = /\/([a-zA-Z0-9_.-]+)\.git/
 
     private static GitAutocloner() {
         return GitAutocloner.Create()

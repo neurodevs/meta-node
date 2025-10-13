@@ -1,4 +1,4 @@
-import { execSync } from 'child_process'
+import { exec as execSync } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
 import { promisify } from 'util'
 import { pathExists } from 'fs-extra'

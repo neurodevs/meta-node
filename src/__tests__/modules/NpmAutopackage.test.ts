@@ -1,4 +1,6 @@
+import { exec as execSync } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
+import { promisify } from 'util'
 import { test, assert, generateId } from '@sprucelabs/test-utils'
 import {
     callsToChdir,
@@ -26,6 +28,8 @@ import NpmAutopackage, {
 } from '../../modules/NpmAutopackage'
 import AbstractPackageTest from '../AbstractPackageTest'
 
+const exec = promisify(execSync)
+
 export default class NpmAutopackageTest extends AbstractPackageTest {
     private static instance: Autopackage
 
@@ -34,7 +38,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         this.fakeChdir()
         this.fakeExec()
-        this.fakeExistsSync()
+        this.fakePathExists()
         this.fakeFetch()
         this.fakeReadFile()
         this.fakeWriteFile()
@@ -431,11 +435,11 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     private static fakeExec() {
-        NpmAutopackage.exec = fakeExec
+        NpmAutopackage.exec = fakeExec as unknown as typeof exec
         resetCallsToExec()
     }
 
-    private static fakeExistsSync() {
+    private static fakePathExists() {
         NpmAutopackage.pathExists = fakePathExists
         resetCallsToPathExists()
     }

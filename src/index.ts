@@ -29,8 +29,3 @@ export * from './modules/NpmAutopackage'
 
 export { default as FakeAutopackage } from './testDoubles/Autopackage/FakeAutopackage'
 export * from './testDoubles/Autopackage/FakeAutopackage'
-
-// fs
-
-export { default as fakePathExists } from './testDoubles/fs/fakePathExists'
-export * from './testDoubles/fs/fakePathExists'

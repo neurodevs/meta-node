@@ -1,11 +1,13 @@
-import { execSync } from 'child_process'
-import { existsSync } from 'fs'
+import { exec as execSync } from 'child_process'
 import { chdir } from 'process'
+import { promisify } from 'util'
+import { pathExists } from 'fs-extra'
 
 export default class GitAutocloner implements Autocloner {
     public static Class?: AutoclonerConstructor
-    public static execSync = execSync
-    public static existsSync = existsSync
+    public static chdir = chdir
+    public static exec = promisify(execSync)
+    public static pathExists = pathExists
 
     private urls!: string[]
     private dirPath!: string
@@ -25,19 +27,22 @@ export default class GitAutocloner implements Autocloner {
         this.urls = urls
         this.dirPath = dirPath
 
-        this.throwIfDirPathDoesNotExist()
+        await this.throwIfDirPathDoesNotExist()
+
         this.changeDirectoryToDirPath()
-        this.cloneReposFromUrls()
+        await this.cloneReposFromUrls()
     }
 
-    private throwIfDirPathDoesNotExist() {
-        if (!this.dirPathExists) {
+    private async throwIfDirPathDoesNotExist() {
+        const dirPathExists = await this.checkIfDirPathExists()
+
+        if (!dirPathExists) {
             this.throwDirPathDoesNotExist()
         }
     }
 
-    private get dirPathExists() {
-        return this.existsSync(this.dirPath)
+    private async checkIfDirPathExists() {
+        return this.pathExists(this.dirPath)
     }
 
     private throwDirPathDoesNotExist() {
@@ -45,26 +50,28 @@ export default class GitAutocloner implements Autocloner {
     }
 
     private changeDirectoryToDirPath() {
-        chdir(this.dirPath)
+        this.chdir(this.dirPath)
     }
 
-    private cloneReposFromUrls() {
-        this.urls.forEach((url) => {
+    private async cloneReposFromUrls() {
+        for (const url of this.urls) {
             this.currentUrl = url
-            this.cloneCurrentUrl()
-        })
+            await this.cloneCurrentUrl()
+        }
     }
 
-    private cloneCurrentUrl() {
-        if (!this.currentRepoExists) {
-            this.tryToCloneRepo()
+    private async cloneCurrentUrl() {
+        const currentRepoExists = await this.checkIfCurrentRepoExists()
+
+        if (!currentRepoExists) {
+            await this.tryToCloneRepo()
         } else {
             this.log.info(`Repo exists, skipping: ${this.currentRepoName}!`)
         }
     }
 
-    private get currentRepoExists() {
-        return this.existsSync(this.currentRepoName)
+    private async checkIfCurrentRepoExists() {
+        return this.pathExists(this.currentRepoName)
     }
 
     private get currentRepoName() {
@@ -73,9 +80,9 @@ export default class GitAutocloner implements Autocloner {
 
     private readonly regexForRepoName = /\/([a-zA-Z0-9_.-]+)\.git/
 
-    private tryToCloneRepo() {
+    private async tryToCloneRepo() {
         try {
-            this.execSync(`git clone ${this.currentUrl}`)
+            await this.exec(`git clone ${this.currentUrl}`)
         } catch (err: any) {
             this.currentError = err
             this.throwGitCloneFailed()
@@ -90,12 +97,16 @@ export default class GitAutocloner implements Autocloner {
         return `Git clone failed for repo: ${this.currentUrl}!\n\n${this.currentError}\n\n`
     }
 
-    private get existsSync() {
-        return GitAutocloner.existsSync
+    private get chdir() {
+        return GitAutocloner.chdir
     }
 
-    private get execSync() {
-        return GitAutocloner.execSync
+    private get exec() {
+        return GitAutocloner.exec
+    }
+
+    private get pathExists() {
+        return GitAutocloner.pathExists
     }
 }
 

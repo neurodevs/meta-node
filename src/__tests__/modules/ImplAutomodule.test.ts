@@ -6,17 +6,16 @@ import {
     callsToExec,
     callsToWriteFile,
     fakeExec,
+    fakePathExists,
     fakeReadFile,
     fakeReadFileResult,
     fakeWriteFile,
     resetCallsToReadFile,
     resetCallsToWriteFile,
     setFakeReadFileResult,
+    setPathShouldExist,
 } from '@neurodevs/fake-node-core'
 import ImplAutomodule, { Automodule } from '../../modules/ImplAutomodule'
-import fakePathExists, {
-    setPathShouldExist,
-} from '../../testDoubles/fs/fakePathExists'
 import AbstractPackageTest from '../AbstractPackageTest'
 
 const exec = promisify(execSync)

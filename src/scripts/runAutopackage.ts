@@ -1,4 +1,4 @@
-import { execSync } from 'child_process'
+import { exec as execSync } from 'child_process'
 import NpmAutopackage from '../modules/NpmAutopackage'
 
 async function main() {
