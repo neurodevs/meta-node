@@ -180,7 +180,7 @@ export default class ImplAutomoduleTest extends AbstractSpruceTest {
 
     private static get fakeFilePattern() {
         return `
-            import { ${this.interfaceName} } from '../modules/${this.implName}'
+            import { ${this.interfaceName} } from '../../modules/${this.implName}'
 
             export default class Fake${this.interfaceName} implements ${this.interfaceName} {
                 public static numCallsToConstructor = 0
