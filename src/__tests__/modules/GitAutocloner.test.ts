@@ -1,15 +1,12 @@
 import { chdir } from 'process'
-import AbstractSpruceTest, {
-    test,
-    assert,
-    generateId,
-} from '@sprucelabs/test-utils'
+import { test, assert, generateId } from '@sprucelabs/test-utils'
 import GitAutocloner, {
     Autocloner,
     AutoclonerOptions,
 } from '../../modules/GitAutocloner'
+import AbstractPackageTest from '../AbstractPackageTest'
 
-export default class AutoclonerTest extends AbstractSpruceTest {
+export default class AutoclonerTest extends AbstractPackageTest {
     private static instance: Autocloner
     private static originalDir = process.cwd()
     private static originalExecSync = GitAutocloner.execSync
@@ -126,10 +123,6 @@ export default class AutoclonerTest extends AbstractSpruceTest {
 
     private static generateUrl() {
         return `https://github.com/${generateId()}.git`
-    }
-
-    private static normalize(input: string) {
-        return input.replace(/\s+/g, ' ').trim()
     }
 
     private static get gitCloneFailedMessage() {

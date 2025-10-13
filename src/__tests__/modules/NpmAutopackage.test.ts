@@ -1,14 +1,11 @@
-import AbstractSpruceTest, {
-    test,
-    assert,
-    generateId,
-} from '@sprucelabs/test-utils'
+import { test, assert, generateId } from '@sprucelabs/test-utils'
 import NpmAutopackage, {
     Autopackage,
     AutopackageOptions,
 } from '../../modules/NpmAutopackage'
+import AbstractPackageTest from '../AbstractPackageTest'
 
-export default class NpmAutopackageTest extends AbstractSpruceTest {
+export default class NpmAutopackageTest extends AbstractPackageTest {
     private static instance: Autopackage
 
     private static callsToChdir: string[] = []

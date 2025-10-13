@@ -102,7 +102,7 @@ export default class ImplAutomodule implements Automodule {
 
     private async updateIndexFileExports() {
         this.originalIndexFile = await this.loadOriginalIndexFile()
-        await this.writeFile(this.indexFilePath, this.indexFilePattern)
+        await this.writeFile(this.indexFilePath, this.sortedIndexFile)
     }
 
     private async loadOriginalIndexFile() {
@@ -197,6 +197,21 @@ export default class ImplAutomodule implements Automodule {
             export { default as Fake${this.interfaceName} } from './testDoubles/${this.interfaceName}/Fake${this.interfaceName}'
             export * from './testDoubles/${this.interfaceName}/Fake${this.interfaceName}'
         `
+    }
+
+    private get sortedIndexFile() {
+        const blocks = this.indexFilePattern
+            .split(/(?=\/\/)/)
+            .map((s) => s.trim())
+            .filter(Boolean)
+
+        blocks.sort((a, b) => {
+            const aKey = a.match(/^\/\/\s*([^\n]*)/)?.[1]?.trim() ?? ''
+            const bKey = b.match(/^\/\/\s*([^\n]*)/)?.[1]?.trim() ?? ''
+            return aKey.localeCompare(bKey)
+        })
+
+        return blocks.join('\n\n')
     }
 }
 

@@ -1,9 +1,10 @@
-import AbstractSpruceTest, { test, assert } from '@sprucelabs/test-utils'
+import { test, assert } from '@sprucelabs/test-utils'
 import PackageAutodocumenter, {
     Autodocumenter,
 } from '../../modules/PackageAutodocumenter'
+import AbstractPackageTest from '../AbstractPackageTest'
 
-export default class PackageAutodocumenterTest extends AbstractSpruceTest {
+export default class PackageAutodocumenterTest extends AbstractPackageTest {
     private static instance: Autodocumenter
 
     protected static async beforeEach() {

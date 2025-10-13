@@ -1,9 +1,5 @@
 import { readFile, writeFile } from 'fs/promises'
-import AbstractSpruceTest, {
-    test,
-    assert,
-    generateId,
-} from '@sprucelabs/test-utils'
+import { test, assert, generateId } from '@sprucelabs/test-utils'
 import ImplAutomodule, { Automodule } from '../../modules/ImplAutomodule'
 import fakePathExists, {
     setPathShouldExist,
@@ -11,13 +7,15 @@ import fakePathExists, {
 import fakeReadFile, {
     fakeReadFileResult,
     resetCallsToReadFile,
+    setFakeReadFileResult,
 } from '../../testDoubles/fs/fakeReadFile'
 import fakeWriteFile, {
     callsToWriteFile,
     resetCallsToWriteFile,
 } from '../../testDoubles/fs/fakeWriteFile'
+import AbstractPackageTest from '../AbstractPackageTest'
 
-export default class ImplAutomoduleTest extends AbstractSpruceTest {
+export default class ImplAutomoduleTest extends AbstractPackageTest {
     private static instance: Automodule
 
     protected static async beforeEach() {
@@ -117,14 +115,25 @@ export default class ImplAutomoduleTest extends AbstractSpruceTest {
     }
 
     @test()
-    protected static async updatesIndexFileExports() {
+    protected static async sortsIndexFileExportsAlphabetically() {
+        setFakeReadFileResult(`
+            // A-${fakeReadFileResult}
+            
+            // C-${fakeReadFileResult}
+        `)
+
         await this.run()
 
+        const call = callsToWriteFile[3]
+
         assert.isEqualDeep(
-            callsToWriteFile[3],
+            {
+                file: call.file,
+                data: this.normalize(call.data),
+            },
             {
                 file: this.indexFilePath,
-                data: this.indexFilePattern,
+                data: this.normalize(this.sortedIndexFile),
             },
             'Did not update index file as expected!'
         )
@@ -152,7 +161,7 @@ export default class ImplAutomoduleTest extends AbstractSpruceTest {
         ImplAutomodule.writeFile = fakeWriteFile as typeof writeFile
         resetCallsToWriteFile()
     }
-    private static readonly interfaceName = generateId()
+    private static readonly interfaceName = `B-${generateId()}`
     private static readonly implName = generateId()
 
     private static readonly testSaveDir = generateId()
@@ -222,11 +231,10 @@ export default class ImplAutomoduleTest extends AbstractSpruceTest {
     }
 
     private static readonly indexFilePath = './src/index.ts'
-    private static readonly originalIndexFile = fakeReadFileResult
 
     private static get indexFilePattern() {
         return `
-            ${this.originalIndexFile}
+            ${fakeReadFileResult}
 
             // ${this.interfaceName}
 
@@ -235,7 +243,23 @@ export default class ImplAutomoduleTest extends AbstractSpruceTest {
 
             export { default as Fake${this.interfaceName} } from './testDoubles/${this.interfaceName}/Fake${this.interfaceName}'
             export * from './testDoubles/${this.interfaceName}/Fake${this.interfaceName}'
+
         `
+    }
+
+    private static get sortedIndexFile() {
+        const blocks = this.indexFilePattern
+            .split(/(?=\/\/)/)
+            .map((s) => s.trim())
+            .filter(Boolean)
+
+        blocks.sort((a, b) => {
+            const aKey = a.match(/^\/\/\s*([^\n]*)/)?.[1]?.trim() ?? ''
+            const bKey = b.match(/^\/\/\s*([^\n]*)/)?.[1]?.trim() ?? ''
+            return aKey.localeCompare(bKey)
+        })
+
+        return blocks.join('\n\n')
     }
 
     private static ImplAutomodule() {
