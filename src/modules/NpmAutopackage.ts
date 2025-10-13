@@ -7,7 +7,7 @@ export default class NpmAutopackage implements Autopackage {
     public static chdir = process.chdir
     public static execSync = execSync
     public static pathExists = pathExists
-    public static fetch = globalThis.fetch
+    public static fetch = fetch
     public static readFile = readFile
     public static writeFile = writeFile
 
@@ -53,6 +53,7 @@ export default class NpmAutopackage implements Autopackage {
 
         this.chdirToInstallDir()
         await this.cloneGitRepo()
+
         this.chdirToPackageDir()
         await this.spruceCreateModule()
         await this.updatePackage()
