@@ -1,5 +1,7 @@
+import { exec as execSync } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
 import path from 'path'
+import { promisify } from 'util'
 import pathExists from './pathExists'
 
 export default class ImplAutomodule implements Automodule {
@@ -7,6 +9,7 @@ export default class ImplAutomodule implements Automodule {
     public static pathExists = pathExists
     public static readFile = readFile
     public static writeFile = writeFile
+    public static exec = promisify(execSync)
 
     private testSaveDir: string
     private moduleSaveDir: string
@@ -46,6 +49,7 @@ export default class ImplAutomodule implements Automodule {
         await this.createFakeFile()
 
         await this.updateIndexFileExports()
+        await this.bumpMinorVersion()
     }
 
     private async throwIfTestDirDoesNotExist() {
@@ -110,6 +114,14 @@ export default class ImplAutomodule implements Automodule {
     }
 
     private readonly indexFilePath = './src/index.ts'
+
+    private async bumpMinorVersion() {
+        await this.exec('yarn version --minor --no-git-tag-version')
+    }
+
+    private get exec() {
+        return ImplAutomodule.exec
+    }
 
     private get pathExists() {
         return ImplAutomodule.pathExists

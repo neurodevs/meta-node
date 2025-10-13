@@ -1,6 +1,9 @@
+import { exec as execSync } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
+import { promisify } from 'util'
 import { test, assert, generateId } from '@sprucelabs/test-utils'
 import ImplAutomodule, { Automodule } from '../../modules/ImplAutomodule'
+import fakeExec, { callsToExec } from '../../testDoubles/child_process/fakeExec'
 import fakePathExists, {
     setPathShouldExist,
 } from '../../testDoubles/fs/fakePathExists'
@@ -15,12 +18,15 @@ import fakeWriteFile, {
 } from '../../testDoubles/fs/fakeWriteFile'
 import AbstractPackageTest from '../AbstractPackageTest'
 
+const exec = promisify(execSync)
+
 export default class ImplAutomoduleTest extends AbstractPackageTest {
     private static instance: Automodule
 
     protected static async beforeEach() {
         await super.beforeEach()
 
+        this.setFakeExec()
         this.setFakePathExists()
         this.setFakeReadFile()
         this.setFakeWriteFile()
@@ -139,8 +145,23 @@ export default class ImplAutomoduleTest extends AbstractPackageTest {
         )
     }
 
+    @test()
+    protected static async bumpsMinorVersionWithYarn() {
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToExec[0],
+            'yarn version --minor --no-git-tag-version',
+            'Did not bump minor version!'
+        )
+    }
+
     private static async run() {
         return await this.instance.run()
+    }
+
+    private static setFakeExec() {
+        ImplAutomodule.exec = fakeExec as unknown as typeof exec
     }
 
     private static setFakePathExists() {
