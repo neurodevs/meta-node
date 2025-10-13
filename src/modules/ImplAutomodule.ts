@@ -2,7 +2,7 @@ import { exec as execSync } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
 import path from 'path'
 import { promisify } from 'util'
-import pathExists from './pathExists'
+import { pathExists } from 'fs-extra'
 
 export default class ImplAutomodule implements Automodule {
     public static Class?: AutomoduleConstructor

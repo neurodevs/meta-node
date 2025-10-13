@@ -48,6 +48,7 @@
     "watch.tsc": "tsc -w"
   },
   "dependencies": {
+    "fs-extra": "^11.3.2",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
@@ -56,6 +57,7 @@
     "@sprucelabs/resolve-path-aliases": "^3.0.28",
     "@sprucelabs/test": "^10.0.24",
     "@sprucelabs/test-utils": "^6.0.94",
+    "@types/fs-extra": "^11.0.4",
     "@types/node": "^24.6.2",
     "@types/node-fetch": "^2.6.13",
     "chokidar-cli": "^3.0.0",

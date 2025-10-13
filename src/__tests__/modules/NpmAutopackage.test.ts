@@ -438,7 +438,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     private static fakeExistsSync() {
         // @ts-ignore
-        NpmAutopackage.existsSync = (path: string) => {
+        NpmAutopackage.pathExists = (path: string) => {
             if (this.callsToExistsSync.includes(path)) {
                 this.callsToExistsSync.push(path)
                 return true

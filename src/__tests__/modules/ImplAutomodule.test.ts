@@ -88,6 +88,7 @@ export default class ImplAutomoduleTest extends AbstractPackageTest {
             {
                 file: `${this.testSaveDir}/${this.implName}.test.ts`,
                 data: this.testFilePattern,
+                options: undefined,
             },
             'Did not write expected test file!'
         )
@@ -102,6 +103,7 @@ export default class ImplAutomoduleTest extends AbstractPackageTest {
             {
                 file: `${this.moduleSaveDir}/${this.implName}.ts`,
                 data: this.moduleFilePattern,
+                options: undefined,
             },
             'Did not write expected module file!'
         )
@@ -116,6 +118,7 @@ export default class ImplAutomoduleTest extends AbstractPackageTest {
             {
                 file: `${this.fakeSaveDir}/Fake${this.interfaceName}.ts`,
                 data: this.fakeFilePattern,
+                options: undefined,
             },
             'Did not write expected fake file!'
         )

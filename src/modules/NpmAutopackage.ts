@@ -1,12 +1,12 @@
 import { execSync } from 'child_process'
-import fs from 'fs'
 import { readFile, writeFile } from 'fs/promises'
+import { pathExists } from 'fs-extra'
 
 export default class NpmAutopackage implements Autopackage {
     public static Class?: AutopackageConstructor
     public static chdir = process.chdir
     public static execSync = execSync
-    public static existsSync = fs.existsSync
+    public static pathExists = pathExists
     public static fetch = globalThis.fetch
     public static readFile = readFile
     public static writeFile = writeFile
@@ -52,12 +52,12 @@ export default class NpmAutopackage implements Autopackage {
         await this.createRepoInGithubOrg()
 
         this.chdirToInstallDir()
-        this.cloneGitRepo()
+        await this.cloneGitRepo()
         this.chdirToPackageDir()
-        this.spruceCreateModule()
+        await this.spruceCreateModule()
         await this.updatePackage()
         await this.updateGitignore()
-        this.setupVscode()
+        await this.setupVscode()
     }
 
     private throwIfGithubTokenNotInEnv() {
@@ -96,15 +96,17 @@ export default class NpmAutopackage implements Autopackage {
         this.chdir(this.installDir)
     }
 
-    private cloneGitRepo() {
-        if (!this.packageDirExists) {
+    private async cloneGitRepo() {
+        const packageDirExists = await this.checkIfPackageDirExists()
+
+        if (!packageDirExists) {
             console.log('Cloning git repository...')
             this.exec(`git clone ${this.gitUrl}`)
         }
     }
 
-    private get packageDirExists() {
-        return this.existsSync(this.packageDir)
+    private async checkIfPackageDirExists() {
+        return this.pathExists(this.packageDir)
     }
 
     private get packageDir() {
@@ -119,16 +121,18 @@ export default class NpmAutopackage implements Autopackage {
         this.chdir(this.packageDir)
     }
 
-    private spruceCreateModule() {
-        if (!this.packageJsonExists) {
+    private async spruceCreateModule() {
+        const packageJsonExists = await this.checkIfPackageJsonExists()
+
+        if (!packageJsonExists) {
             console.log('Running spruce create.module...')
             this.execSpruceCreateModule()
             this.commitCreatePackage()
         }
     }
 
-    private get packageJsonExists() {
-        return this.existsSync(this.packageJsonPath)
+    private async checkIfPackageJsonExists() {
+        return this.pathExists(this.packageJsonPath)
     }
 
     private get packageJsonPath() {
@@ -312,16 +316,18 @@ export default class NpmAutopackage implements Autopackage {
         this.exec('git commit -m "patch: add build dir to gitignore"')
     }
 
-    private setupVscode() {
-        if (!this.vscodeSettingsExists) {
+    private async setupVscode() {
+        const vscodeSettingsExist = await this.checkIfVscodeSettingsExist()
+
+        if (!vscodeSettingsExist) {
             console.log('Setting up VSCode...')
             this.spruceSetupVscode()
             this.commitSetupVscode()
         }
     }
 
-    private get vscodeSettingsExists() {
-        return this.existsSync(`${this.packageDir}/.vscode/settings.json`)
+    private async checkIfVscodeSettingsExist() {
+        return this.pathExists(`${this.packageDir}/.vscode/settings.json`)
     }
 
     private spruceSetupVscode() {
@@ -346,8 +352,8 @@ export default class NpmAutopackage implements Autopackage {
         return NpmAutopackage.execSync
     }
 
-    private get existsSync() {
-        return NpmAutopackage.existsSync
+    private get pathExists() {
+        return NpmAutopackage.pathExists
     }
 
     private get fetch() {
