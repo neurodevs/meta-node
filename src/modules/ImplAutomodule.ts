@@ -9,14 +9,22 @@ export default class ImplAutomodule implements Automodule {
 
     private testSaveDir: string
     private moduleSaveDir: string
+    private fakeSaveDir: string
     private interfaceName: string
     private implName: string
 
     protected constructor(options: AutomoduleOptions) {
-        const { testSaveDir, moduleSaveDir, interfaceName, implName } = options
+        const {
+            testSaveDir,
+            moduleSaveDir,
+            fakeSaveDir,
+            interfaceName,
+            implName,
+        } = options
 
         this.testSaveDir = testSaveDir
         this.moduleSaveDir = moduleSaveDir
+        this.fakeSaveDir = fakeSaveDir
         this.interfaceName = interfaceName
         this.implName = implName
     }
@@ -28,6 +36,7 @@ export default class ImplAutomodule implements Automodule {
     public async run() {
         await this.throwIfTestDirDoesNotExist()
         await this.throwIfModuleDirDoesNotExist()
+        await this.throwIfFakeDirDoesNotExist()
 
         await this.createTestFile()
         await this.createModuleFile()
@@ -37,7 +46,7 @@ export default class ImplAutomodule implements Automodule {
         const testDirExists = await this.pathExists(this.testSaveDir)
 
         if (!testDirExists) {
-            throw new Error(`testSaveDir does not exist: ${this.testSaveDir}!`)
+            this.throw(`testSaveDir does not exist: ${this.testSaveDir}!`)
         }
     }
 
@@ -45,10 +54,20 @@ export default class ImplAutomodule implements Automodule {
         const moduleDirExists = await this.pathExists(this.moduleSaveDir)
 
         if (!moduleDirExists) {
-            throw new Error(
-                `moduleSaveDir does not exist: ${this.moduleSaveDir}!`
-            )
+            this.throw(`moduleSaveDir does not exist: ${this.moduleSaveDir}!`)
         }
+    }
+
+    private async throwIfFakeDirDoesNotExist() {
+        const fakeDirExists = await this.pathExists(this.fakeSaveDir)
+
+        if (!fakeDirExists) {
+            this.throw(`fakeSaveDir does not exist: ${this.fakeSaveDir}!`)
+        }
+    }
+
+    private throw(err: string) {
+        throw new Error(err)
     }
 
     private async createTestFile() {
@@ -131,6 +150,7 @@ export type AutomoduleConstructor = new (
 export interface AutomoduleOptions {
     testSaveDir: string
     moduleSaveDir: string
+    fakeSaveDir: string
     interfaceName: string
     implName: string
 }

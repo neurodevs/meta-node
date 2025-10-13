@@ -57,6 +57,19 @@ export default class ImplAutomoduleTest extends AbstractSpruceTest {
     }
 
     @test()
+    protected static async runThrowsIfFakeSaveDirMissing() {
+        setPathShouldExist(this.fakeSaveDir, false)
+
+        const err = await assert.doesThrowAsync(async () => await this.run())
+
+        assert.isEqual(
+            err.message,
+            `fakeSaveDir does not exist: ${this.fakeSaveDir}!`,
+            'Did not receive the expected error!'
+        )
+    }
+
+    @test()
     protected static async createsTestFileAsExpected() {
         await this.run()
 
@@ -93,17 +106,19 @@ export default class ImplAutomoduleTest extends AbstractSpruceTest {
 
         setPathShouldExist(this.testSaveDir, true)
         setPathShouldExist(this.moduleSaveDir, true)
+        setPathShouldExist(this.fakeSaveDir, true)
     }
 
     private static setFakeWriteFile() {
         ImplAutomodule.writeFile = fakeWriteFile as typeof writeFile
         resetCallsToWriteFile()
     }
+    private static readonly interfaceName = generateId()
+    private static readonly implName = generateId()
 
     private static readonly testSaveDir = generateId()
     private static readonly moduleSaveDir = generateId()
-    private static readonly interfaceName = generateId()
-    private static readonly implName = generateId()
+    private static readonly fakeSaveDir = generateId()
 
     private static get testFilePattern() {
         return `
@@ -153,6 +168,7 @@ export default class ImplAutomoduleTest extends AbstractSpruceTest {
         return ImplAutomodule.Create({
             testSaveDir: this.testSaveDir,
             moduleSaveDir: this.moduleSaveDir,
+            fakeSaveDir: this.fakeSaveDir,
             interfaceName: this.interfaceName,
             implName: this.implName,
         })
