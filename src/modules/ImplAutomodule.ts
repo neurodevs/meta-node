@@ -40,9 +40,7 @@ export default class ImplAutomodule implements Automodule {
     }
 
     public async run() {
-        await this.throwIfTestDirDoesNotExist()
-        await this.throwIfModuleDirDoesNotExist()
-        await this.throwIfFakeDirDoesNotExist()
+        await this.throwIfDirectoriesDoNotExist()
 
         await this.createTestFile()
         await this.createModuleFile()
@@ -50,6 +48,12 @@ export default class ImplAutomodule implements Automodule {
 
         await this.updateIndexFileExports()
         await this.bumpMinorVersion()
+    }
+
+    private async throwIfDirectoriesDoNotExist() {
+        await this.throwIfTestDirDoesNotExist()
+        await this.throwIfModuleDirDoesNotExist()
+        await this.throwIfFakeDirDoesNotExist()
     }
 
     private async throwIfTestDirDoesNotExist() {
