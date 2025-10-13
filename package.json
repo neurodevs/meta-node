@@ -51,6 +51,7 @@
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
+    "@neurodevs/fake-node-core": "^0.0.1",
     "@sprucelabs/jest-json-reporter": "^9.0.61",
     "@sprucelabs/resolve-path-aliases": "^3.0.28",
     "@sprucelabs/test": "^10.0.24",

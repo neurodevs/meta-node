@@ -2,20 +2,21 @@ import { exec as execSync } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
 import { promisify } from 'util'
 import { test, assert, generateId } from '@sprucelabs/test-utils'
+import {
+    callsToExec,
+    callsToWriteFile,
+    fakeExec,
+    fakeReadFile,
+    fakeReadFileResult,
+    fakeWriteFile,
+    resetCallsToReadFile,
+    resetCallsToWriteFile,
+    setFakeReadFileResult,
+} from '@neurodevs/fake-node-core'
 import ImplAutomodule, { Automodule } from '../../modules/ImplAutomodule'
-import fakeExec, { callsToExec } from '../../testDoubles/child_process/fakeExec'
 import fakePathExists, {
     setPathShouldExist,
 } from '../../testDoubles/fs/fakePathExists'
-import fakeReadFile, {
-    fakeReadFileResult,
-    resetCallsToReadFile,
-    setFakeReadFileResult,
-} from '../../testDoubles/fs/fakeReadFile'
-import fakeWriteFile, {
-    callsToWriteFile,
-    resetCallsToWriteFile,
-} from '../../testDoubles/fs/fakeWriteFile'
 import AbstractPackageTest from '../AbstractPackageTest'
 
 const exec = promisify(execSync)

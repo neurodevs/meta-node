@@ -34,9 +34,3 @@ export * from './testDoubles/Autopackage/FakeAutopackage'
 
 export { default as fakePathExists } from './testDoubles/fs/fakePathExists'
 export * from './testDoubles/fs/fakePathExists'
-
-export { default as fakeReadFile } from './testDoubles/fs/fakeReadFile'
-export * from './testDoubles/fs/fakeReadFile'
-
-export { default as fakeWriteFile } from './testDoubles/fs/fakeWriteFile'
-export * from './testDoubles/fs/fakeWriteFile'
