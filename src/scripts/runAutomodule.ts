@@ -8,9 +8,9 @@ async function main() {
             '/Users/ericthecurious/dev/meta-node/src/__tests__/modules',
         moduleSaveDir: '/Users/ericthecurious/dev/meta-node/src/modules',
         fakeSaveDir:
-            '/Users/ericthecurious/dev/meta-node/src/testDoubles/Autodocumenter',
-        interfaceName: 'Autodocumenter',
-        implName: 'PackageAutodocumenter',
+            '/Users/ericthecurious/dev/meta-node/src/testDoubles/Autothingy',
+        interfaceName: 'Autothingy',
+        implName: 'PackageAutothingy',
     })
 
     await instance.run()
