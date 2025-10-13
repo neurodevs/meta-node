@@ -1,11 +1,12 @@
 import { execSync } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
+import { promisify } from 'util'
 import { pathExists } from 'fs-extra'
 
 export default class NpmAutopackage implements Autopackage {
     public static Class?: AutopackageConstructor
     public static chdir = process.chdir
-    public static execSync = execSync
+    public static exec = promisify(execSync)
     public static pathExists = pathExists
     public static fetch = fetch
     public static readFile = readFile
@@ -102,7 +103,7 @@ export default class NpmAutopackage implements Autopackage {
 
         if (!packageDirExists) {
             console.log('Cloning git repository...')
-            this.exec(`git clone ${this.gitUrl}`)
+            await this.exec(`git clone ${this.gitUrl}`)
         }
     }
 
@@ -127,8 +128,8 @@ export default class NpmAutopackage implements Autopackage {
 
         if (!packageJsonExists) {
             console.log('Running spruce create.module...')
-            this.execSpruceCreateModule()
-            this.commitCreatePackage()
+            await this.execSpruceCreateModule()
+            await this.commitCreatePackage()
         }
     }
 
@@ -140,28 +141,28 @@ export default class NpmAutopackage implements Autopackage {
         return `${this.packageDir}/package.json`
     }
 
-    private execSpruceCreateModule() {
-        this.exec(
+    private async execSpruceCreateModule() {
+        await this.exec(
             `spruce create.module --name "${this.packageName}" --destination "${this.installDir}/${this.packageName}" --description "${this.description}"`
         )
     }
 
-    private commitCreatePackage() {
-        this.gitAddAll()
-        this.gitCommitCreatePackage()
-        this.gitPush()
+    private async commitCreatePackage() {
+        await this.gitAddAll()
+        await this.gitCommitCreatePackage()
+        await this.gitPush()
     }
 
-    private gitAddAll() {
-        this.exec('git add .')
+    private async gitAddAll() {
+        await this.exec('git add .')
     }
 
-    private gitCommitCreatePackage() {
-        this.exec('git commit -m "patch: create package"')
+    private async gitCommitCreatePackage() {
+        await this.exec('git commit -m "patch: create package"')
     }
 
-    private gitPush() {
-        this.exec('git push')
+    private async gitPush() {
+        await this.exec('git push')
     }
 
     private async updatePackage() {
@@ -170,7 +171,7 @@ export default class NpmAutopackage implements Autopackage {
         if (!this.isPackageUpToDate) {
             console.log('Updating package.json...')
             await this.updatePackageJson()
-            this.commitUpdatePackage()
+            await this.commitUpdatePackage()
         }
     }
 
@@ -261,14 +262,14 @@ export default class NpmAutopackage implements Autopackage {
         return ordered
     }
 
-    private commitUpdatePackage() {
-        this.gitAddAll()
-        this.gitCommitUpdatePackage()
-        this.gitPush()
+    private async commitUpdatePackage() {
+        await this.gitAddAll()
+        await this.gitCommitUpdatePackage()
+        await this.gitPush()
     }
 
-    private gitCommitUpdatePackage() {
-        this.exec('git commit -m "patch: update package"')
+    private async gitCommitUpdatePackage() {
+        await this.exec('git commit -m "patch: update package"')
     }
 
     private async updateGitignore() {
@@ -278,7 +279,7 @@ export default class NpmAutopackage implements Autopackage {
             console.log('Updating .gitignore...')
 
             await this.addBuildDirToGitignore()
-            this.commitUpdateGitignore()
+            await this.commitUpdateGitignore()
         }
     }
 
@@ -307,14 +308,14 @@ export default class NpmAutopackage implements Autopackage {
         })
     }
 
-    private commitUpdateGitignore() {
-        this.gitAddAll()
-        this.gitCommitUpdateGitignore()
-        this.gitPush()
+    private async commitUpdateGitignore() {
+        await this.gitAddAll()
+        await this.gitCommitUpdateGitignore()
+        await this.gitPush()
     }
 
-    private gitCommitUpdateGitignore() {
-        this.exec('git commit -m "patch: add build dir to gitignore"')
+    private async gitCommitUpdateGitignore() {
+        await this.exec('git commit -m "patch: add build dir to gitignore"')
     }
 
     private async setupVscode() {
@@ -322,8 +323,8 @@ export default class NpmAutopackage implements Autopackage {
 
         if (!vscodeSettingsExist) {
             console.log('Setting up VSCode...')
-            this.spruceSetupVscode()
-            this.commitSetupVscode()
+            await this.spruceSetupVscode()
+            await this.commitSetupVscode()
         }
     }
 
@@ -331,18 +332,18 @@ export default class NpmAutopackage implements Autopackage {
         return this.pathExists(`${this.packageDir}/.vscode/settings.json`)
     }
 
-    private spruceSetupVscode() {
-        this.exec('spruce setup.vscode --all true')
+    private async spruceSetupVscode() {
+        await this.exec('spruce setup.vscode --all true')
     }
 
-    private commitSetupVscode() {
-        this.gitAddAll()
-        this.gitCommitSetup()
-        this.gitPush()
+    private async commitSetupVscode() {
+        await this.gitAddAll()
+        await this.gitCommitSetup()
+        await this.gitPush()
     }
 
-    private gitCommitSetup() {
-        this.exec('git commit -m "patch: setup vscode"')
+    private async gitCommitSetup() {
+        await this.exec('git commit -m "patch: setup vscode"')
     }
 
     private get chdir() {
@@ -350,7 +351,7 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private get exec() {
-        return NpmAutopackage.execSync
+        return NpmAutopackage.exec
     }
 
     private get pathExists() {

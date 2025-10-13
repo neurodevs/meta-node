@@ -430,7 +430,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     private static fakeExecSync() {
         // @ts-ignore
-        NpmAutopackage.execSync = (cmd: string) => {
+        NpmAutopackage.exec = (cmd: string) => {
             this.callsToExecSync.push(cmd)
         }
         this.callsToExecSync = []
