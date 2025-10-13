@@ -1,6 +1,6 @@
 {
   "name": "@neurodevs/meta-node",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Meta-layer utilities for maintaining Node.js package ecosystems.",
   "keywords": [
     "nodejs",
@@ -48,8 +48,7 @@
     "watch.tsc": "tsc -w"
   },
   "dependencies": {
-    "fs-extra": "^11.3.2",
-    "node-fetch": "^3.3.2"
+    "fs-extra": "^11.3.2"
   },
   "devDependencies": {
     "@neurodevs/fake-node-core": "^0.1.1",
