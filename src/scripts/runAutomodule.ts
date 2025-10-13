@@ -4,9 +4,11 @@ async function main() {
     console.log('\nRunning automodule...')
 
     const instance = ImplAutomodule.Create({
-        testSaveDir: '/Users/ericthecurious/dev/meta-node/src/__tests__',
+        testSaveDir:
+            '/Users/ericthecurious/dev/meta-node/src/__tests__/modules',
         moduleSaveDir: '/Users/ericthecurious/dev/meta-node/src/modules',
-        fakeSaveDir: '/Users/ericthecurious/dev/meta-node/src/testDoubles',
+        fakeSaveDir:
+            '/Users/ericthecurious/dev/meta-node/src/testDoubles/Autodocumenter',
         interfaceName: 'Autodocumenter',
         implName: 'PackageAutodocumenter',
     })
