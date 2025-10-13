@@ -1,11 +1,12 @@
 import { exec as execSync } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
+import { chdir } from 'process'
 import { promisify } from 'util'
 import { pathExists } from 'fs-extra'
 
 export default class NpmAutopackage implements Autopackage {
     public static Class?: AutopackageConstructor
-    public static chdir = process.chdir
+    public static chdir = chdir
     public static exec = promisify(execSync)
     public static fetch = fetch
     public static pathExists = pathExists
