@@ -1,5 +1,6 @@
 import { execSync } from 'child_process'
 import fs from 'fs'
+import { readFile, writeFile } from 'fs/promises'
 
 export default class NpmAutopackage implements Autopackage {
     public static Class?: AutopackageConstructor
@@ -7,8 +8,8 @@ export default class NpmAutopackage implements Autopackage {
     public static execSync = execSync
     public static existsSync = fs.existsSync
     public static fetch = globalThis.fetch
-    public static readFileSync = fs.readFileSync
-    public static writeFileSync = fs.writeFileSync
+    public static readFile = readFile
+    public static writeFile = writeFile
 
     private packageName: string
     private description: string
@@ -19,6 +20,7 @@ export default class NpmAutopackage implements Autopackage {
     private author?: string
 
     private originalJsonFile!: Record<string, unknown>
+    private originalGitignoreFile!: string
 
     protected constructor(options: AutopackageOptions) {
         const {
@@ -53,8 +55,8 @@ export default class NpmAutopackage implements Autopackage {
         this.cloneGitRepo()
         this.chdirToPackageDir()
         this.spruceCreateModule()
-        this.updatePackage()
-        this.updateGitignore()
+        await this.updatePackage()
+        await this.updateGitignore()
         this.setupVscode()
     }
 
@@ -157,18 +159,18 @@ export default class NpmAutopackage implements Autopackage {
         this.exec('git push')
     }
 
-    private updatePackage() {
-        this.originalJsonFile = this.loadOriginalJsonFile()
+    private async updatePackage() {
+        this.originalJsonFile = await this.loadPackageJsonFile()
 
         if (!this.isPackageUpToDate) {
             console.log('Updating package.json...')
-            this.updatePackageJson()
+            await this.updatePackageJson()
             this.commitUpdatePackage()
         }
     }
 
-    private loadOriginalJsonFile() {
-        const raw = this.readFileSync(this.packageJsonPath, {
+    private async loadPackageJsonFile() {
+        const raw = await this.readFile(this.packageJsonPath, {
             encoding: 'utf-8',
         })
         return JSON.parse(raw)
@@ -181,7 +183,7 @@ export default class NpmAutopackage implements Autopackage {
         )
     }
 
-    private updatePackageJson() {
+    private async updatePackageJson() {
         const ordered = this.orderJsonKeys(this.updatedJsonFile, [
             'name',
             'version',
@@ -202,7 +204,7 @@ export default class NpmAutopackage implements Autopackage {
             'skill',
         ])
 
-        this.writeFileSync(
+        await this.writeFile(
             this.packageJsonPath,
             JSON.stringify(ordered, null, 2) + '\n',
             { encoding: 'utf-8' }
@@ -264,27 +266,40 @@ export default class NpmAutopackage implements Autopackage {
         this.exec('git commit -m "patch: update package"')
     }
 
-    private updateGitignore() {
-        if (!this.gitignoreUpdated) {
+    private async updateGitignore() {
+        this.originalGitignoreFile = await this.loadGitignoreFile()
+
+        if (!this.isGitignoreUpdated) {
             console.log('Updating .gitignore...')
-            this.writeFileSync(this.gitignorePath, '\nbuild/\n', {
-                encoding: 'utf-8',
-                flag: 'a',
-            })
+
+            await this.addBuildDirToGitignore()
             this.commitUpdateGitignore()
         }
     }
 
-    private get gitignoreUpdated() {
-        const content = this.readFileSync(this.gitignorePath, {
+    private async loadGitignoreFile() {
+        return await this.readFile(this.gitignorePath, {
             encoding: 'utf-8',
         })
-        const lines = content.split(/\r?\n/).map((line) => line.trim())
-        return lines.includes('build/')
     }
 
     private get gitignorePath() {
         return `${this.packageDir}/.gitignore`
+    }
+
+    private get isGitignoreUpdated() {
+        const lines = this.originalGitignoreFile
+            .split(/\r?\n/)
+            .map((line) => line.trim())
+
+        return lines.includes('build/')
+    }
+
+    private async addBuildDirToGitignore() {
+        await this.writeFile(this.gitignorePath, '\nbuild/\n', {
+            encoding: 'utf-8',
+            flag: 'a',
+        })
     }
 
     private commitUpdateGitignore() {
@@ -339,12 +354,12 @@ export default class NpmAutopackage implements Autopackage {
         return NpmAutopackage.fetch
     }
 
-    private get readFileSync() {
-        return NpmAutopackage.readFileSync
+    private get readFile() {
+        return NpmAutopackage.readFile
     }
 
-    private get writeFileSync() {
-        return NpmAutopackage.writeFileSync
+    private get writeFile() {
+        return NpmAutopackage.writeFile
     }
 }
 

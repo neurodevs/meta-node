@@ -1,4 +1,14 @@
+import { readFile, writeFile } from 'fs/promises'
 import { test, assert, generateId } from '@sprucelabs/test-utils'
+import {
+    callsToReadFile,
+    callsToWriteFile,
+    fakeReadFile,
+    fakeWriteFile,
+    resetCallsToReadFile,
+    resetCallsToWriteFile,
+    setFakeReadFileResult,
+} from '@neurodevs/fake-node-core'
 import NpmAutopackage, {
     Autopackage,
     AutopackageOptions,
@@ -12,12 +22,6 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     private static callsToExecSync: string[] = []
     private static callsToExistsSync: string[] = []
     private static callsToFetch: { url: string; init: RequestInit }[] = []
-    private static callsToReadFileSync: { path: string; options: any }[] = []
-    private static callsToWriteFileSync: {
-        path: string
-        data: any
-        options: any
-    }[] = []
 
     protected static async beforeEach() {
         await super.beforeEach()
@@ -26,13 +30,12 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         this.fakeExecSync()
         this.fakeExistsSync()
         this.fakeFetch()
-        this.fakeReadFileSync()
-        this.fakeWriteFileSync()
+        this.fakeReadFile()
+        this.fakeWriteFile()
 
         process.env.GITHUB_TOKEN = this.githubToken
 
         this.instance = this.NpmAutopackage()
-        await this.instance.run()
     }
 
     @test()
@@ -56,6 +59,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     @test()
     protected static async firstCreateRepoInGithubOrg() {
+        await this.run()
+
         assert.isEqualDeep(
             {
                 passedUrl: this.callsToFetch[0]?.url,
@@ -86,6 +91,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     @test()
     protected static async secondChdirToInstallDir() {
+        await this.run()
+
         assert.isEqual(
             this.callsToChdir[0],
             this.installDir,
@@ -95,6 +102,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     @test()
     protected static async thirdGitClone() {
+        await this.run()
+
         assert.isEqual(
             this.callsToExecSync[0],
             `git clone https://github.com/${this.gitNamespace}/${this.packageName}.git`,
@@ -104,6 +113,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     @test()
     protected static async fourthSpruceCreateModule() {
+        await this.run()
+
         assert.isEqual(
             this.callsToExecSync[1],
             this.createModuleCmd,
@@ -113,6 +124,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     @test()
     protected static async fifthCommitCreatePackage() {
+        await this.run()
+
         assert.isEqualDeep(
             this.callsToExecSync.slice(2, 5),
             ['git add .', 'git commit -m "patch: create package"', 'git push'],
@@ -122,6 +135,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     @test()
     protected static async sixthChdirToPackageDir() {
+        await this.run()
+
         assert.isEqual(
             this.callsToChdir[1],
             this.packageDir,
@@ -131,7 +146,9 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     @test()
     protected static async seventhReadPackageJson() {
-        assert.isEqualDeep(this.callsToReadFileSync[0], {
+        await this.run()
+
+        assert.isEqualDeep(callsToReadFile[0], {
             path: this.packageJsonPath,
             options: { encoding: 'utf-8' },
         })
@@ -139,42 +156,44 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     @test()
     protected static async eighthUpdatePackageJson() {
-        const actual = this.callsToWriteFileSync[0]
+        await this.run()
+
+        const actual = callsToWriteFile[0]
+
+        const ordered = this.orderJsonKeys(JSON.parse(this.updatedJsonFile), [
+            'name',
+            'version',
+            'description',
+            'keywords',
+            'license',
+            'author',
+            'homepage',
+            'repository',
+            'bugs',
+            'main',
+            'bin',
+            'files',
+            'scripts',
+            'dependencies',
+            'devDependencies',
+            'jest',
+            'skill',
+        ])
 
         const expected = {
-            path: this.packageJsonPath,
-            data: this.orderJsonKeys(JSON.parse(this.updatedJsonFile), [
-                'name',
-                'version',
-                'description',
-                'keywords',
-                'license',
-                'author',
-                'homepage',
-                'repository',
-                'bugs',
-                'main',
-                'bin',
-                'files',
-                'scripts',
-                'dependencies',
-                'devDependencies',
-                'jest',
-                'skill',
-            ]),
+            file: this.packageJsonPath,
+            data: JSON.stringify(ordered, null, 2) + '\n',
             options: { encoding: 'utf-8' },
         }
-
-        const normalize = (s: string) => s.replace(/\s+/g, '').trim()
 
         assert.isEqualDeep(
             {
                 ...actual,
-                data: normalize(actual.data),
+                data: this.normalize(actual.data),
             },
             {
                 ...expected,
-                data: normalize(expected.data),
+                data: this.normalize(expected.data),
             },
             'Did not update package.json as expected!'
         )
@@ -182,6 +201,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     @test()
     protected static async ninthCommitUpdatePackage() {
+        await this.run()
+
         assert.isEqualDeep(
             this.callsToExecSync.slice(5, 8),
             ['git add .', 'git commit -m "patch: update package"', 'git push'],
@@ -191,23 +212,23 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     @test()
     protected static async tenthAddBuildDirToGitignore() {
-        const actual = this.callsToWriteFileSync[1]
-
-        const expected = {
-            path: this.gitignorePath,
-            data: '\nbuild/\n',
-            options: { encoding: 'utf-8', flag: 'a' },
-        }
+        await this.run()
 
         assert.isEqualDeep(
-            actual,
-            expected,
+            callsToWriteFile[1],
+            {
+                file: this.gitignorePath,
+                data: this.buildDirGitignorePattern,
+                options: { encoding: 'utf-8', flag: 'a' },
+            },
             'Did not update .gitignore as expected!'
         )
     }
 
     @test()
     protected static async eleventhCommitUpdateGitignore() {
+        await this.run()
+
         assert.isEqualDeep(
             this.callsToExecSync.slice(8, 11),
             [
@@ -221,6 +242,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     @test()
     protected static async twelfthSpruceSetupVscode() {
+        await this.run()
+
         assert.isEqual(
             this.callsToExecSync[11],
             NpmAutopackageTest.setupVscodeCmd,
@@ -230,6 +253,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     @test()
     protected static async lastlyCommitVscodeChanges() {
+        await this.run()
+
         assert.isEqualDeep(
             this.callsToExecSync.slice(12, 15),
             ['git add .', 'git commit -m "patch: setup vscode"', 'git push'],
@@ -239,6 +264,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     @test()
     protected static async doesNotCloneRepoIfDone() {
+        await this.createAndRunAutopackage()
+
         assert.isEqual(
             this.callsToExecSync.filter(
                 (cmd) =>
@@ -329,11 +356,17 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     @test()
     protected static async doesNotOverrideOriginalDependencies() {
+        await this.createAndRunAutopackage()
+
         assert.isEqualDeep(
-            JSON.parse(this.callsToWriteFileSync[0]?.data).dependencies,
+            JSON.parse(callsToWriteFile[0]?.data).dependencies,
             this.dependencies,
             'Did not update package.json as expected!'
         )
+    }
+
+    private static async run() {
+        await this.instance.run()
     }
 
     private static async createAndRunAutopackage() {
@@ -356,6 +389,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     private static get gitignorePath() {
         return `${this.packageDir}/.gitignore`
     }
+
+    private static readonly buildDirGitignorePattern = '\nbuild/\n'
 
     private static get createModuleCmd() {
         return `spruce create.module --name "${this.packageName}" --destination "${this.packageDir}" --description "${this.packageDescription}"`
@@ -383,7 +418,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
             ordered[key] = json[key]
         }
 
-        return JSON.stringify(ordered)
+        return ordered
     }
 
     private static fakeChdir() {
@@ -423,33 +458,20 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         this.callsToFetch = []
     }
 
-    private static fakeReadFileSync() {
-        // @ts-ignore
-        NpmAutopackage.readFileSync = (path: string, options: any) => {
-            this.callsToReadFileSync.push({ path, options })
+    private static fakeReadFile() {
+        NpmAutopackage.readFile = fakeReadFile as unknown as typeof readFile
+        resetCallsToReadFile()
 
-            if (path === this.packageJsonPath) {
-                if (
-                    this.callsToReadFileSync.filter(
-                        ({ path }) => path === this.packageJsonPath
-                    ).length > 1
-                ) {
-                    return this.updatedJsonFile
-                }
-                return this.originalJsonFile
-            } else if (path === this.gitignorePath) {
-                if (
-                    this.callsToReadFileSync.filter(
-                        ({ path }) => path === this.gitignorePath
-                    ).length > 1
-                ) {
-                    return 'node_modules/\n\nbuild/\n'
-                }
-                return 'node_modules/\n'
-            }
-            return ''
-        }
-        this.callsToReadFileSync = []
+        this.setFakeReadResultToOriginalPackageJson()
+    }
+
+    private static setFakeReadResultToOriginalPackageJson() {
+        setFakeReadFileResult(this.originalJsonFile)
+    }
+
+    private static fakeWriteFile() {
+        NpmAutopackage.writeFile = fakeWriteFile as unknown as typeof writeFile
+        resetCallsToWriteFile()
     }
 
     private static get originalJsonFile() {
@@ -484,18 +506,6 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
             },
             dependencies: this.dependencies,
         })
-    }
-
-    private static fakeWriteFileSync() {
-        // @ts-ignore
-        NpmAutopackage.writeFileSync = (
-            path: string,
-            data: any,
-            options: any
-        ) => {
-            this.callsToWriteFileSync.push({ path, data, options })
-        }
-        this.callsToWriteFileSync = []
     }
 
     private static readonly packageName = generateId()
