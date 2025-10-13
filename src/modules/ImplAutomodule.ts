@@ -115,6 +115,21 @@ export default class ImplAutomodule implements Automodule {
 
     private readonly indexFilePath = './src/index.ts'
 
+    private get sortedIndexFile() {
+        const blocks = this.indexFilePattern
+            .split(/(?=\/\/)/)
+            .map((s) => s.trim())
+            .filter(Boolean)
+
+        blocks.sort((a, b) => {
+            const aKey = a.match(/^\/\/\s*([^\n]*)/)?.[1]?.trim() ?? ''
+            const bKey = b.match(/^\/\/\s*([^\n]*)/)?.[1]?.trim() ?? ''
+            return aKey.localeCompare(bKey)
+        })
+
+        return blocks.join('\n\n')
+    }
+
     private async bumpMinorVersion() {
         await this.exec('yarn version --minor --no-git-tag-version')
     }
@@ -209,21 +224,6 @@ export default class ImplAutomodule implements Automodule {
             export { default as Fake${this.interfaceName} } from './testDoubles/${this.interfaceName}/Fake${this.interfaceName}'
             export * from './testDoubles/${this.interfaceName}/Fake${this.interfaceName}'
         `
-    }
-
-    private get sortedIndexFile() {
-        const blocks = this.indexFilePattern
-            .split(/(?=\/\/)/)
-            .map((s) => s.trim())
-            .filter(Boolean)
-
-        blocks.sort((a, b) => {
-            const aKey = a.match(/^\/\/\s*([^\n]*)/)?.[1]?.trim() ?? ''
-            const bKey = b.match(/^\/\/\s*([^\n]*)/)?.[1]?.trim() ?? ''
-            return aKey.localeCompare(bKey)
-        })
-
-        return blocks.join('\n\n')
     }
 }
 
