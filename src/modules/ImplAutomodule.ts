@@ -6,10 +6,10 @@ import { pathExists } from 'fs-extra'
 
 export default class ImplAutomodule implements Automodule {
     public static Class?: AutomoduleConstructor
+    public static exec = promisify(execSync)
     public static pathExists = pathExists
     public static readFile = readFile
     public static writeFile = writeFile
-    public static exec = promisify(execSync)
 
     private testSaveDir: string
     private moduleSaveDir: string

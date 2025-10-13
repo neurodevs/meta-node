@@ -7,8 +7,8 @@ export default class NpmAutopackage implements Autopackage {
     public static Class?: AutopackageConstructor
     public static chdir = process.chdir
     public static exec = promisify(execSync)
-    public static pathExists = pathExists
     public static fetch = fetch
+    public static pathExists = pathExists
     public static readFile = readFile
     public static writeFile = writeFile
 
