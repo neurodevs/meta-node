@@ -6,6 +6,14 @@ export * from './modules/GitAutocloner'
 export { default as FakeAutocloner } from './testDoubles/Autocloner/FakeAutocloner'
 export * from './testDoubles/Autocloner/FakeAutocloner'
 
+// Autodocumenter
+
+export { default as PackageAutodocumenter } from './modules/PackageAutodocumenter'
+export * from './modules/PackageAutodocumenter'
+
+export { default as FakeAutodocumenter } from './testDoubles/Autodocumenter/FakeAutodocumenter'
+export * from './testDoubles/Autodocumenter/FakeAutodocumenter'
+
 // Automodule
 
 export { default as ImplAutomodule } from './modules/ImplAutomodule'
