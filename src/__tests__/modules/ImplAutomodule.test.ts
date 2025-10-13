@@ -97,6 +97,20 @@ export default class ImplAutomoduleTest extends AbstractSpruceTest {
         )
     }
 
+    @test()
+    protected static async createsFakeFileAsExpected() {
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToWriteFile[2],
+            {
+                file: `${this.fakeSaveDir}/Fake${this.interfaceName}.ts`,
+                data: this.fakeFilePattern,
+            },
+            'Did not write expected fake file!'
+        )
+    }
+
     private static async run() {
         return await this.instance.run()
     }
@@ -161,6 +175,24 @@ export default class ImplAutomoduleTest extends AbstractSpruceTest {
             export interface ${this.interfaceName} {}
 
             export type ${this.interfaceName}Constructor = new () => ${this.interfaceName}
+        `
+    }
+
+    private static get fakeFilePattern() {
+        return `
+            import { ${this.interfaceName} } from '../modules/${this.implName}'
+
+            export default class Fake${this.interfaceName} implements ${this.interfaceName} {
+                public static numCallsToConstructor = 0
+                
+                public constructor() {
+                    Fake${this.interfaceName}.numCallsToConstructor++
+                }
+                
+                public static resetTestDouble() {
+                    Fake${this.interfaceName}.numCallsToConstructor = 0
+                }
+            }
         `
     }
 

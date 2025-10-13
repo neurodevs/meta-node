@@ -4,11 +4,11 @@ async function main() {
     console.log('\nRunning automodule...')
 
     const instance = ImplAutomodule.Create({
-        testSaveDir:
-            '/Users/ericthecurious/dev/meta-node/src/__tests__/modules',
+        testSaveDir: '/Users/ericthecurious/dev/meta-node/src/__tests__',
         moduleSaveDir: '/Users/ericthecurious/dev/meta-node/src/modules',
-        interfaceName: 'Autocomponent',
-        implName: 'ReactAutocomponent',
+        fakeSaveDir: '/Users/ericthecurious/dev/meta-node/src/testDoubles',
+        interfaceName: 'Autodocumenter',
+        implName: 'PackageAutodocumenter',
     })
 
     await instance.run()

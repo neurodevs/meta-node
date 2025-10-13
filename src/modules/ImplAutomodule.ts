@@ -40,6 +40,7 @@ export default class ImplAutomodule implements Automodule {
 
         await this.createTestFile()
         await this.createModuleFile()
+        await this.createFakeFile()
     }
 
     private async throwIfTestDirDoesNotExist() {
@@ -84,6 +85,14 @@ export default class ImplAutomodule implements Automodule {
 
     private get moduleFileName() {
         return path.join(this.moduleSaveDir, `${this.implName}.ts`)
+    }
+
+    private async createFakeFile() {
+        await this.writeFile(this.fakeFileName, this.fakeFilePattern)
+    }
+
+    private get fakeFileName() {
+        return path.join(this.fakeSaveDir, `Fake${this.interfaceName}.ts`)
     }
 
     private get pathExists() {
@@ -135,6 +144,24 @@ export default class ImplAutomodule implements Automodule {
             export interface ${this.interfaceName} {}
 
             export type ${this.interfaceName}Constructor = new () => ${this.interfaceName}
+        `
+    }
+
+    private get fakeFilePattern() {
+        return `
+            import { ${this.interfaceName} } from '../modules/${this.implName}'
+
+            export default class Fake${this.interfaceName} implements ${this.interfaceName} {
+                public static numCallsToConstructor = 0
+                
+                public constructor() {
+                    Fake${this.interfaceName}.numCallsToConstructor++
+                }
+                
+                public static resetTestDouble() {
+                    Fake${this.interfaceName}.numCallsToConstructor = 0
+                }
+            }
         `
     }
 }
