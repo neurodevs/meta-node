@@ -708,10 +708,10 @@
     "@emnapi/runtime" "^1.4.3"
     "@tybys/wasm-util" "^0.10.0"
 
-"@neurodevs/fake-node-core@^0.1.0":
-  version "0.1.0"
-  resolved "https://registry.yarnpkg.com/@neurodevs/fake-node-core/-/fake-node-core-0.1.0.tgz#63b0332d146066485e9d8f1d1d464bd1b75ba38b"
-  integrity sha512-NtjXj/TRyQ6pIbhaa5fOxOh0VTy3c5d3epEahCZOAJVZSCmaEpwSQMKh0O6VWRiJmCxyJEN6seV6aPPEA24LNg==
+"@neurodevs/fake-node-core@^0.1.1":
+  version "0.1.1"
+  resolved "https://registry.yarnpkg.com/@neurodevs/fake-node-core/-/fake-node-core-0.1.1.tgz#153d15306572da14f953c8764ca5efd7e4bc7b9d"
+  integrity sha512-8KPyGAd8OV4akXxodxUY1P/eNwVCRWPwX9jKIyGY6Lsbkm3XTUPhWTTjeFM6IcKeKXXSnNEhT0TOatCja5PYqw==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"

@@ -1,10 +1,21 @@
 import { readFile, writeFile } from 'fs/promises'
 import { test, assert, generateId } from '@sprucelabs/test-utils'
 import {
+    callsToChdir,
+    callsToExec,
+    callsToFetch,
     callsToReadFile,
     callsToWriteFile,
+    fakeChdir,
+    fakeExec,
+    fakeFetch,
+    fakePathExists,
     fakeReadFile,
     fakeWriteFile,
+    resetCallsToChdir,
+    resetCallsToExec,
+    resetCallsToFetch,
+    resetCallsToPathExists,
     resetCallsToReadFile,
     resetCallsToWriteFile,
     setFakeReadFileResult,
@@ -18,16 +29,11 @@ import AbstractPackageTest from '../AbstractPackageTest'
 export default class NpmAutopackageTest extends AbstractPackageTest {
     private static instance: Autopackage
 
-    private static callsToChdir: string[] = []
-    private static callsToExecSync: string[] = []
-    private static callsToExistsSync: string[] = []
-    private static callsToFetch: { url: string; init: RequestInit }[] = []
-
     protected static async beforeEach() {
         await super.beforeEach()
 
         this.fakeChdir()
-        this.fakeExecSync()
+        this.fakeExec()
         this.fakeExistsSync()
         this.fakeFetch()
         this.fakeReadFile()
@@ -63,8 +69,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         assert.isEqualDeep(
             {
-                passedUrl: this.callsToFetch[0]?.url,
-                passedInit: this.callsToFetch[0]?.init,
+                passedUrl: callsToFetch[0]?.input,
+                passedInit: callsToFetch[0]?.init,
             },
             {
                 passedUrl: `https://api.github.com/orgs/${this.gitNamespace}/repos`,
@@ -94,7 +100,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqual(
-            this.callsToChdir[0],
+            callsToChdir[0],
             this.installDir,
             'Did not change to installDir!'
         )
@@ -105,7 +111,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqual(
-            this.callsToExecSync[0],
+            callsToExec[0],
             `git clone https://github.com/${this.gitNamespace}/${this.packageName}.git`,
             'Did not call git clone!'
         )
@@ -116,7 +122,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqual(
-            this.callsToExecSync[1],
+            callsToExec[1],
             this.createModuleCmd,
             'Did not call "spruce create.module"!'
         )
@@ -127,7 +133,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            this.callsToExecSync.slice(2, 5),
+            callsToExec.slice(2, 5),
             ['git add .', 'git commit -m "patch: create package"', 'git push'],
             'Did not commit create package changes!'
         )
@@ -138,7 +144,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqual(
-            this.callsToChdir[1],
+            callsToChdir[1],
             this.packageDir,
             'Did not change to packageDir!'
         )
@@ -204,7 +210,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            this.callsToExecSync.slice(5, 8),
+            callsToExec.slice(5, 8),
             ['git add .', 'git commit -m "patch: update package"', 'git push'],
             'Did not commit update package changes!'
         )
@@ -230,7 +236,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            this.callsToExecSync.slice(8, 11),
+            callsToExec.slice(8, 11),
             [
                 'git add .',
                 'git commit -m "patch: add build dir to gitignore"',
@@ -245,7 +251,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqual(
-            this.callsToExecSync[11],
+            callsToExec[11],
             NpmAutopackageTest.setupVscodeCmd,
             'Did not call "spruce setup.vscode"!'
         )
@@ -256,7 +262,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            this.callsToExecSync.slice(12, 15),
+            callsToExec.slice(12, 15),
             ['git add .', 'git commit -m "patch: setup vscode"', 'git push'],
             'Did not commit vscode changes!'
         )
@@ -267,7 +273,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.createAndRunAutopackage()
 
         assert.isEqual(
-            this.callsToExecSync.filter(
+            callsToExec.filter(
                 (cmd) =>
                     cmd ===
                     `git clone https://github.com/${this.gitNamespace}/${this.packageName}.git`
@@ -282,8 +288,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.createAndRunAutopackage()
 
         assert.isEqual(
-            this.callsToExecSync.filter((cmd) => cmd === this.createModuleCmd)
-                .length,
+            callsToExec.filter((cmd) => cmd === this.createModuleCmd).length,
             1,
             'Did not call spruce create.module once!'
         )
@@ -294,8 +299,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.createAndRunAutopackage()
 
         assert.isEqual(
-            this.callsToExecSync.filter((cmd) => cmd === this.setupVscodeCmd)
-                .length,
+            callsToExec.filter((cmd) => cmd === this.setupVscodeCmd).length,
             1,
             'Did not call spruce setup.vscode once!'
         )
@@ -306,7 +310,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.createAndRunAutopackage()
 
         assert.isEqual(
-            this.callsToExecSync.filter(
+            callsToExec.filter(
                 (cmd) => cmd === 'git commit -m "patch: create package"'
             ).length,
             1,
@@ -319,7 +323,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.createAndRunAutopackage()
 
         assert.isEqual(
-            this.callsToExecSync.filter(
+            callsToExec.filter(
                 (cmd) => cmd === 'git commit -m "patch: update package"'
             ).length,
             1,
@@ -332,7 +336,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.createAndRunAutopackage()
 
         assert.isEqual(
-            this.callsToExecSync.filter(
+            callsToExec.filter(
                 (cmd) =>
                     cmd === 'git commit -m "patch: add build dir to gitignore"'
             ).length,
@@ -346,7 +350,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.createAndRunAutopackage()
 
         assert.isEqual(
-            this.callsToExecSync.filter(
+            callsToExec.filter(
                 (cmd) => cmd === 'git commit -m "patch: setup vscode"'
             ).length,
             1,
@@ -422,50 +426,29 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     private static fakeChdir() {
-        NpmAutopackage.chdir = (dir: string) => {
-            this.callsToChdir.push(dir)
-        }
-        this.callsToChdir = []
+        NpmAutopackage.chdir = fakeChdir
+        resetCallsToChdir()
     }
 
-    private static fakeExecSync() {
-        // @ts-ignore
-        NpmAutopackage.exec = (cmd: string) => {
-            this.callsToExecSync.push(cmd)
-        }
-        this.callsToExecSync = []
+    private static fakeExec() {
+        NpmAutopackage.exec = fakeExec
+        resetCallsToExec()
     }
 
     private static fakeExistsSync() {
-        // @ts-ignore
-        NpmAutopackage.pathExists = (path: string) => {
-            if (this.callsToExistsSync.includes(path)) {
-                this.callsToExistsSync.push(path)
-                return true
-            } else {
-                this.callsToExistsSync.push(path)
-                return false
-            }
-        }
-        this.callsToExistsSync = []
+        NpmAutopackage.pathExists = fakePathExists
+        resetCallsToPathExists()
     }
 
     private static fakeFetch() {
-        // @ts-ignore
-        NpmAutopackage.fetch = async (url: string, init: RequestInit) => {
-            this.callsToFetch.push({ url, init })
-        }
-        this.callsToFetch = []
+        NpmAutopackage.fetch = fakeFetch as unknown as typeof fetch
+        resetCallsToFetch()
     }
 
     private static fakeReadFile() {
         NpmAutopackage.readFile = fakeReadFile as unknown as typeof readFile
         resetCallsToReadFile()
 
-        this.setFakeReadResultToOriginalPackageJson()
-    }
-
-    private static setFakeReadResultToOriginalPackageJson() {
         setFakeReadFileResult(this.originalJsonFile)
     }
 
