@@ -50,6 +50,21 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
         )
     }
 
+    @test()
+    protected static async createsFakeFileAsExpected() {
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToWriteFile[2],
+            {
+                file: `${this.fakeSaveDir}/Fake${this.componentName}.tsx`,
+                data: this.fakeFilePattern,
+                options: undefined,
+            },
+            'Did not write expected module file!'
+        )
+    }
+
     private static readonly componentName = generateId()
 
     private static readonly componentNameKebabCase = this.toKebabCase(
@@ -117,6 +132,27 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
             }
 
             export default ${this.componentName}
+        `
+    }
+
+    private static get fakeFilePattern() {
+        return `
+            import React from 'react'
+            import { ${this.componentName}Props } from '../ui/${this.componentName}'
+
+            export let last${this.componentName}Props: ${this.componentName}Props | undefined
+
+            const Fake${this.componentName}: React.FC<${this.componentName}Props> = (
+                props: ${this.componentName}Props
+            ) => {
+                last${this.componentName}Props = props
+
+                return (
+                    <div data-testid="${this.componentNameKebabCase}" />
+                )
+            }
+
+            export default Fake${this.componentName}
         `
     }
 

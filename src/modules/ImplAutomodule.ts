@@ -1,6 +1,5 @@
 import { exec as execSync } from 'child_process'
 import { readFile } from 'fs/promises'
-import path from 'path'
 import { promisify } from 'util'
 import { Automodule, BaseAutomoduleOptions } from '../types'
 import AbstractAutomodule from './AbstractAutomodule'
@@ -42,25 +41,20 @@ export default class ImplAutomodule
     }
 
     public async run() {
+        await this.generateFiles()
+        await this.updateIndexFileExports()
+        await this.bumpMinorVersion()
+    }
+
+    private async generateFiles() {
         await this.runAbstract({
             testFileName: `${this.implName}.test.ts`,
             testFileContent: this.testFilePattern,
             moduleFileName: `${this.implName}.ts`,
             moduleFileContent: this.moduleFilePattern,
+            fakeFileName: `Fake${this.interfaceName}.ts`,
+            fakeFileContent: this.fakeFilePattern,
         })
-
-        await this.createFakeFile()
-
-        await this.updateIndexFileExports()
-        await this.bumpMinorVersion()
-    }
-
-    private async createFakeFile() {
-        await this.writeFile(this.fakeFileName, this.fakeFilePattern)
-    }
-
-    private get fakeFileName() {
-        return path.join(this.fakeSaveDir, `Fake${this.interfaceName}.ts`)
     }
 
     private async updateIndexFileExports() {

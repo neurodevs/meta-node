@@ -43,6 +43,8 @@ export default class UiAutomodule
             testFileContent: this.testFileTemplate,
             moduleFileName: `${this.componentName}.tsx`,
             moduleFileContent: this.moduleFilePattern,
+            fakeFileName: `Fake${this.componentName}.tsx`,
+            fakeFileContent: this.fakeFilePattern,
         })
     }
 
@@ -107,6 +109,27 @@ export default class UiAutomodule
             }
 
             export default ${this.componentName}
+        `
+    }
+
+    private get fakeFilePattern() {
+        return `
+            import React from 'react'
+            import { ${this.componentName}Props } from '../ui/${this.componentName}'
+
+            export let last${this.componentName}Props: ${this.componentName}Props | undefined
+
+            const Fake${this.componentName}: React.FC<${this.componentName}Props> = (
+                props: ${this.componentName}Props
+            ) => {
+                last${this.componentName}Props = props
+
+                return (
+                    <div data-testid="${this.componentNameKebabCase}" />
+                )
+            }
+
+            export default Fake${this.componentName}
         `
     }
 }

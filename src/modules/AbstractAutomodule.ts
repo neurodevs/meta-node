@@ -14,6 +14,8 @@ export default abstract class AbstractAutomodule implements Automodule {
     protected testFileContent!: string
     protected moduleFileName!: string
     protected moduleFileContent!: string
+    protected fakeFileName!: string
+    protected fakeFileContent!: string
 
     protected constructor(options: BaseAutomoduleOptions) {
         const { testSaveDir, moduleSaveDir, fakeSaveDir } = options
@@ -31,17 +33,22 @@ export default abstract class AbstractAutomodule implements Automodule {
             testFileContent,
             moduleFileName,
             moduleFileContent,
+            fakeFileName,
+            fakeFileContent,
         } = options
 
         this.testFileName = testFileName
         this.testFileContent = testFileContent
         this.moduleFileName = moduleFileName
         this.moduleFileContent = moduleFileContent
+        this.fakeFileName = fakeFileName
+        this.fakeFileContent = fakeFileContent
 
         await this.throwIfDirectoriesDoNotExist()
 
         await this.createTestFile()
         await this.createModuleFile()
+        await this.createFakeFile()
     }
 
     private async throwIfDirectoriesDoNotExist() {
@@ -94,6 +101,14 @@ export default abstract class AbstractAutomodule implements Automodule {
         return `${this.moduleSaveDir}/${this.moduleFileName}`
     }
 
+    private async createFakeFile() {
+        await this.writeFile(this.fakeFilePath, this.fakeFileContent)
+    }
+
+    private get fakeFilePath() {
+        return `${this.fakeSaveDir}/${this.fakeFileName}`
+    }
+
     private get pathExists() {
         return AbstractAutomodule.pathExists
     }
@@ -113,4 +128,6 @@ export interface AbstractAutomoduleRunOptions {
     testFileContent: string
     moduleFileName: string
     moduleFileContent: string
+    fakeFileName: string
+    fakeFileContent: string
 }
