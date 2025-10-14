@@ -1,8 +1,7 @@
 import { exec as execSync } from 'child_process'
-import { readFile, writeFile } from 'fs/promises'
+import { readFile } from 'fs/promises'
 import path from 'path'
 import { promisify } from 'util'
-import { pathExists } from 'fs-extra'
 import { Automodule, BaseAutomoduleOptions } from '../types'
 import AbstractAutomodule from './AbstractAutomodule'
 
@@ -12,9 +11,7 @@ export default class ImplAutomodule
 {
     public static Class?: ImplAutomoduleConstructor
     public static exec = promisify(execSync)
-    public static pathExists = pathExists
     public static readFile = readFile
-    public static writeFile = writeFile
 
     private interfaceName: string
     private implName: string
@@ -34,7 +31,6 @@ export default class ImplAutomodule
             testSaveDir,
             moduleSaveDir,
             fakeSaveDir,
-            pathExists: ImplAutomodule.pathExists,
         })
 
         this.interfaceName = interfaceName
@@ -46,22 +42,16 @@ export default class ImplAutomodule
     }
 
     public async run() {
-        await this.throwIfDirectoriesDoNotExist()
+        await this.runAbstract({
+            testFileName: `${this.implName}.test.ts`,
+            testFileContent: this.testFilePattern,
+        })
 
-        await this.createTestFile()
         await this.createModuleFile()
         await this.createFakeFile()
 
         await this.updateIndexFileExports()
         await this.bumpMinorVersion()
-    }
-
-    private async createTestFile() {
-        await this.writeFile(this.testFileName, this.testFilePattern)
-    }
-
-    private get testFileName() {
-        return path.join(this.testSaveDir, `${this.implName}.test.ts`)
     }
 
     private async createModuleFile() {
@@ -118,10 +108,6 @@ export default class ImplAutomodule
         return ImplAutomodule.readFile
     }
 
-    private get writeFile() {
-        return ImplAutomodule.writeFile
-    }
-
     private get testFilePattern() {
         return `
             import AbstractSpruceTest, { test, assert } from '@sprucelabs/test-utils'
@@ -129,10 +115,10 @@ export default class ImplAutomodule
 
             export default class ${this.implName}Test extends AbstractSpruceTest {
                 private static instance: ${this.interfaceName}
-                
+
                 protected static async beforeEach() {
                     await super.beforeEach()
-                    
+
                     this.instance = this.${this.implName}()
                 }
                 

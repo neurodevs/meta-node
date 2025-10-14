@@ -1,5 +1,5 @@
 import { exec as execSync } from 'child_process'
-import { readFile, writeFile } from 'fs/promises'
+import { readFile } from 'fs/promises'
 import { promisify } from 'util'
 import { test, assert, generateId } from '@sprucelabs/test-utils'
 import {
@@ -8,9 +8,8 @@ import {
     fakeExec,
     fakeReadFile,
     fakeReadFileResult,
-    fakeWriteFile,
+    resetCallsToExec,
     resetCallsToReadFile,
-    resetCallsToWriteFile,
     setFakeReadFileResult,
 } from '@neurodevs/fake-node-core'
 import ImplAutomodule from '../../modules/ImplAutomodule'
@@ -24,7 +23,6 @@ export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
 
         this.setFakeExec()
         this.setFakeReadFile()
-        this.setFakeWriteFile()
 
         this.instance = this.ImplAutomodule()
     }
@@ -44,11 +42,13 @@ export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToWriteFile[0],
+            {
+                file: callsToWriteFile[0].file,
+                data: this.normalize(callsToWriteFile[0].data),
+            },
             {
                 file: `${this.testSaveDir}/${this.implName}.test.ts`,
-                data: this.testFilePattern,
-                options: undefined,
+                data: this.normalize(this.testFilePattern),
             },
             'Did not write expected test file!'
         )
@@ -122,6 +122,7 @@ export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
 
     private static setFakeExec() {
         ImplAutomodule.exec = fakeExec as unknown as typeof exec
+        resetCallsToExec()
     }
 
     private static setFakeReadFile() {
@@ -129,10 +130,6 @@ export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
         resetCallsToReadFile()
     }
 
-    private static setFakeWriteFile() {
-        ImplAutomodule.writeFile = fakeWriteFile as typeof writeFile
-        resetCallsToWriteFile()
-    }
     private static readonly interfaceName = `B-${generateId()}`
     private static readonly implName = generateId()
 
@@ -143,10 +140,10 @@ export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
 
             export default class ${this.implName}Test extends AbstractSpruceTest {
                 private static instance: ${this.interfaceName}
-                
+
                 protected static async beforeEach() {
                     await super.beforeEach()
-                    
+
                     this.instance = this.${this.implName}()
                 }
                 

@@ -1,29 +1,46 @@
+import { writeFile } from 'fs/promises'
+import { pathExists } from 'fs-extra'
 import { Automodule, BaseAutomoduleOptions } from '../types'
 
 export default abstract class AbstractAutomodule implements Automodule {
+    public static pathExists = pathExists
+    public static writeFile = writeFile
+
     protected testSaveDir: string
     protected moduleSaveDir: string
     protected fakeSaveDir: string
-    protected pathExists: (path: string) => Promise<boolean>
 
-    protected constructor(options: AbstractAutomoduleOptions) {
-        const { testSaveDir, moduleSaveDir, fakeSaveDir, pathExists } = options
+    protected testFileName!: string
+    protected testFileContent!: string
+
+    protected constructor(options: BaseAutomoduleOptions) {
+        const { testSaveDir, moduleSaveDir, fakeSaveDir } = options
 
         this.testSaveDir = testSaveDir
         this.moduleSaveDir = moduleSaveDir
         this.fakeSaveDir = fakeSaveDir
-        this.pathExists = pathExists
     }
 
     public abstract run(): Promise<void>
 
-    protected async throwIfDirectoriesDoNotExist() {
+    protected async runAbstract(options: AbstractAutomoduleRunOptions) {
+        const { testFileName, testFileContent } = options
+
+        this.testFileName = testFileName
+        this.testFileContent = testFileContent
+
+        await this.throwIfDirectoriesDoNotExist()
+
+        await this.createTestFile()
+    }
+
+    private async throwIfDirectoriesDoNotExist() {
         await this.throwIfTestDirDoesNotExist()
         await this.throwIfModuleDirDoesNotExist()
         await this.throwIfFakeDirDoesNotExist()
     }
 
-    protected async throwIfTestDirDoesNotExist() {
+    private async throwIfTestDirDoesNotExist() {
         const testDirExists = await this.pathExists(this.testSaveDir)
 
         if (!testDirExists) {
@@ -31,7 +48,7 @@ export default abstract class AbstractAutomodule implements Automodule {
         }
     }
 
-    protected async throwIfModuleDirDoesNotExist() {
+    private async throwIfModuleDirDoesNotExist() {
         const moduleDirExists = await this.pathExists(this.moduleSaveDir)
 
         if (!moduleDirExists) {
@@ -39,7 +56,7 @@ export default abstract class AbstractAutomodule implements Automodule {
         }
     }
 
-    protected async throwIfFakeDirDoesNotExist() {
+    private async throwIfFakeDirDoesNotExist() {
         const fakeDirExists = await this.pathExists(this.fakeSaveDir)
 
         if (!fakeDirExists) {
@@ -47,11 +64,33 @@ export default abstract class AbstractAutomodule implements Automodule {
         }
     }
 
-    protected throw(err: string) {
+    private async createTestFile() {
+        await this.writeFile(this.testFilePath, this.testFileContent)
+    }
+
+    private get testFilePath() {
+        return `${this.testSaveDir}/${this.testFileName}`
+    }
+
+    private throw(err: string) {
         throw new Error(err)
+    }
+
+    private get pathExists() {
+        return AbstractAutomodule.pathExists
+    }
+
+    protected get writeFile() {
+        return AbstractAutomodule.writeFile
     }
 }
 
 export interface AbstractAutomoduleOptions extends BaseAutomoduleOptions {
-    pathExists: (path: string) => Promise<boolean>
+    testFileName: string
+    testFileContent: string
+}
+
+export interface AbstractAutomoduleRunOptions {
+    testFileName: string
+    testFileContent: string
 }

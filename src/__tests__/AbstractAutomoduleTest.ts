@@ -1,11 +1,13 @@
+import { writeFile } from 'fs/promises'
 import { assert, generateId } from '@sprucelabs/test-utils'
 import {
     fakePathExists,
+    fakeWriteFile,
     resetCallsToPathExists,
+    resetCallsToWriteFile,
     setPathShouldExist,
 } from '@neurodevs/fake-node-core'
-import ImplAutomodule from '../modules/ImplAutomodule'
-import UiAutomodule from '../modules/UiAutomodule'
+import AbstractAutomodule from '../modules/AbstractAutomodule'
 import { Automodule } from '../types'
 import AbstractPackageTest from './AbstractPackageTest'
 
@@ -16,6 +18,7 @@ export default class AbstractAutomoduleTest extends AbstractPackageTest {
         await super.beforeEach()
 
         this.setFakePathExists()
+        this.setFakeWriteFile()
     }
 
     protected static async runAbstractTests() {
@@ -63,8 +66,7 @@ export default class AbstractAutomoduleTest extends AbstractPackageTest {
     protected static readonly indexFilePath = './src/index.ts'
 
     protected static setFakePathExists() {
-        ImplAutomodule.pathExists = fakePathExists
-        UiAutomodule.pathExists = fakePathExists
+        AbstractAutomodule.pathExists = fakePathExists
 
         setPathShouldExist(this.testSaveDir, true)
         setPathShouldExist(this.moduleSaveDir, true)
@@ -72,5 +74,10 @@ export default class AbstractAutomoduleTest extends AbstractPackageTest {
         setPathShouldExist(this.indexFilePath, true)
 
         resetCallsToPathExists()
+    }
+
+    protected static setFakeWriteFile() {
+        AbstractAutomodule.writeFile = fakeWriteFile as typeof writeFile
+        resetCallsToWriteFile()
     }
 }
