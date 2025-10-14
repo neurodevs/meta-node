@@ -4,17 +4,18 @@ import path from 'path'
 import { promisify } from 'util'
 import { pathExists } from 'fs-extra'
 import { Automodule, BaseAutomoduleOptions } from '../types'
+import AbstractAutomodule from './AbstractAutomodule'
 
-export default class ImplAutomodule implements Automodule {
+export default class ImplAutomodule
+    extends AbstractAutomodule
+    implements Automodule
+{
     public static Class?: ImplAutomoduleConstructor
     public static exec = promisify(execSync)
     public static pathExists = pathExists
     public static readFile = readFile
     public static writeFile = writeFile
 
-    private testSaveDir: string
-    private moduleSaveDir: string
-    private fakeSaveDir: string
     private interfaceName: string
     private implName: string
 
@@ -29,9 +30,13 @@ export default class ImplAutomodule implements Automodule {
             implName,
         } = options
 
-        this.testSaveDir = testSaveDir
-        this.moduleSaveDir = moduleSaveDir
-        this.fakeSaveDir = fakeSaveDir
+        super({
+            testSaveDir,
+            moduleSaveDir,
+            fakeSaveDir,
+            pathExists: ImplAutomodule.pathExists,
+        })
+
         this.interfaceName = interfaceName
         this.implName = implName
     }
@@ -49,40 +54,6 @@ export default class ImplAutomodule implements Automodule {
 
         await this.updateIndexFileExports()
         await this.bumpMinorVersion()
-    }
-
-    private async throwIfDirectoriesDoNotExist() {
-        await this.throwIfTestDirDoesNotExist()
-        await this.throwIfModuleDirDoesNotExist()
-        await this.throwIfFakeDirDoesNotExist()
-    }
-
-    private async throwIfTestDirDoesNotExist() {
-        const testDirExists = await this.pathExists(this.testSaveDir)
-
-        if (!testDirExists) {
-            this.throw(`testSaveDir does not exist: ${this.testSaveDir}!`)
-        }
-    }
-
-    private async throwIfModuleDirDoesNotExist() {
-        const moduleDirExists = await this.pathExists(this.moduleSaveDir)
-
-        if (!moduleDirExists) {
-            this.throw(`moduleSaveDir does not exist: ${this.moduleSaveDir}!`)
-        }
-    }
-
-    private async throwIfFakeDirDoesNotExist() {
-        const fakeDirExists = await this.pathExists(this.fakeSaveDir)
-
-        if (!fakeDirExists) {
-            this.throw(`fakeSaveDir does not exist: ${this.fakeSaveDir}!`)
-        }
-    }
-
-    private throw(err: string) {
-        throw new Error(err)
     }
 
     private async createTestFile() {
@@ -141,10 +112,6 @@ export default class ImplAutomodule implements Automodule {
 
     private get exec() {
         return ImplAutomodule.exec
-    }
-
-    private get pathExists() {
-        return ImplAutomodule.pathExists
     }
 
     private get readFile() {

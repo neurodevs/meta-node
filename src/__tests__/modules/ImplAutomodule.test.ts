@@ -6,29 +6,23 @@ import {
     callsToExec,
     callsToWriteFile,
     fakeExec,
-    fakePathExists,
     fakeReadFile,
     fakeReadFileResult,
     fakeWriteFile,
     resetCallsToReadFile,
     resetCallsToWriteFile,
     setFakeReadFileResult,
-    setPathShouldExist,
 } from '@neurodevs/fake-node-core'
 import ImplAutomodule from '../../modules/ImplAutomodule'
-import { Automodule } from '../../types'
-import AbstractPackageTest from '../AbstractPackageTest'
+import AbstractAutomoduleTest from '../AbstractAutomoduleTest'
 
 const exec = promisify(execSync)
 
-export default class ImplAutomoduleTest extends AbstractPackageTest {
-    private static instance: Automodule
-
+export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
     protected static async beforeEach() {
         await super.beforeEach()
 
         this.setFakeExec()
-        this.setFakePathExists()
         this.setFakeReadFile()
         this.setFakeWriteFile()
 
@@ -36,47 +30,13 @@ export default class ImplAutomoduleTest extends AbstractPackageTest {
     }
 
     @test()
+    protected static async passesAbstractTests() {
+        await this.runAbstractTests()
+    }
+
+    @test()
     protected static async createsInstance() {
         assert.isTruthy(this.instance, 'Failed to create instance!')
-    }
-
-    @test()
-    protected static async runThrowsIfTestSaveDirMissing() {
-        setPathShouldExist(this.testSaveDir, false)
-
-        const err = await assert.doesThrowAsync(async () => await this.run())
-
-        assert.isEqual(
-            err.message,
-            `testSaveDir does not exist: ${this.testSaveDir}!`,
-            'Did not receive the expected error!'
-        )
-    }
-
-    @test()
-    protected static async runThrowsIfModuleSaveDirMissing() {
-        setPathShouldExist(this.moduleSaveDir, false)
-
-        const err = await assert.doesThrowAsync(async () => await this.run())
-
-        assert.isEqual(
-            err.message,
-            `moduleSaveDir does not exist: ${this.moduleSaveDir}!`,
-            'Did not receive the expected error!'
-        )
-    }
-
-    @test()
-    protected static async runThrowsIfFakeSaveDirMissing() {
-        setPathShouldExist(this.fakeSaveDir, false)
-
-        const err = await assert.doesThrowAsync(async () => await this.run())
-
-        assert.isEqual(
-            err.message,
-            `fakeSaveDir does not exist: ${this.fakeSaveDir}!`,
-            'Did not receive the expected error!'
-        )
     }
 
     @test()
@@ -160,21 +120,8 @@ export default class ImplAutomoduleTest extends AbstractPackageTest {
         )
     }
 
-    private static async run() {
-        return await this.instance.run()
-    }
-
     private static setFakeExec() {
         ImplAutomodule.exec = fakeExec as unknown as typeof exec
-    }
-
-    private static setFakePathExists() {
-        ImplAutomodule.pathExists = fakePathExists
-
-        setPathShouldExist(this.testSaveDir, true)
-        setPathShouldExist(this.moduleSaveDir, true)
-        setPathShouldExist(this.fakeSaveDir, true)
-        setPathShouldExist(this.indexFilePath, true)
     }
 
     private static setFakeReadFile() {
@@ -250,8 +197,6 @@ export default class ImplAutomoduleTest extends AbstractPackageTest {
             }
         `
     }
-
-    private static readonly indexFilePath = './src/index.ts'
 
     private static get indexFilePattern() {
         return `

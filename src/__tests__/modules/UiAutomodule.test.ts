@@ -1,15 +1,17 @@
 import { test, assert } from '@sprucelabs/test-utils'
 import UiAutomodule from '../../modules/UiAutomodule'
-import { Automodule } from '../../types'
-import AbstractPackageTest from '../AbstractPackageTest'
+import AbstractAutomoduleTest from '../AbstractAutomoduleTest'
 
-export default class UiAutomoduleTest extends AbstractPackageTest {
-    private static instance: Automodule
-
+export default class UiAutomoduleTest extends AbstractAutomoduleTest {
     protected static async beforeEach() {
         await super.beforeEach()
 
         this.instance = this.UiAutomodule()
+    }
+
+    @test()
+    protected static async passesAbstractTests() {
+        await this.runAbstractTests()
     }
 
     @test()
