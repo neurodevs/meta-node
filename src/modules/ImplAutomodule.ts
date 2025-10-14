@@ -3,9 +3,10 @@ import { readFile, writeFile } from 'fs/promises'
 import path from 'path'
 import { promisify } from 'util'
 import { pathExists } from 'fs-extra'
+import { Automodule, BaseAutomoduleOptions } from '../types'
 
 export default class ImplAutomodule implements Automodule {
-    public static Class?: AutomoduleConstructor
+    public static Class?: ImplAutomoduleConstructor
     public static exec = promisify(execSync)
     public static pathExists = pathExists
     public static readFile = readFile
@@ -19,7 +20,7 @@ export default class ImplAutomodule implements Automodule {
 
     private originalIndexFile!: string
 
-    protected constructor(options: AutomoduleOptions) {
+    protected constructor(options: ImplAutomoduleOptions) {
         const {
             testSaveDir,
             moduleSaveDir,
@@ -35,7 +36,7 @@ export default class ImplAutomodule implements Automodule {
         this.implName = implName
     }
 
-    public static Create(options: AutomoduleOptions) {
+    public static Create(options: ImplAutomoduleOptions) {
         return new (this.Class ?? this)(options)
     }
 
@@ -231,18 +232,11 @@ export default class ImplAutomodule implements Automodule {
     }
 }
 
-export interface Automodule {
-    run(): Promise<void>
-}
-
-export type AutomoduleConstructor = new (
-    options: AutomoduleOptions
+export type ImplAutomoduleConstructor = new (
+    options: ImplAutomoduleOptions
 ) => Automodule
 
-export interface AutomoduleOptions {
-    testSaveDir: string
-    moduleSaveDir: string
-    fakeSaveDir: string
+export interface ImplAutomoduleOptions extends BaseAutomoduleOptions {
     interfaceName: string
     implName: string
 }

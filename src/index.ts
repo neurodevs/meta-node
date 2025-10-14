@@ -19,6 +19,9 @@ export * from './testDoubles/Autodocumenter/FakeAutodocumenter'
 export { default as ImplAutomodule } from './modules/ImplAutomodule'
 export * from './modules/ImplAutomodule'
 
+export { default as UiAutomodule } from './modules/UiAutomodule'
+export * from './modules/UiAutomodule'
+
 export { default as FakeAutomodule } from './testDoubles/Automodule/FakeAutomodule'
 export * from './testDoubles/Automodule/FakeAutomodule'
 

@@ -15,7 +15,8 @@ import {
     setFakeReadFileResult,
     setPathShouldExist,
 } from '@neurodevs/fake-node-core'
-import ImplAutomodule, { Automodule } from '../../modules/ImplAutomodule'
+import ImplAutomodule from '../../modules/ImplAutomodule'
+import { Automodule } from '../../types'
 import AbstractPackageTest from '../AbstractPackageTest'
 
 const exec = promisify(execSync)
@@ -187,10 +188,6 @@ export default class ImplAutomoduleTest extends AbstractPackageTest {
     }
     private static readonly interfaceName = `B-${generateId()}`
     private static readonly implName = generateId()
-
-    private static readonly testSaveDir = generateId()
-    private static readonly moduleSaveDir = generateId()
-    private static readonly fakeSaveDir = generateId()
 
     private static get testFilePattern() {
         return `

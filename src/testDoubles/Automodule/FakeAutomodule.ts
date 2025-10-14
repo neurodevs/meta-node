@@ -1,15 +1,17 @@
-import { Automodule, AutomoduleOptions } from '../../modules/ImplAutomodule'
+import { ImplAutomoduleOptions } from '../../modules/ImplAutomodule'
+import { UiAutomoduleOptions } from '../../modules/UiAutomodule'
+import { Automodule } from '../../types'
 
-export default class FakeAutomodule implements Automodule {
-    public static callsToConstructor: AutomoduleOptions[] = []
+export default class FakeImplAutomodule implements Automodule {
+    public static callsToConstructor: FakeAutomoduleOptions[] = []
     public static numCallsToRun = 0
 
-    public constructor(options: AutomoduleOptions) {
-        FakeAutomodule.callsToConstructor.push(options)
+    public constructor(options: FakeAutomoduleOptions) {
+        FakeImplAutomodule.callsToConstructor.push(options)
     }
 
     public async run() {
-        FakeAutomodule.numCallsToRun++
+        FakeImplAutomodule.numCallsToRun++
     }
 
     public static resetTestDouble() {
@@ -17,3 +19,5 @@ export default class FakeAutomodule implements Automodule {
         this.numCallsToRun = 0
     }
 }
+
+export type FakeAutomoduleOptions = ImplAutomoduleOptions | UiAutomoduleOptions
