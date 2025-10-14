@@ -12,6 +12,8 @@ export default abstract class AbstractAutomodule implements Automodule {
 
     protected testFileName!: string
     protected testFileContent!: string
+    protected moduleFileName!: string
+    protected moduleFileContent!: string
 
     protected constructor(options: BaseAutomoduleOptions) {
         const { testSaveDir, moduleSaveDir, fakeSaveDir } = options
@@ -24,14 +26,22 @@ export default abstract class AbstractAutomodule implements Automodule {
     public abstract run(): Promise<void>
 
     protected async runAbstract(options: AbstractAutomoduleRunOptions) {
-        const { testFileName, testFileContent } = options
+        const {
+            testFileName,
+            testFileContent,
+            moduleFileName,
+            moduleFileContent,
+        } = options
 
         this.testFileName = testFileName
         this.testFileContent = testFileContent
+        this.moduleFileName = moduleFileName
+        this.moduleFileContent = moduleFileContent
 
         await this.throwIfDirectoriesDoNotExist()
 
         await this.createTestFile()
+        await this.createModuleFile()
     }
 
     private async throwIfDirectoriesDoNotExist() {
@@ -64,6 +74,10 @@ export default abstract class AbstractAutomodule implements Automodule {
         }
     }
 
+    private throw(err: string) {
+        throw new Error(err)
+    }
+
     private async createTestFile() {
         await this.writeFile(this.testFilePath, this.testFileContent)
     }
@@ -72,8 +86,12 @@ export default abstract class AbstractAutomodule implements Automodule {
         return `${this.testSaveDir}/${this.testFileName}`
     }
 
-    private throw(err: string) {
-        throw new Error(err)
+    private async createModuleFile() {
+        await this.writeFile(this.moduleFilePath, this.moduleFileContent)
+    }
+
+    private get moduleFilePath() {
+        return `${this.moduleSaveDir}/${this.moduleFileName}`
     }
 
     private get pathExists() {
@@ -93,4 +111,6 @@ export interface AbstractAutomoduleOptions extends BaseAutomoduleOptions {
 export interface AbstractAutomoduleRunOptions {
     testFileName: string
     testFileContent: string
+    moduleFileName: string
+    moduleFileContent: string
 }

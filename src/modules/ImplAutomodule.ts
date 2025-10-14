@@ -45,21 +45,14 @@ export default class ImplAutomodule
         await this.runAbstract({
             testFileName: `${this.implName}.test.ts`,
             testFileContent: this.testFilePattern,
+            moduleFileName: `${this.implName}.ts`,
+            moduleFileContent: this.moduleFilePattern,
         })
 
-        await this.createModuleFile()
         await this.createFakeFile()
 
         await this.updateIndexFileExports()
         await this.bumpMinorVersion()
-    }
-
-    private async createModuleFile() {
-        await this.writeFile(this.moduleFileName, this.moduleFilePattern)
-    }
-
-    private get moduleFileName() {
-        return path.join(this.moduleSaveDir, `${this.implName}.ts`)
     }
 
     private async createFakeFile() {

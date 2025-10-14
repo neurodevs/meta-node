@@ -35,7 +35,26 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
         )
     }
 
+    @test()
+    protected static async createsModuleFileAsExpected() {
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToWriteFile[1],
+            {
+                file: `${this.moduleSaveDir}/${this.componentName}.tsx`,
+                data: this.moduleFilePattern,
+                options: undefined,
+            },
+            'Did not write expected module file!'
+        )
+    }
+
     private static readonly componentName = generateId()
+
+    private static readonly componentNameKebabCase = this.toKebabCase(
+        this.componentName
+    )
 
     private static get testFilePattern() {
         return `
@@ -75,12 +94,29 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
                     return this.result.getByTestId
                 }
 
-                private static readonly className = '${this.toKebabCase(this.componentName)}'
+                private static readonly className = '${this.componentNameKebabCase}'
 
                 protected static render() {
                     return render(<${this.componentName} />)
                 }
             }
+        `
+    }
+
+    private static get moduleFilePattern() {
+        return `
+            import React from 'react'
+
+            const ${this.componentName}: React.FC = () => {
+                return (
+                    <div
+                        className="${this.componentNameKebabCase}"
+                        data-testid="${this.componentNameKebabCase}"
+                    />
+                )
+            }
+
+            export default ${this.componentName}
         `
     }
 

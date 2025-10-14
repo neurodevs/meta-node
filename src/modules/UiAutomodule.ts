@@ -10,6 +10,7 @@ export default class UiAutomodule
     public static pathExists = pathExists
 
     protected componentName: string
+    protected componentNameKebabCase: string
 
     protected constructor(options: UiAutomoduleOptions) {
         const { testSaveDir, moduleSaveDir, fakeSaveDir, componentName } =
@@ -22,16 +23,26 @@ export default class UiAutomodule
         })
 
         this.componentName = componentName
+        this.componentNameKebabCase = this.toKebabCase(componentName)
     }
 
     public static Create(options: UiAutomoduleOptions) {
         return new (this.Class ?? this)(options)
     }
 
+    private toKebabCase(str: string): string {
+        return str
+            .replace(/([a-z])([A-Z])/g, '$1-$2')
+            .replace(/[\s_]+/g, '-')
+            .toLowerCase()
+    }
+
     public async run() {
         await this.runAbstract({
             testFileName: `${this.componentName}.test.tsx`,
             testFileContent: this.testFileTemplate,
+            moduleFileName: `${this.componentName}.tsx`,
+            moduleFileContent: this.moduleFilePattern,
         })
     }
 
@@ -82,11 +93,21 @@ export default class UiAutomodule
         `
     }
 
-    private toKebabCase(str: string): string {
-        return str
-            .replace(/([a-z])([A-Z])/g, '$1-$2')
-            .replace(/[\s_]+/g, '-')
-            .toLowerCase()
+    private get moduleFilePattern() {
+        return `
+            import React from 'react'
+
+            const ${this.componentName}: React.FC = () => {
+                return (
+                    <div
+                        className="${this.componentNameKebabCase}"
+                        data-testid="${this.componentNameKebabCase}"
+                    />
+                )
+            }
+
+            export default ${this.componentName}
+        `
     }
 }
 
