@@ -58,7 +58,7 @@ export default class NpmAutopackage implements Autopackage {
 
         this.chdirToPackageDir()
         await this.spruceCreateModule()
-        await this.updatePackage()
+        await this.updatePackageJson()
         await this.updateGitignore()
         await this.setupVscode()
     }
@@ -166,12 +166,12 @@ export default class NpmAutopackage implements Autopackage {
         await this.exec('git push')
     }
 
-    private async updatePackage() {
+    private async updatePackageJson() {
         this.originalJsonFile = await this.loadPackageJsonFile()
 
         if (!this.isPackageUpToDate) {
             console.log('Updating package.json...')
-            await this.updatePackageJson()
+            await this.updatePackageJsonFile()
             await this.commitUpdatePackage()
         }
     }
@@ -190,7 +190,7 @@ export default class NpmAutopackage implements Autopackage {
         )
     }
 
-    private async updatePackageJson() {
+    private async updatePackageJsonFile() {
         const ordered = this.orderJsonKeys(this.updatedJsonFile, [
             'name',
             'version',
@@ -279,7 +279,7 @@ export default class NpmAutopackage implements Autopackage {
         if (!this.isGitignoreUpdated) {
             console.log('Updating .gitignore...')
 
-            await this.addBuildDirToGitignore()
+            await this.updateGitignoreFile()
             await this.commitUpdateGitignore()
         }
     }
@@ -302,7 +302,7 @@ export default class NpmAutopackage implements Autopackage {
         return lines.includes('build/')
     }
 
-    private async addBuildDirToGitignore() {
+    private async updateGitignoreFile() {
         await this.writeFile(this.gitignorePath, '\nbuild/\n', {
             encoding: 'utf-8',
             flag: 'a',
