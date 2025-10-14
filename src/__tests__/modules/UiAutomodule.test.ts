@@ -122,7 +122,9 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
         return `
             import React from 'react'
 
-            const ${this.componentName}: React.FC = () => {
+            export interface ${this.componentName}Props {}
+
+            const ${this.componentName}: React.FC<${this.componentName}Props> = (_props: ${this.componentName}Props) => {
                 return (
                     <div
                         className="${this.componentNameKebabCase}"
