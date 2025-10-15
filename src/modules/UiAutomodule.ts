@@ -35,6 +35,11 @@ export default class UiAutomodule extends AbstractAutomodule {
     }
 
     public async run() {
+        await this.runAbstractAutomodule()
+        await this.installDevDependencies()
+    }
+
+    private async runAbstractAutomodule() {
         await this.runAbstract({
             testFileName: `${this.componentName}.test.tsx`,
             testFileContent: this.testFileTemplate,
@@ -44,6 +49,12 @@ export default class UiAutomodule extends AbstractAutomodule {
             fakeFileContent: this.fakeFilePattern,
             indexFileContent: this.indexFilePattern,
         })
+    }
+
+    private async installDevDependencies() {
+        await this.exec(
+            'yarn add -D @testing-library/react @testing-library/jest-dom @types/react'
+        )
     }
 
     private get testFileTemplate() {

@@ -106,6 +106,17 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
         )
     }
 
+    @test()
+    protected static async installsDevDependenciesIfMissing() {
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToExec[1],
+            'yarn add -D @testing-library/react @testing-library/jest-dom @types/react',
+            'Did not install dev dependencies!'
+        )
+    }
+
     private static readonly componentName = generateId()
 
     private static readonly componentNameKebabCase = this.toKebabCase(

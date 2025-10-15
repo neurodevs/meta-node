@@ -151,7 +151,7 @@ export default abstract class AbstractAutomodule implements Automodule {
         await this.exec('yarn version --minor --no-git-tag-version')
     }
 
-    private get exec() {
+    protected get exec() {
         return AbstractAutomodule.exec
     }
 
