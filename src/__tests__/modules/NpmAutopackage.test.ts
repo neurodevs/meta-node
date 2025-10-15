@@ -460,7 +460,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         NpmAutopackage.readFile = fakeReadFile as unknown as typeof readFile
         resetCallsToReadFile()
 
-        setFakeReadFileResult(this.originalJsonFile)
+        setFakeReadFileResult(this.packageJsonPath, this.originalJsonFile)
     }
 
     private static fakeWriteFile() {

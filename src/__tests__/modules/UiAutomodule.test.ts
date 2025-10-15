@@ -2,7 +2,6 @@ import { test, assert, generateId } from '@sprucelabs/test-utils'
 import {
     callsToExec,
     callsToWriteFile,
-    fakeReadFileResult,
     setFakeReadFileResult,
 } from '@neurodevs/fake-node-core'
 import UiAutomodule from '../../modules/UiAutomodule'
@@ -11,6 +10,8 @@ import AbstractAutomoduleTest from '../AbstractAutomoduleTest'
 export default class UiAutomoduleTest extends AbstractAutomoduleTest {
     protected static async beforeEach() {
         await super.beforeEach()
+
+        this.setFakePackageJsonOnReadFile()
 
         this.instance = this.UiAutomodule()
     }
@@ -72,11 +73,7 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
 
     @test()
     protected static async updatesIndexFileExportsAndSortsAlphabetically() {
-        setFakeReadFileResult(`
-                // C-${fakeReadFileResult}
-                
-                // A-${fakeReadFileResult}
-            `)
+        setFakeReadFileResult(this.indexFilePath, this.originalIndexFile)
 
         await this.run()
 
@@ -108,12 +105,24 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
 
     @test()
     protected static async installsDevDependenciesIfMissing() {
+        setFakeReadFileResult(this.packageJsonPath, '{}')
+
         await this.run()
 
         assert.isEqualDeep(
             callsToExec[1],
-            'yarn add -D @testing-library/react @testing-library/jest-dom @types/react',
+            this.installDevDependenciesCommand,
             'Did not install dev dependencies!'
+        )
+    }
+
+    @test()
+    protected static async doesNotInstallDevDependenciesIfPresent() {
+        await this.run()
+
+        assert.isFalse(
+            callsToExec.includes(this.installDevDependenciesCommand),
+            'Should not have installed dev dependencies!'
         )
     }
 
@@ -122,6 +131,26 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
     private static readonly componentNameKebabCase = this.toKebabCase(
         this.componentName
     )
+
+    private static readonly packageJsonPath = 'src/package.json'
+
+    private static readonly installDevDependenciesCommand =
+        'yarn add -D @types/react @testing-library/react @testing-library/jest-dom'
+
+    private static setFakePackageJsonOnReadFile() {
+        setFakeReadFileResult(
+            this.packageJsonPath,
+            `
+                {
+                    "devDependencies": {
+                        "@testing-library/react": "...",
+                        "@testing-library/jest-dom": "...",
+                        "@types/react": "..."
+                    }
+                }
+            `
+        )
+    }
 
     private static get testFilePattern() {
         return `
@@ -212,8 +241,6 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
 
     private static get indexFilePattern() {
         return `
-            ${fakeReadFileResult}
-
             // ${this.componentName}
 
             export { default as ${this.componentName} } from './ui/${this.componentName}'
@@ -226,7 +253,7 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
     }
 
     private static get sortedIndexFile() {
-        const blocks = this.indexFilePattern
+        const blocks = `${this.originalIndexFile}${this.indexFilePattern}`
             .split(/(?=\/\/)/)
             .map((s) => s.trim())
             .filter(Boolean)

@@ -163,7 +163,7 @@ export default abstract class AbstractAutomodule implements Automodule {
         return AbstractAutomodule.writeFile
     }
 
-    private get readFile() {
+    protected get readFile() {
         return AbstractAutomodule.readFile
     }
 }

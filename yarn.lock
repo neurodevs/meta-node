@@ -708,10 +708,15 @@
     "@emnapi/runtime" "^1.4.3"
     "@tybys/wasm-util" "^0.10.0"
 
-"@neurodevs/fake-node-core@^0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@neurodevs/fake-node-core/-/fake-node-core-0.1.1.tgz#153d15306572da14f953c8764ca5efd7e4bc7b9d"
-  integrity sha512-8KPyGAd8OV4akXxodxUY1P/eNwVCRWPwX9jKIyGY6Lsbkm3XTUPhWTTjeFM6IcKeKXXSnNEhT0TOatCja5PYqw==
+"@neurodevs/fake-node-core@^0.2.0":
+  version "0.2.0"
+  resolved "https://registry.yarnpkg.com/@neurodevs/fake-node-core/-/fake-node-core-0.2.0.tgz#0c7e6ba5489687649ff5d7780fc818e884f15aef"
+  integrity sha512-SxcUyKIbB7LtR6pTz6szshkYex6FqaX/Yg8ls4SChE/ocLH1/dRXKCNNV+tjPVYbR+PuII9rLgzCOpCu7B9EkA==
+
+"@neurodevs/generate-id@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@neurodevs/generate-id/-/generate-id-1.0.0.tgz#0a2b756c569d4fa12e01c744fa1bb8a094aa7606"
+  integrity sha512-F5UabBUeIql4WnS1P/mIUj4tuM3iT6s2mro96HcdDh4WMSwzlNisSh26VmmYaX2NMK1rzwshde01rW5+rMLuNQ==
 
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"

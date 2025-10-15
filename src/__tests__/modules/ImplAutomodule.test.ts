@@ -11,6 +11,8 @@ export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
     protected static async beforeEach() {
         await super.beforeEach()
 
+        this.setFakeIndexFileOnReadFile()
+
         this.instance = this.ImplAutomodule()
     }
 
@@ -73,8 +75,6 @@ export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
 
     @test()
     protected static async sortsIndexFileExportsAlphabetically() {
-        setFakeReadFileResult(this.originalIndexFile)
-
         await this.run()
 
         const call = callsToWriteFile[3]
@@ -103,14 +103,12 @@ export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
         )
     }
 
-    private static readonly originalIndexFile = `
-        // C-${generateId()}
-        
-        // A-${generateId()}
-    `
-
     private static readonly interfaceName = `B-${generateId()}`
     private static readonly implName = generateId()
+
+    private static setFakeIndexFileOnReadFile() {
+        setFakeReadFileResult(this.indexFilePath, this.originalIndexFile)
+    }
 
     private static get testFilePattern() {
         return `

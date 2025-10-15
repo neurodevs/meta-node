@@ -75,6 +75,12 @@ export default class AbstractAutomoduleTest extends AbstractPackageTest {
     protected static readonly fakeSaveDir = generateId()
     protected static readonly indexFilePath = './src/index.ts'
 
+    protected static readonly originalIndexFile = `
+        // C-${generateId()}
+        
+        // A-${generateId()}
+    `
+
     protected static setFakeExec() {
         AbstractAutomodule.exec = fakeExec as unknown as typeof exec
         resetCallsToExec()
