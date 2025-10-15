@@ -55,6 +55,8 @@ export default class UiAutomodule extends AbstractAutomodule {
         const isInstalled = await this.checkIfDevDependenciesAreInstalled()
 
         if (!isInstalled) {
+            console.log('Installing required dev dependencies...')
+
             await this.exec(
                 'yarn add -D @types/react @testing-library/react @testing-library/jest-dom'
             )
