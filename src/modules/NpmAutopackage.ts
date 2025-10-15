@@ -61,6 +61,7 @@ export default class NpmAutopackage implements Autopackage {
         await this.updatePackageJson()
         await this.updateGitignore()
         await this.setupVscode()
+        await this.openVscode()
     }
 
     private throwIfGithubTokenNotInEnv() {
@@ -339,12 +340,16 @@ export default class NpmAutopackage implements Autopackage {
 
     private async commitSetupVscode() {
         await this.gitAddAll()
-        await this.gitCommitSetup()
+        await this.gitCommitSetupVscode()
         await this.gitPush()
     }
 
-    private async gitCommitSetup() {
+    private async gitCommitSetupVscode() {
         await this.exec('git commit -m "patch: setup vscode"')
+    }
+
+    private async openVscode() {
+        await this.exec('code .')
     }
 
     private get chdir() {

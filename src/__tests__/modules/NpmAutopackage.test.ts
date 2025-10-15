@@ -373,6 +373,13 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         )
     }
 
+    @test()
+    protected static async opensVscodeAtEnd() {
+        await this.run()
+
+        assert.isEqual(callsToExec[15], 'code .', 'Did not open vscode at end!')
+    }
+
     private static async run() {
         await this.instance.run()
     }
