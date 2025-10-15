@@ -1,10 +1,14 @@
-import { writeFile } from 'fs/promises'
+import { exec as execSync } from 'child_process'
+import { readFile, writeFile } from 'fs/promises'
+import { promisify } from 'util'
 import { pathExists } from 'fs-extra'
 import { Automodule, BaseAutomoduleOptions } from '../types'
 
 export default abstract class AbstractAutomodule implements Automodule {
+    public static exec = promisify(execSync)
     public static pathExists = pathExists
     public static writeFile = writeFile
+    public static readFile = readFile
 
     protected testSaveDir: string
     protected moduleSaveDir: string
@@ -16,6 +20,9 @@ export default abstract class AbstractAutomodule implements Automodule {
     protected moduleFileContent!: string
     protected fakeFileName!: string
     protected fakeFileContent!: string
+    protected indexFileContent!: string
+
+    protected originalIndexFile!: string
 
     protected constructor(options: BaseAutomoduleOptions) {
         const { testSaveDir, moduleSaveDir, fakeSaveDir } = options
@@ -35,6 +42,7 @@ export default abstract class AbstractAutomodule implements Automodule {
             moduleFileContent,
             fakeFileName,
             fakeFileContent,
+            indexFileContent,
         } = options
 
         this.testFileName = testFileName
@@ -43,12 +51,16 @@ export default abstract class AbstractAutomodule implements Automodule {
         this.moduleFileContent = moduleFileContent
         this.fakeFileName = fakeFileName
         this.fakeFileContent = fakeFileContent
+        this.indexFileContent = indexFileContent
 
         await this.throwIfDirectoriesDoNotExist()
 
         await this.createTestFile()
         await this.createModuleFile()
         await this.createFakeFile()
+
+        await this.updateIndexFileExports()
+        await this.bumpMinorVersion()
     }
 
     private async throwIfDirectoriesDoNotExist() {
@@ -109,12 +121,50 @@ export default abstract class AbstractAutomodule implements Automodule {
         return `${this.fakeSaveDir}/${this.fakeFileName}`
     }
 
+    private async updateIndexFileExports() {
+        this.originalIndexFile = await this.loadOriginalIndexFile()
+        await this.writeFile(this.indexFilePath, this.sortedIndexFile)
+    }
+
+    private async loadOriginalIndexFile() {
+        return await this.readFile(this.indexFilePath, 'utf-8')
+    }
+
+    private readonly indexFilePath = './src/index.ts'
+
+    private get sortedIndexFile() {
+        const blocks = `${this.originalIndexFile}${this.indexFileContent}`
+            .split(/(?=\/\/)/)
+            .map((s) => s.trim())
+            .filter(Boolean)
+
+        blocks.sort((a, b) => {
+            const aKey = a.match(/^\/\/\s*([^\n]*)/)?.[1]?.trim() ?? ''
+            const bKey = b.match(/^\/\/\s*([^\n]*)/)?.[1]?.trim() ?? ''
+            return aKey.localeCompare(bKey)
+        })
+
+        return blocks.join('\n\n')
+    }
+
+    private async bumpMinorVersion() {
+        await this.exec('yarn version --minor --no-git-tag-version')
+    }
+
+    private get exec() {
+        return AbstractAutomodule.exec
+    }
+
     private get pathExists() {
         return AbstractAutomodule.pathExists
     }
 
     protected get writeFile() {
         return AbstractAutomodule.writeFile
+    }
+
+    private get readFile() {
+        return AbstractAutomodule.readFile
     }
 }
 
@@ -130,4 +180,5 @@ export interface AbstractAutomoduleRunOptions {
     moduleFileContent: string
     fakeFileName: string
     fakeFileContent: string
+    indexFileContent: string
 }

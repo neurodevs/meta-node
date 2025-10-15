@@ -1,21 +1,11 @@
-import { exec as execSync } from 'child_process'
-import { readFile } from 'fs/promises'
-import { promisify } from 'util'
 import { Automodule, BaseAutomoduleOptions } from '../types'
 import AbstractAutomodule from './AbstractAutomodule'
 
-export default class ImplAutomodule
-    extends AbstractAutomodule
-    implements Automodule
-{
+export default class ImplAutomodule extends AbstractAutomodule {
     public static Class?: ImplAutomoduleConstructor
-    public static exec = promisify(execSync)
-    public static readFile = readFile
 
     private interfaceName: string
     private implName: string
-
-    private originalIndexFile!: string
 
     protected constructor(options: ImplAutomoduleOptions) {
         const {
@@ -41,12 +31,6 @@ export default class ImplAutomodule
     }
 
     public async run() {
-        await this.generateFiles()
-        await this.updateIndexFileExports()
-        await this.bumpMinorVersion()
-    }
-
-    private async generateFiles() {
         await this.runAbstract({
             testFileName: `${this.implName}.test.ts`,
             testFileContent: this.testFilePattern,
@@ -54,45 +38,8 @@ export default class ImplAutomodule
             moduleFileContent: this.moduleFilePattern,
             fakeFileName: `Fake${this.interfaceName}.ts`,
             fakeFileContent: this.fakeFilePattern,
+            indexFileContent: this.indexFilePattern,
         })
-    }
-
-    private async updateIndexFileExports() {
-        this.originalIndexFile = await this.loadOriginalIndexFile()
-        await this.writeFile(this.indexFilePath, this.sortedIndexFile)
-    }
-
-    private async loadOriginalIndexFile() {
-        return await this.readFile(this.indexFilePath, 'utf-8')
-    }
-
-    private readonly indexFilePath = './src/index.ts'
-
-    private get sortedIndexFile() {
-        const blocks = this.indexFilePattern
-            .split(/(?=\/\/)/)
-            .map((s) => s.trim())
-            .filter(Boolean)
-
-        blocks.sort((a, b) => {
-            const aKey = a.match(/^\/\/\s*([^\n]*)/)?.[1]?.trim() ?? ''
-            const bKey = b.match(/^\/\/\s*([^\n]*)/)?.[1]?.trim() ?? ''
-            return aKey.localeCompare(bKey)
-        })
-
-        return blocks.join('\n\n')
-    }
-
-    private async bumpMinorVersion() {
-        await this.exec('yarn version --minor --no-git-tag-version')
-    }
-
-    private get exec() {
-        return ImplAutomodule.exec
-    }
-
-    private get readFile() {
-        return ImplAutomodule.readFile
     }
 
     private get testFilePattern() {
@@ -159,8 +106,6 @@ export default class ImplAutomodule
 
     private get indexFilePattern() {
         return `
-            ${this.originalIndexFile}
-
             // ${this.interfaceName}
 
             export { default as ${this.implName} } from './modules/${this.implName}'

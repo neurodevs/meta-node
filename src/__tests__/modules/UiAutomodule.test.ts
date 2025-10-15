@@ -1,5 +1,10 @@
 import { test, assert, generateId } from '@sprucelabs/test-utils'
-import { callsToWriteFile } from '@neurodevs/fake-node-core'
+import {
+    callsToExec,
+    callsToWriteFile,
+    fakeReadFileResult,
+    setFakeReadFileResult,
+} from '@neurodevs/fake-node-core'
 import UiAutomodule from '../../modules/UiAutomodule'
 import AbstractAutomoduleTest from '../AbstractAutomoduleTest'
 
@@ -62,6 +67,42 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
                 options: undefined,
             },
             'Did not write expected module file!'
+        )
+    }
+
+    @test()
+    protected static async updatesIndexFileExportsAndSortsAlphabetically() {
+        setFakeReadFileResult(`
+                // C-${fakeReadFileResult}
+                
+                // A-${fakeReadFileResult}
+            `)
+
+        await this.run()
+
+        const call = callsToWriteFile[3]
+
+        assert.isEqualDeep(
+            {
+                file: call.file,
+                data: this.normalize(call.data),
+            },
+            {
+                file: this.indexFilePath,
+                data: this.normalize(this.sortedIndexFile),
+            },
+            'Did not update index file exports as expected!'
+        )
+    }
+
+    @test()
+    protected static async bumpsMinorVersionWithYarn() {
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToExec[0],
+            'yarn version --minor --no-git-tag-version',
+            'Did not bump minor version!'
         )
     }
 
@@ -157,6 +198,36 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
 
             export default Fake${this.componentName}
         `
+    }
+
+    private static get indexFilePattern() {
+        return `
+            ${fakeReadFileResult}
+
+            // ${this.componentName}
+
+            export { default as ${this.componentName} } from './ui/${this.componentName}'
+            export * from './ui/${this.componentName}'
+
+            export { default as Fake${this.componentName} } from './testDoubles/${this.componentName}/Fake${this.componentName}'
+            export * from './testDoubles/${this.componentName}/Fake${this.componentName}'
+
+        `
+    }
+
+    private static get sortedIndexFile() {
+        const blocks = this.indexFilePattern
+            .split(/(?=\/\/)/)
+            .map((s) => s.trim())
+            .filter(Boolean)
+
+        blocks.sort((a, b) => {
+            const aKey = a.match(/^\/\/\s*([^\n]*)/)?.[1]?.trim() ?? ''
+            const bKey = b.match(/^\/\/\s*([^\n]*)/)?.[1]?.trim() ?? ''
+            return aKey.localeCompare(bKey)
+        })
+
+        return blocks.join('\n\n')
     }
 
     private static toKebabCase(str: string): string {

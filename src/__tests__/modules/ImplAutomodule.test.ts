@@ -1,28 +1,15 @@
-import { exec as execSync } from 'child_process'
-import { readFile } from 'fs/promises'
-import { promisify } from 'util'
 import { test, assert, generateId } from '@sprucelabs/test-utils'
 import {
     callsToExec,
     callsToWriteFile,
-    fakeExec,
-    fakeReadFile,
-    fakeReadFileResult,
-    resetCallsToExec,
-    resetCallsToReadFile,
     setFakeReadFileResult,
 } from '@neurodevs/fake-node-core'
 import ImplAutomodule from '../../modules/ImplAutomodule'
 import AbstractAutomoduleTest from '../AbstractAutomoduleTest'
 
-const exec = promisify(execSync)
-
 export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
     protected static async beforeEach() {
         await super.beforeEach()
-
-        this.setFakeExec()
-        this.setFakeReadFile()
 
         this.instance = this.ImplAutomodule()
     }
@@ -86,11 +73,7 @@ export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
 
     @test()
     protected static async sortsIndexFileExportsAlphabetically() {
-        setFakeReadFileResult(`
-            // A-${fakeReadFileResult}
-            
-            // C-${fakeReadFileResult}
-        `)
+        setFakeReadFileResult(this.originalIndexFile)
 
         await this.run()
 
@@ -120,15 +103,11 @@ export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
         )
     }
 
-    private static setFakeExec() {
-        ImplAutomodule.exec = fakeExec as unknown as typeof exec
-        resetCallsToExec()
-    }
-
-    private static setFakeReadFile() {
-        ImplAutomodule.readFile = fakeReadFile as unknown as typeof readFile
-        resetCallsToReadFile()
-    }
+    private static readonly originalIndexFile = `
+        // C-${generateId()}
+        
+        // A-${generateId()}
+    `
 
     private static readonly interfaceName = `B-${generateId()}`
     private static readonly implName = generateId()
@@ -197,8 +176,6 @@ export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
 
     private static get indexFilePattern() {
         return `
-            ${fakeReadFileResult}
-
             // ${this.interfaceName}
 
             export { default as ${this.implName} } from './modules/${this.implName}'
@@ -211,7 +188,7 @@ export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
     }
 
     private static get sortedIndexFile() {
-        const blocks = this.indexFilePattern
+        const blocks = `${this.originalIndexFile}${this.indexFilePattern}`
             .split(/(?=\/\/)/)
             .map((s) => s.trim())
             .filter(Boolean)

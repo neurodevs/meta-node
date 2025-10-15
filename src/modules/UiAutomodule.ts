@@ -2,10 +2,7 @@ import { pathExists } from 'fs-extra'
 import { Automodule, BaseAutomoduleOptions } from '../types'
 import AbstractAutomodule from './AbstractAutomodule'
 
-export default class UiAutomodule
-    extends AbstractAutomodule
-    implements Automodule
-{
+export default class UiAutomodule extends AbstractAutomodule {
     public static Class?: UiAutomoduleConstructor
     public static pathExists = pathExists
 
@@ -45,6 +42,7 @@ export default class UiAutomodule
             moduleFileContent: this.moduleFilePattern,
             fakeFileName: `Fake${this.componentName}.tsx`,
             fakeFileContent: this.fakeFilePattern,
+            indexFileContent: this.indexFilePattern,
         })
     }
 
@@ -133,6 +131,19 @@ export default class UiAutomodule
             }
 
             export default Fake${this.componentName}
+        `
+    }
+
+    private get indexFilePattern() {
+        return `
+            // ${this.componentName}
+
+            export { default as ${this.componentName} } from './ui/${this.componentName}'
+            export * from './ui/${this.componentName}'
+
+            export { default as Fake${this.componentName} } from './testDoubles/${this.componentName}/Fake${this.componentName}'
+            export * from './testDoubles/${this.componentName}/Fake${this.componentName}'
+
         `
     }
 }

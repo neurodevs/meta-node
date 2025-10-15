@@ -1,9 +1,15 @@
-import { writeFile } from 'fs/promises'
+import { exec as execSync } from 'child_process'
+import { readFile, writeFile } from 'fs/promises'
+import { promisify } from 'util'
 import { assert, generateId } from '@sprucelabs/test-utils'
 import {
+    fakeExec,
     fakePathExists,
+    fakeReadFile,
     fakeWriteFile,
+    resetCallsToExec,
     resetCallsToPathExists,
+    resetCallsToReadFile,
     resetCallsToWriteFile,
     setPathShouldExist,
 } from '@neurodevs/fake-node-core'
@@ -11,13 +17,17 @@ import AbstractAutomodule from '../modules/AbstractAutomodule'
 import { Automodule } from '../types'
 import AbstractPackageTest from './AbstractPackageTest'
 
+const exec = promisify(execSync)
+
 export default class AbstractAutomoduleTest extends AbstractPackageTest {
     protected static instance: Automodule
 
     protected static async beforeEach() {
         await super.beforeEach()
 
+        this.setFakeExec()
         this.setFakePathExists()
+        this.setFakeReadFile()
         this.setFakeWriteFile()
     }
 
@@ -65,6 +75,11 @@ export default class AbstractAutomoduleTest extends AbstractPackageTest {
     protected static readonly fakeSaveDir = generateId()
     protected static readonly indexFilePath = './src/index.ts'
 
+    protected static setFakeExec() {
+        AbstractAutomodule.exec = fakeExec as unknown as typeof exec
+        resetCallsToExec()
+    }
+
     protected static setFakePathExists() {
         AbstractAutomodule.pathExists = fakePathExists
 
@@ -74,6 +89,11 @@ export default class AbstractAutomoduleTest extends AbstractPackageTest {
         setPathShouldExist(this.indexFilePath, true)
 
         resetCallsToPathExists()
+    }
+
+    protected static setFakeReadFile() {
+        AbstractAutomodule.readFile = fakeReadFile as unknown as typeof readFile
+        resetCallsToReadFile()
     }
 
     protected static setFakeWriteFile() {
