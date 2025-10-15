@@ -50,7 +50,6 @@ export default class UiAutomodule extends AbstractAutomodule {
         return `
             import { test, assert } from '@sprucelabs/test-utils'
             import { render, RenderResult } from '@testing-library/react'
-            import React from 'react'
             import ${this.componentName} from '../../ui/${this.componentName}'
             import AbstractPackageTest from '../AbstractPackageTest'
 
