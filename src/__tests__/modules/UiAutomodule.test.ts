@@ -132,7 +132,7 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
         this.componentName
     )
 
-    private static readonly packageJsonPath = 'src/package.json'
+    private static readonly packageJsonPath = 'package.json'
 
     private static readonly installDevDependenciesCommand =
         'yarn add -D @types/react @testing-library/react @testing-library/jest-dom'

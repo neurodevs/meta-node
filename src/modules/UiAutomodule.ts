@@ -65,7 +65,7 @@ export default class UiAutomodule extends AbstractAutomodule {
         return await this.readFile(this.packageJsonPath, 'utf-8')
     }
 
-    private readonly packageJsonPath = 'src/package.json'
+    private readonly packageJsonPath = 'package.json'
 
     private async checkIfDevDependenciesAreInstalled() {
         const original = await this.loadPackageJson()
