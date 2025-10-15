@@ -36,7 +36,6 @@ export default class UiAutomodule extends AbstractAutomodule {
 
     public async run() {
         await this.runAbstractAutomodule()
-        await this.installDevDependencies()
     }
 
     private async runAbstractAutomodule() {
@@ -50,40 +49,6 @@ export default class UiAutomodule extends AbstractAutomodule {
             indexFileContent: this.indexFilePattern,
         })
     }
-
-    private async installDevDependencies() {
-        const isInstalled = await this.checkIfDevDependenciesAreInstalled()
-
-        if (!isInstalled) {
-            console.log('Installing required dev dependencies...')
-
-            await this.exec(
-                'yarn add -D @types/react @testing-library/react @testing-library/jest-dom'
-            )
-        }
-    }
-
-    private async loadPackageJson() {
-        return await this.readFile(this.packageJsonPath, 'utf-8')
-    }
-
-    private readonly packageJsonPath = 'package.json'
-
-    private async checkIfDevDependenciesAreInstalled() {
-        const original = await this.loadPackageJson()
-        const parsed = JSON.parse(original)
-        const devDependencies = Object.keys(parsed.devDependencies ?? {})
-
-        return this.requiredDevDependencies.every((dep) =>
-            devDependencies.includes(dep)
-        )
-    }
-
-    private readonly requiredDevDependencies = [
-        '@types/react',
-        '@testing-library/react',
-        '@testing-library/jest-dom',
-    ]
 
     private get testFileTemplate() {
         return `

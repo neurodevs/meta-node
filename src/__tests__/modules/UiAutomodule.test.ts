@@ -11,8 +11,6 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
     protected static async beforeEach() {
         await super.beforeEach()
 
-        this.setFakePackageJsonOnReadFile()
-
         this.instance = this.UiAutomodule()
     }
 
@@ -103,54 +101,11 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
         )
     }
 
-    @test()
-    protected static async installsDevDependenciesIfMissing() {
-        setFakeReadFileResult(this.packageJsonPath, '{}')
-
-        await this.run()
-
-        assert.isEqualDeep(
-            callsToExec[1],
-            this.installDevDependenciesCommand,
-            'Did not install dev dependencies!'
-        )
-    }
-
-    @test()
-    protected static async doesNotInstallDevDependenciesIfPresent() {
-        await this.run()
-
-        assert.isFalse(
-            callsToExec.includes(this.installDevDependenciesCommand),
-            'Should not have installed dev dependencies!'
-        )
-    }
-
     private static readonly componentName = generateId()
 
     private static readonly componentNameKebabCase = this.toKebabCase(
         this.componentName
     )
-
-    private static readonly packageJsonPath = 'package.json'
-
-    private static readonly installDevDependenciesCommand =
-        'yarn add -D @types/react @testing-library/react @testing-library/jest-dom'
-
-    private static setFakePackageJsonOnReadFile() {
-        setFakeReadFileResult(
-            this.packageJsonPath,
-            `
-                {
-                    "devDependencies": {
-                        "@testing-library/react": "...",
-                        "@testing-library/jest-dom": "...",
-                        "@types/react": "..."
-                    }
-                }
-            `
-        )
-    }
 
     private static get testFilePattern() {
         return `
