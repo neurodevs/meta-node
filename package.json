@@ -51,7 +51,7 @@
     "fs-extra": "^11.3.2"
   },
   "devDependencies": {
-    "@neurodevs/fake-node-core": "^0.2.1",
+    "@neurodevs/fake-node-core": "^0.3.0",
     "@neurodevs/generate-id": "^1.0.0",
     "@sprucelabs/jest-json-reporter": "^9.0.61",
     "@sprucelabs/resolve-path-aliases": "^3.0.28",

@@ -3,6 +3,7 @@ import {
     callsToExec,
     callsToWriteFile,
     setFakeReadFileResult,
+    setFakeReadFileThrowsFor,
 } from '@neurodevs/fake-node-core'
 import UiAutomodule from '../../modules/UiAutomodule'
 import AbstractAutomoduleTest from '../AbstractAutomoduleTest'
@@ -87,6 +88,28 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
                 data: this.normalize(this.sortedIndexFile),
             },
             'Did not update index file exports as expected!'
+        )
+    }
+
+    @test()
+    protected static async triesBackupIndexFilePathIfNotFound() {
+        setFakeReadFileThrowsFor(this.indexFilePath)
+        setFakeReadFileResult('./src/exports.ts', this.originalIndexFile)
+
+        await this.run()
+
+        const call = callsToWriteFile[3]
+
+        assert.isEqualDeep(
+            {
+                file: call.file,
+                data: this.normalize(call.data),
+            },
+            {
+                file: './src/exports.ts',
+                data: this.normalize(this.sortedIndexFile),
+            },
+            'Did not update index file as expected!'
         )
     }
 
