@@ -10,20 +10,20 @@ export default abstract class AbstractAutomodule implements Automodule {
     public static writeFile = writeFile
     public static readFile = readFile
 
-    protected testSaveDir: string
-    protected moduleSaveDir: string
-    protected fakeSaveDir: string
+    private testSaveDir: string
+    private moduleSaveDir: string
+    private fakeSaveDir: string
 
-    protected testFileName!: string
-    protected testFileContent!: string
-    protected moduleFileName!: string
-    protected moduleFileContent!: string
-    protected fakeFileName!: string
-    protected fakeFileContent!: string
-    protected indexFileContent!: string
+    private testFileName!: string
+    private testFileContent!: string
+    private moduleFileName!: string
+    private moduleFileContent!: string
+    private fakeFileName!: string
+    private fakeFileContent!: string
+    private indexFileContent!: string
 
-    protected originalIndexFile!: string
-    protected actualIndexFilePath?: string
+    private originalIndexFile!: string
+    private actualIndexFilePath?: string
 
     protected constructor(options: BaseAutomoduleOptions) {
         const { testSaveDir, moduleSaveDir, fakeSaveDir } = options
@@ -161,7 +161,7 @@ export default abstract class AbstractAutomodule implements Automodule {
         await this.exec('yarn version --minor --no-git-tag-version')
     }
 
-    protected get exec() {
+    private get exec() {
         return AbstractAutomodule.exec
     }
 
@@ -169,11 +169,11 @@ export default abstract class AbstractAutomodule implements Automodule {
         return AbstractAutomodule.pathExists
     }
 
-    protected get writeFile() {
+    private get writeFile() {
         return AbstractAutomodule.writeFile
     }
 
-    protected get readFile() {
+    private get readFile() {
         return AbstractAutomodule.readFile
     }
 }
