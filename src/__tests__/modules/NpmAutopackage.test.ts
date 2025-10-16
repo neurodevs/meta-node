@@ -219,7 +219,11 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         assert.isEqualDeep(
             callsToExec.slice(5, 8),
-            ['git add .', 'git commit -m "patch: update package"', 'git push'],
+            [
+                'git add .',
+                'git commit -m "patch: update package.json"',
+                'git push',
+            ],
             'Did not commit update package changes!'
         )
     }
@@ -365,7 +369,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         assert.isEqual(
             callsToExec.filter(
-                (cmd) => cmd === 'git commit -m "patch: update package"'
+                (cmd) => cmd === 'git commit -m "patch: update package.json"'
             ).length,
             1,
             'Did not commit update package changes once!'

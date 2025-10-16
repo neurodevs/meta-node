@@ -182,7 +182,7 @@ export default class NpmAutopackage implements Autopackage {
         if (!this.isPackageUpToDate) {
             console.log('Updating package.json...')
             await this.updatePackageJsonFile()
-            await this.commitUpdatePackage()
+            await this.commitUpdatePackageJson()
         }
     }
 
@@ -273,14 +273,14 @@ export default class NpmAutopackage implements Autopackage {
         return ordered
     }
 
-    private async commitUpdatePackage() {
+    private async commitUpdatePackageJson() {
         await this.gitAddAll()
         await this.gitCommitUpdatePackage()
         await this.gitPush()
     }
 
     private async gitCommitUpdatePackage() {
-        await this.exec('git commit -m "patch: update package"')
+        await this.exec('git commit -m "patch: update package.json"')
     }
 
     private async updateGitignore() {
