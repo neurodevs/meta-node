@@ -21,6 +21,7 @@ import {
     resetCallsToReadFile,
     resetCallsToWriteFile,
     setFakeReadFileResult,
+    setPathShouldExist,
 } from '@neurodevs/fake-node-core'
 import NpmAutopackage, {
     Autopackage,
@@ -378,6 +379,18 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqual(callsToExec[15], 'code .', 'Did not open vscode at end!')
+    }
+
+    @test()
+    protected static async doesNotOpenVscodeIfNotCloned() {
+        setPathShouldExist(this.packageName, true)
+
+        await this.createAndRunAutopackage()
+
+        assert.isFalse(
+            callsToExec.includes('code .'),
+            'Should not open vscode if not cloned!'
+        )
     }
 
     private static async run() {

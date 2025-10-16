@@ -24,6 +24,8 @@ export default class NpmAutopackage implements Autopackage {
     private originalJsonFile!: Record<string, unknown>
     private originalGitignoreFile!: string
 
+    private shouldOpenVscode = false
+
     protected constructor(options: AutopackageOptions) {
         const {
             name,
@@ -106,6 +108,7 @@ export default class NpmAutopackage implements Autopackage {
         if (!packageDirExists) {
             console.log('Cloning git repository...')
             await this.exec(`git clone ${this.gitUrl}`)
+            this.shouldOpenVscode = true
         }
     }
 
@@ -345,7 +348,9 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async openVscode() {
-        await this.exec('code .')
+        if (this.shouldOpenVscode) {
+            await this.exec('code .')
+        }
     }
 
     private get chdir() {
