@@ -171,25 +171,28 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         const actual = callsToWriteFile[0]
 
-        const ordered = this.orderJsonKeys(JSON.parse(this.updatedJsonFile), [
-            'name',
-            'version',
-            'description',
-            'keywords',
-            'license',
-            'author',
-            'homepage',
-            'repository',
-            'bugs',
-            'main',
-            'bin',
-            'files',
-            'scripts',
-            'dependencies',
-            'devDependencies',
-            'jest',
-            'skill',
-        ])
+        const ordered = this.orderJsonKeys(
+            JSON.parse(this.updatedPackageJson),
+            [
+                'name',
+                'version',
+                'description',
+                'keywords',
+                'license',
+                'author',
+                'homepage',
+                'repository',
+                'bugs',
+                'main',
+                'bin',
+                'files',
+                'scripts',
+                'dependencies',
+                'devDependencies',
+                'jest',
+                'skill',
+            ]
+        )
 
         const expected = {
             file: this.packageJsonPath,
@@ -279,7 +282,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         assert.isEqualDeep(callsToWriteFile[2], {
             file: this.tasksJsonPath,
-            data: this.updatedTasksJsonFile,
+            data: this.updatedTasksJson,
             options: { encoding: 'utf-8' },
         })
     }
@@ -394,7 +397,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     @test()
     protected static async doesNotUpdateTasksJsonIfAlreadyDone() {
-        setFakeReadFileResult(this.tasksJsonPath, this.updatedTasksJsonFile)
+        setFakeReadFileResult(this.tasksJsonPath, this.updatedTasksJson)
 
         await this.createAndRunAutopackage()
 
@@ -496,7 +499,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         setFakeReadFileResult(
             this.tasksJsonPath,
-            JSON.stringify(this.originalTasksJsonFile)
+            JSON.stringify(this.originalTasksJson)
         )
     }
 
@@ -530,7 +533,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     private static readonly githubToken = generateId()
     private static readonly randomId = generateId()
 
-    private static get updatedJsonFile() {
+    private static get updatedPackageJson() {
         return JSON.stringify({
             ...JSON.parse(this.originalJsonFile),
             name: `@${this.scopedPackage}`,
@@ -553,7 +556,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     private static readonly tasksJsonPath = '.vscode/tasks.json'
 
-    private static originalTasksJsonFile = {
+    private static originalTasksJson = {
         [this.randomId]: this.randomId,
         tasks: [
             {
@@ -567,11 +570,11 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         ],
     }
 
-    private static get updatedTasksJsonFile() {
+    private static get updatedTasksJson() {
         return JSON.stringify({
-            ...this.originalTasksJsonFile,
+            ...this.originalTasksJson,
             tasks: [
-                ...this.originalTasksJsonFile.tasks,
+                ...this.originalTasksJson.tasks,
                 {
                     label: 'ndx',
                     type: 'shell',
@@ -586,7 +589,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
                 },
             ],
             inputs: [
-                ...this.originalTasksJsonFile.inputs,
+                ...this.originalTasksJson.inputs,
                 {
                     id: 'ndxCommand',
                     description: 'ndx command',

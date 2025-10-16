@@ -21,10 +21,10 @@ export default class NpmAutopackage implements Autopackage {
     private license?: string
     private author?: string
 
-    private originalJsonFile!: Record<string, unknown>
+    private originalPackageJson!: Record<string, unknown>
     private originalGitignoreFile!: string
 
-    private originalTasksJsonFile!: {
+    private originalTasksJson!: {
         tasks: unknown[]
         inputs: unknown[]
         [key: string]: unknown
@@ -176,7 +176,7 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async updatePackageJson() {
-        this.originalJsonFile = await this.loadPackageJsonFile()
+        this.originalPackageJson = await this.loadPackageJsonFile()
 
         if (!this.isPackageUpToDate) {
             console.log('Updating package.json...')
@@ -194,13 +194,13 @@ export default class NpmAutopackage implements Autopackage {
 
     private get isPackageUpToDate() {
         return (
-            JSON.stringify(this.originalJsonFile) ==
-            JSON.stringify(this.updatedJsonFile)
+            JSON.stringify(this.originalPackageJson) ==
+            JSON.stringify(this.updatedPackageJson)
         )
     }
 
     private async updatePackageJsonFile() {
-        const ordered = this.orderJsonKeys(this.updatedJsonFile, [
+        const ordered = this.orderJsonKeys(this.updatedPackageJson, [
             'name',
             'version',
             'description',
@@ -227,9 +227,9 @@ export default class NpmAutopackage implements Autopackage {
         )
     }
 
-    private get updatedJsonFile() {
+    private get updatedPackageJson() {
         return {
-            ...this.originalJsonFile,
+            ...this.originalPackageJson,
             name: this.scopedPackageName,
             description: this.description,
             keywords: this.keywords ?? [],
@@ -244,7 +244,7 @@ export default class NpmAutopackage implements Autopackage {
             bugs: {
                 url: `https://github.com/${this.gitNamespace}/${this.packageName}/issues`,
             },
-            dependencies: this.originalJsonFile.dependencies ?? {},
+            dependencies: this.originalPackageJson.dependencies ?? {},
         }
     }
 
@@ -355,7 +355,7 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async updateVscodeTasks() {
-        this.originalTasksJsonFile = await this.loadTasksJsonFile()
+        this.originalTasksJson = await this.loadTasksJsonFile()
 
         if (!this.isTasksJsonUpdated) {
             console.log('Updating VSCode tasks...')
@@ -375,13 +375,13 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private get isTaskUpdated() {
-        return this.originalTasksJsonFile.tasks.some(
+        return this.originalTasksJson.tasks.some(
             (task) => JSON.stringify(task) === JSON.stringify(this.requiredTask)
         )
     }
 
     private get isInputUpdated() {
-        return this.originalTasksJsonFile.inputs.some(
+        return this.originalTasksJson.inputs.some(
             (input) =>
                 JSON.stringify(input) === JSON.stringify(this.requiredInput)
         )
@@ -398,9 +398,9 @@ export default class NpmAutopackage implements Autopackage {
 
     private get updatedTasksJsonFile() {
         return JSON.stringify({
-            ...this.originalTasksJsonFile,
-            tasks: [...this.originalTasksJsonFile.tasks, this.requiredTask],
-            inputs: [...this.originalTasksJsonFile.inputs, this.requiredInput],
+            ...this.originalTasksJson,
+            tasks: [...this.originalTasksJson.tasks, this.requiredTask],
+            inputs: [...this.originalTasksJson.inputs, this.requiredInput],
         })
     }
 
