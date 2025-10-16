@@ -139,9 +139,7 @@ export default class NpmAutopackage implements Autopackage {
         return this.pathExists(this.packageJsonPath)
     }
 
-    private get packageJsonPath() {
-        return `${this.packageDir}/package.json`
-    }
+    private readonly packageJsonPath = 'package.json'
 
     private async execSpruceCreateModule() {
         await this.exec(

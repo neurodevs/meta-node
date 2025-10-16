@@ -397,9 +397,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         return this.packageName
     }
 
-    private static get packageJsonPath() {
-        return `${this.packageDir}/package.json`
-    }
+    private static readonly packageJsonPath = 'package.json'
 
     private static get gitignorePath() {
         return `${this.packageDir}/.gitignore`
