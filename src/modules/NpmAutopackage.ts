@@ -220,7 +220,7 @@ export default class NpmAutopackage implements Autopackage {
     private get updatedJsonFile() {
         return {
             ...this.originalJsonFile,
-            name: `@${this.scopedPackage}`,
+            name: this.scopedPackageName,
             description: this.description,
             keywords: this.keywords ?? [],
             license: this.license,
@@ -238,8 +238,8 @@ export default class NpmAutopackage implements Autopackage {
         }
     }
 
-    private get scopedPackage() {
-        return `${this.gitNamespace}/${this.packageName}`
+    private get scopedPackageName() {
+        return `@${this.gitNamespace}/${this.packageName}`
     }
 
     private orderJsonKeys(json: Record<string, unknown>, keyOrder: string[]) {
@@ -289,9 +289,7 @@ export default class NpmAutopackage implements Autopackage {
         })
     }
 
-    private get gitignorePath() {
-        return `${this.packageDir}/.gitignore`
-    }
+    private readonly gitignorePath = '.gitignore'
 
     private get isGitignoreUpdated() {
         const lines = this.originalGitignoreFile
@@ -329,7 +327,7 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async checkIfVscodeSettingsExist() {
-        return this.pathExists(`${this.packageDir}/.vscode/settings.json`)
+        return this.pathExists(`.vscode/settings.json`)
     }
 
     private async spruceSetupVscode() {

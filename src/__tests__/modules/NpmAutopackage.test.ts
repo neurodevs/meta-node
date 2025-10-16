@@ -398,11 +398,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     private static readonly packageJsonPath = 'package.json'
-
-    private static get gitignorePath() {
-        return `${this.packageDir}/.gitignore`
-    }
-
+    private static readonly gitignorePath = '.gitignore'
     private static readonly buildDirGitignorePattern = '\nbuild/\n'
 
     private static get createModuleCmd() {
