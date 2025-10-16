@@ -277,7 +277,11 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     protected static async fourteenthUpdatesVscodeTasksJson() {
         await this.run()
 
-        assert.isEqualDeep(callsToWriteFile[2], this.updatedTasksJsonFile)
+        assert.isEqualDeep(callsToWriteFile[2], {
+            file: this.tasksJsonPath,
+            data: this.updatedTasksJsonFile,
+            options: { encoding: 'utf-8' },
+        })
     }
 
     @test()
@@ -365,7 +369,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     @test()
-    protected static async doesNotCommitVscodeIfDone() {
+    protected static async doesNotCommitSetupVscodeIfDone() {
         await this.createAndRunAutopackage()
 
         assert.isEqual(
@@ -385,6 +389,20 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
             JSON.parse(callsToWriteFile[0]?.data).dependencies,
             this.dependencies,
             'Did not update package.json as expected!'
+        )
+    }
+
+    @test()
+    protected static async doesNotUpdateTasksJsonIfAlreadyDone() {
+        setFakeReadFileResult(this.tasksJsonPath, this.updatedTasksJsonFile)
+
+        await this.createAndRunAutopackage()
+
+        assert.isEqualDeep(
+            callsToWriteFile.filter((call) => call.file === this.tasksJsonPath)
+                .length,
+            1,
+            'Did not update tasks.json once!'
         )
     }
 
@@ -475,8 +493,9 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         resetCallsToReadFile()
 
         setFakeReadFileResult(this.packageJsonPath, this.originalJsonFile)
+
         setFakeReadFileResult(
-            '.vscode/tasks.json',
+            this.tasksJsonPath,
             JSON.stringify(this.originalTasksJsonFile)
         )
     }
@@ -532,6 +551,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         })
     }
 
+    private static readonly tasksJsonPath = '.vscode/tasks.json'
+
     private static originalTasksJsonFile = {
         [this.randomId]: this.randomId,
         tasks: [
@@ -547,37 +568,33 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     private static get updatedTasksJsonFile() {
-        return {
-            file: '.vscode/tasks.json',
-            data: JSON.stringify({
-                ...this.originalTasksJsonFile,
-                tasks: [
-                    ...this.originalTasksJsonFile.tasks,
-                    {
-                        label: 'ndx',
-                        type: 'shell',
-                        command: 'ndx ${input:ndxCommand}',
-                        problemMatcher: [],
-                        presentation: {
-                            reveal: 'always',
-                            focus: true,
-                            panel: 'new',
-                            clear: false,
-                        },
+        return JSON.stringify({
+            ...this.originalTasksJsonFile,
+            tasks: [
+                ...this.originalTasksJsonFile.tasks,
+                {
+                    label: 'ndx',
+                    type: 'shell',
+                    command: 'ndx ${input:ndxCommand}',
+                    problemMatcher: [],
+                    presentation: {
+                        reveal: 'always',
+                        focus: true,
+                        panel: 'new',
+                        clear: false,
                     },
-                ],
-                inputs: [
-                    ...this.originalTasksJsonFile.inputs,
-                    {
-                        id: 'ndxCommand',
-                        description: 'ndx command',
-                        default: 'create.module',
-                        type: 'promptString',
-                    },
-                ],
-            }),
-            options: { encoding: 'utf-8' },
-        }
+                },
+            ],
+            inputs: [
+                ...this.originalTasksJsonFile.inputs,
+                {
+                    id: 'ndxCommand',
+                    description: 'ndx command',
+                    default: 'create.module',
+                    type: 'promptString',
+                },
+            ],
+        })
     }
 
     private static readonly defaultOptions = {
