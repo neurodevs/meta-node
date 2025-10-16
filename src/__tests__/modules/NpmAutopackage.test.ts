@@ -401,7 +401,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         assert.isEqualDeep(
             callsToWriteFile.filter((call) => call.file === this.tasksJsonPath)
                 .length,
-            1,
+            0,
             'Did not update tasks.json once!'
         )
     }

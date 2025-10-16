@@ -357,11 +357,34 @@ export default class NpmAutopackage implements Autopackage {
     private async updateVscodeTasks() {
         this.originalTasksJsonFile = await this.loadTasksJsonFile()
 
-        console.log('Updating VSCode tasks...')
+        if (!this.isTasksJsonUpdated) {
+            console.log('Updating VSCode tasks...')
 
-        await this.writeFile(this.tasksJsonPath, this.updatedTasksJsonFile, {
-            encoding: 'utf-8',
-        })
+            await this.writeFile(
+                this.tasksJsonPath,
+                this.updatedTasksJsonFile,
+                {
+                    encoding: 'utf-8',
+                }
+            )
+        }
+    }
+
+    private get isTasksJsonUpdated() {
+        return this.isTaskUpdated && this.isInputUpdated
+    }
+
+    private get isTaskUpdated() {
+        return this.originalTasksJsonFile.tasks.some(
+            (task) => JSON.stringify(task) === JSON.stringify(this.requiredTask)
+        )
+    }
+
+    private get isInputUpdated() {
+        return this.originalTasksJsonFile.inputs.some(
+            (input) =>
+                JSON.stringify(input) === JSON.stringify(this.requiredInput)
+        )
     }
 
     private async loadTasksJsonFile() {
@@ -376,31 +399,33 @@ export default class NpmAutopackage implements Autopackage {
     private get updatedTasksJsonFile() {
         return JSON.stringify({
             ...this.originalTasksJsonFile,
-            tasks: [
-                ...(this.originalTasksJsonFile.tasks ?? []),
-                {
-                    label: 'ndx',
-                    type: 'shell',
-                    command: 'ndx ${input:ndxCommand}',
-                    problemMatcher: [],
-                    presentation: {
-                        reveal: 'always',
-                        focus: true,
-                        panel: 'new',
-                        clear: false,
-                    },
-                },
-            ],
-            inputs: [
-                ...(this.originalTasksJsonFile.inputs ?? []),
-                {
-                    id: 'ndxCommand',
-                    description: 'ndx command',
-                    default: 'create.module',
-                    type: 'promptString',
-                },
-            ],
+            tasks: [...this.originalTasksJsonFile.tasks, this.requiredTask],
+            inputs: [...this.originalTasksJsonFile.inputs, this.requiredInput],
         })
+    }
+
+    private get requiredTask() {
+        return {
+            label: 'ndx',
+            type: 'shell',
+            command: 'ndx ${input:ndxCommand}',
+            problemMatcher: [],
+            presentation: {
+                reveal: 'always',
+                focus: true,
+                panel: 'new',
+                clear: false,
+            },
+        }
+    }
+
+    private get requiredInput() {
+        return {
+            id: 'ndxCommand',
+            description: 'ndx command',
+            default: 'create.module',
+            type: 'promptString',
+        }
     }
 
     private async openVscode() {
