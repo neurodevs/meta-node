@@ -394,7 +394,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     private static get packageDir() {
-        return `${this.installDir}/${this.packageName}`
+        return this.packageName
     }
 
     private static get packageJsonPath() {

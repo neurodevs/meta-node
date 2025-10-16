@@ -110,11 +110,11 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async checkIfPackageDirExists() {
-        return this.pathExists(this.packageDir)
+        return this.pathExists(this.packageName)
     }
 
     private get packageDir() {
-        return `${this.installDir}/${this.packageName}`
+        return this.packageName
     }
 
     private get gitUrl() {
@@ -145,7 +145,7 @@ export default class NpmAutopackage implements Autopackage {
 
     private async execSpruceCreateModule() {
         await this.exec(
-            `spruce create.module --name "${this.packageName}" --destination "${this.installDir}/${this.packageName}" --description "${this.description}"`
+            `spruce create.module --name "${this.packageName}" --destination "${this.packageName}" --description "${this.description}"`
         )
     }
 
