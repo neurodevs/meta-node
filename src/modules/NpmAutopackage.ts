@@ -110,7 +110,7 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async checkIfPackageDirExists() {
-        return this.pathExists(this.packageName)
+        return this.pathExists(this.packageDir)
     }
 
     private get packageDir() {
