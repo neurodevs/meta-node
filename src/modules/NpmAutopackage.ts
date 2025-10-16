@@ -24,6 +24,12 @@ export default class NpmAutopackage implements Autopackage {
     private originalJsonFile!: Record<string, unknown>
     private originalGitignoreFile!: string
 
+    private originalTasksJsonFile!: {
+        tasks: unknown[]
+        inputs: unknown[]
+        [key: string]: unknown
+    }
+
     private shouldOpenVscode = false
 
     protected constructor(options: AutopackageOptions) {
@@ -63,6 +69,7 @@ export default class NpmAutopackage implements Autopackage {
         await this.updatePackageJson()
         await this.updateGitignore()
         await this.setupVscode()
+        await this.updateVscodeTasks()
         await this.openVscode()
     }
 
@@ -345,6 +352,55 @@ export default class NpmAutopackage implements Autopackage {
 
     private async gitCommitSetupVscode() {
         await this.exec('git commit -m "patch: setup vscode"')
+    }
+
+    private async updateVscodeTasks() {
+        this.originalTasksJsonFile = await this.loadTasksJsonFile()
+
+        console.log('Updating VSCode tasks...')
+
+        await this.writeFile(this.tasksJsonPath, this.updatedTasksJsonFile, {
+            encoding: 'utf-8',
+        })
+    }
+
+    private async loadTasksJsonFile() {
+        const raw = await this.readFile(this.tasksJsonPath, {
+            encoding: 'utf-8',
+        })
+        return JSON.parse(raw)
+    }
+
+    private readonly tasksJsonPath = '.vscode/tasks.json'
+
+    private get updatedTasksJsonFile() {
+        return JSON.stringify({
+            ...this.originalTasksJsonFile,
+            tasks: [
+                ...(this.originalTasksJsonFile.tasks ?? []),
+                {
+                    label: 'ndx',
+                    type: 'shell',
+                    command: 'ndx ${input:ndxCommand}',
+                    problemMatcher: [],
+                    presentation: {
+                        reveal: 'always',
+                        focus: true,
+                        panel: 'new',
+                        clear: false,
+                    },
+                },
+            ],
+            inputs: [
+                ...(this.originalTasksJsonFile.inputs ?? []),
+                {
+                    id: 'ndxCommand',
+                    description: 'ndx command',
+                    default: 'create.module',
+                    type: 'promptString',
+                },
+            ],
+        })
     }
 
     private async openVscode() {

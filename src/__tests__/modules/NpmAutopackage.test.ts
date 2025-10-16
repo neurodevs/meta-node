@@ -257,13 +257,13 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         assert.isEqual(
             callsToExec[11],
-            NpmAutopackageTest.setupVscodeCmd,
+            this.setupVscodeCmd,
             'Did not call "spruce setup.vscode"!'
         )
     }
 
     @test()
-    protected static async lastlyCommitVscodeChanges() {
+    protected static async thirteenthCommitVscodeChanges() {
         await this.run()
 
         assert.isEqualDeep(
@@ -271,6 +271,20 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
             ['git add .', 'git commit -m "patch: setup vscode"', 'git push'],
             'Did not commit vscode changes!'
         )
+    }
+
+    @test()
+    protected static async fourteenthUpdatesVscodeTasksJson() {
+        await this.run()
+
+        assert.isEqualDeep(callsToWriteFile[2], this.updatedTasksJsonFile)
+    }
+
+    @test()
+    protected static async lastlyOpensVscodeAtEnd() {
+        await this.run()
+
+        assert.isEqual(callsToExec[15], 'code .', 'Did not open vscode at end!')
     }
 
     @test()
@@ -375,13 +389,6 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     @test()
-    protected static async opensVscodeAtEnd() {
-        await this.run()
-
-        assert.isEqual(callsToExec[15], 'code .', 'Did not open vscode at end!')
-    }
-
-    @test()
     protected static async doesNotOpenVscodeIfNotCloned() {
         setPathShouldExist(this.packageName, true)
 
@@ -468,6 +475,10 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         resetCallsToReadFile()
 
         setFakeReadFileResult(this.packageJsonPath, this.originalJsonFile)
+        setFakeReadFileResult(
+            '.vscode/tasks.json',
+            JSON.stringify(this.originalTasksJsonFile)
+        )
     }
 
     private static fakeWriteFile() {
@@ -487,6 +498,18 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         [generateId()]: generateId(),
         [generateId()]: generateId(),
     }
+
+    private static readonly packageName = generateId()
+    private static readonly packageDescription = generateId()
+    private static readonly gitNamespace = generateId()
+    private static readonly npmNamespace = generateId()
+    private static readonly installDir = generateId()
+    private static readonly keywords = [generateId(), generateId()]
+    private static readonly license = generateId()
+    private static readonly author = generateId()
+
+    private static readonly githubToken = generateId()
+    private static readonly randomId = generateId()
 
     private static get updatedJsonFile() {
         return JSON.stringify({
@@ -509,16 +532,53 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         })
     }
 
-    private static readonly packageName = generateId()
-    private static readonly packageDescription = generateId()
-    private static readonly gitNamespace = generateId()
-    private static readonly npmNamespace = generateId()
-    private static readonly installDir = generateId()
-    private static readonly keywords = [generateId(), generateId()]
-    private static readonly license = generateId()
-    private static readonly author = generateId()
+    private static originalTasksJsonFile = {
+        [this.randomId]: this.randomId,
+        tasks: [
+            {
+                [this.randomId]: this.randomId,
+            },
+        ],
+        inputs: [
+            {
+                [this.randomId]: this.randomId,
+            },
+        ],
+    }
 
-    private static readonly githubToken = generateId()
+    private static get updatedTasksJsonFile() {
+        return {
+            file: '.vscode/tasks.json',
+            data: JSON.stringify({
+                ...this.originalTasksJsonFile,
+                tasks: [
+                    ...this.originalTasksJsonFile.tasks,
+                    {
+                        label: 'ndx',
+                        type: 'shell',
+                        command: 'ndx ${input:ndxCommand}',
+                        problemMatcher: [],
+                        presentation: {
+                            reveal: 'always',
+                            focus: true,
+                            panel: 'new',
+                            clear: false,
+                        },
+                    },
+                ],
+                inputs: [
+                    ...this.originalTasksJsonFile.inputs,
+                    {
+                        id: 'ndxCommand',
+                        description: 'ndx command',
+                        default: 'create.module',
+                        type: 'promptString',
+                    },
+                ],
+            }),
+            options: { encoding: 'utf-8' },
+        }
+    }
 
     private static readonly defaultOptions = {
         name: this.packageName,
