@@ -3,6 +3,7 @@ import { readFile, writeFile } from 'fs/promises'
 import { chdir } from 'process'
 import { promisify } from 'util'
 import { pathExists } from 'fs-extra'
+import { parse } from 'jsonc-parser'
 
 export default class NpmAutopackage implements Autopackage {
     public static Class?: AutopackageConstructor
@@ -391,7 +392,7 @@ export default class NpmAutopackage implements Autopackage {
         const raw = await this.readFile(this.tasksJsonPath, {
             encoding: 'utf-8',
         })
-        return JSON.parse(raw)
+        return parse(raw)
     }
 
     private readonly tasksJsonPath = '.vscode/tasks.json'
