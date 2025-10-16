@@ -397,11 +397,15 @@ export default class NpmAutopackage implements Autopackage {
     private readonly tasksJsonPath = '.vscode/tasks.json'
 
     private get updatedTasksJsonFile() {
-        return JSON.stringify({
-            ...this.originalTasksJson,
-            tasks: [...this.originalTasksJson.tasks, this.requiredTask],
-            inputs: [...this.originalTasksJson.inputs, this.requiredInput],
-        })
+        return JSON.stringify(
+            {
+                ...this.originalTasksJson,
+                tasks: [...this.originalTasksJson.tasks, this.requiredTask],
+                inputs: [...this.originalTasksJson.inputs, this.requiredInput],
+            },
+            null,
+            4
+        )
     }
 
     private get requiredTask() {

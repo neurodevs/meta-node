@@ -571,33 +571,37 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     private static get updatedTasksJson() {
-        return JSON.stringify({
-            ...this.originalTasksJson,
-            tasks: [
-                ...this.originalTasksJson.tasks,
-                {
-                    label: 'ndx',
-                    type: 'shell',
-                    command: 'ndx ${input:ndxCommand}',
-                    problemMatcher: [],
-                    presentation: {
-                        reveal: 'always',
-                        focus: true,
-                        panel: 'new',
-                        clear: false,
+        return JSON.stringify(
+            {
+                ...this.originalTasksJson,
+                tasks: [
+                    ...this.originalTasksJson.tasks,
+                    {
+                        label: 'ndx',
+                        type: 'shell',
+                        command: 'ndx ${input:ndxCommand}',
+                        problemMatcher: [],
+                        presentation: {
+                            reveal: 'always',
+                            focus: true,
+                            panel: 'new',
+                            clear: false,
+                        },
                     },
-                },
-            ],
-            inputs: [
-                ...this.originalTasksJson.inputs,
-                {
-                    id: 'ndxCommand',
-                    description: 'ndx command',
-                    default: 'create.module',
-                    type: 'promptString',
-                },
-            ],
-        })
+                ],
+                inputs: [
+                    ...this.originalTasksJson.inputs,
+                    {
+                        id: 'ndxCommand',
+                        description: 'ndx command',
+                        default: 'create.module',
+                        type: 'promptString',
+                    },
+                ],
+            },
+            null,
+            4
+        )
     }
 
     private static readonly defaultOptions = {
