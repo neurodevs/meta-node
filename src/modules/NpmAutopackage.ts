@@ -359,16 +359,16 @@ export default class NpmAutopackage implements Autopackage {
         this.originalTasksJson = await this.loadTasksJsonFile()
 
         if (!this.isTasksJsonUpdated) {
-            console.log('Updating VSCode tasks...')
-
-            await this.writeFile(
-                this.tasksJsonPath,
-                this.updatedTasksJsonFile,
-                {
-                    encoding: 'utf-8',
-                }
-            )
+            console.log('Updating vscode tasks...')
+            await this.updateTasksJsonFile()
+            await this.commitUpdateVscodeTasks()
         }
+    }
+
+    private async updateTasksJsonFile() {
+        await this.writeFile(this.tasksJsonPath, this.updatedTasksJsonFile, {
+            encoding: 'utf-8',
+        })
     }
 
     private get isTasksJsonUpdated() {
@@ -431,6 +431,16 @@ export default class NpmAutopackage implements Autopackage {
             default: 'create.module',
             type: 'promptString',
         }
+    }
+
+    private async commitUpdateVscodeTasks() {
+        await this.gitAddAll()
+        await this.gitCommitUpdateVscodeTasks()
+        await this.gitPush()
+    }
+
+    private async gitCommitUpdateVscodeTasks() {
+        await this.exec('git commit -m "patch: update vscode tasks.json"')
     }
 
     private async openVscode() {

@@ -288,10 +288,25 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     @test()
+    protected static async fifteenthCommitsUpdateVscodeTasksJson() {
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToExec.slice(15, 18),
+            [
+                'git add .',
+                'git commit -m "patch: update vscode tasks.json"',
+                'git push',
+            ],
+            'Did not commit updated vscode tasks.json changes!'
+        )
+    }
+
+    @test()
     protected static async lastlyOpensVscodeAtEnd() {
         await this.run()
 
-        assert.isEqual(callsToExec[15], 'code .', 'Did not open vscode at end!')
+        assert.isEqual(callsToExec[18], 'code .', 'Did not open vscode at end!')
     }
 
     @test()
