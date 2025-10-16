@@ -1,24 +1,20 @@
-import { exec as execSync } from 'child_process'
 import NpmAutopackage from '../modules/NpmAutopackage'
+import expandHomeDir from './expandHomeDir'
 
 async function main() {
     console.log('Running autopackage...')
 
-    await NpmAutopackage.Create({
+    const instance = NpmAutopackage.Create({
         name: 'node-osf',
         description: 'Node.js client for the Open Science Framework (OSF) API',
         gitNamespace: 'neurodevs',
         npmNamespace: 'neurodevs',
-        installDir: '/Users/ericthecurious/dev',
+        installDir: expandHomeDir('~/dev'),
         license: 'MIT',
         author: 'Eric Yates <hello@ericthecurious.com>',
     })
 
-    console.log('Opening in VSCode...')
-    execSync('code .')
-    console.log('Done!')
-
-    process.exit(0)
+    await instance.run()
 }
 
 main().catch((err) => {

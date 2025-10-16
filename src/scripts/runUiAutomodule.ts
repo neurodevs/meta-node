@@ -1,15 +1,14 @@
 import UiAutomodule from '../modules/UiAutomodule'
+import expandHomeDir from './expandHomeDir'
 
 async function main() {
     console.log('\nRunning automodule...')
 
     const instance = UiAutomodule.Create({
-        testSaveDir:
-            '/Users/ericthecurious/dev/meta-node/src/__tests__/modules',
-        moduleSaveDir: '/Users/ericthecurious/dev/meta-node/src/modules',
-        fakeSaveDir:
-            '/Users/ericthecurious/dev/meta-node/src/testDoubles/Autothingy',
-        componentName: 'Autothingy',
+        testSaveDir: expandHomeDir('~/dev/meta-node/src/__tests__/modules'),
+        moduleSaveDir: expandHomeDir('~/dev/meta-node/src/modules'),
+        fakeSaveDir: expandHomeDir('~/dev/meta-node/src/testDoubles/Component'),
+        componentName: 'Component',
     })
 
     await instance.run()

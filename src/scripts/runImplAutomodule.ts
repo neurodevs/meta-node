@@ -1,16 +1,15 @@
 import ImplAutomodule from '../modules/ImplAutomodule'
+import expandHomeDir from './expandHomeDir'
 
 async function main() {
     console.log('\nRunning automodule...')
 
     const instance = ImplAutomodule.Create({
-        testSaveDir:
-            '/Users/ericthecurious/dev/meta-node/src/__tests__/modules',
-        moduleSaveDir: '/Users/ericthecurious/dev/meta-node/src/modules',
-        fakeSaveDir:
-            '/Users/ericthecurious/dev/meta-node/src/testDoubles/Autothingy',
-        interfaceName: 'Autothingy',
-        implName: 'PackageAutothingy',
+        testSaveDir: expandHomeDir('~/dev/meta-node/src/__tests__/modules'),
+        moduleSaveDir: expandHomeDir('~/dev/meta-node/src/modules'),
+        fakeSaveDir: expandHomeDir('~/dev/meta-node/src/testDoubles/Interface'),
+        interfaceName: 'Interface',
+        implName: 'InterfaceImpl',
     })
 
     await instance.run()
