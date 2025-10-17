@@ -1,4 +1,4 @@
-import { exec as execSync } from 'child_process'
+import { ChildProcess, exec as execSync } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
 import { promisify } from 'util'
 import { test, assert, generateId } from '@sprucelabs/test-utils'
@@ -20,6 +20,7 @@ import {
     resetCallsToPathExists,
     resetCallsToReadFile,
     resetCallsToWriteFile,
+    setFakeExecResult,
     setFakeReadFileResult,
     setPathShouldExist,
 } from '@neurodevs/fake-node-core'
@@ -311,7 +312,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqual(
-            callsToExec[18],
+            callsToExec[19],
             'yarn add -D @neurodevs/generate-id@latest',
             'Did not install default devDependencies!'
         )
@@ -322,7 +323,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(19, 22),
+            callsToExec.slice(20, 23),
             [
                 'git add .',
                 'git commit -m "patch: install default devDependencies"',
@@ -336,7 +337,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     protected static async lastlyOpensVscodeAtEnd() {
         await this.run()
 
-        assert.isEqual(callsToExec[22], 'code .', 'Did not open vscode at end!')
+        assert.isEqual(callsToExec[23], 'code .', 'Did not open vscode at end!')
     }
 
     @test()
@@ -465,6 +466,20 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
             'Should not open vscode if not cloned!'
         )
     }
+    @test()
+    protected static async doesNotInstallDevDependenciesIfLatest() {
+        setFakeExecResult({ stdout: '1.0.0' } as unknown as ChildProcess)
+
+        await this.createAndRunAutopackage()
+
+        assert.isEqual(
+            callsToExec.filter(
+                (cmd) => cmd === 'yarn add -D @neurodevs/generate-id@latest'
+            ).length,
+            0,
+            'Should not install default devDependencies if already installed!'
+        )
+    }
 
     private static async run() {
         await this.instance.run()
@@ -524,6 +539,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     private static fakeExec() {
         NpmAutopackage.exec = fakeExec as unknown as typeof exec
         resetCallsToExec()
+
+        setFakeExecResult({ stdout: '' } as unknown as ChildProcess)
     }
 
     private static fakePathExists() {
@@ -556,6 +573,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     private static get originalJsonFile() {
         return JSON.stringify({
             name: this.packageName,
+            version: '1.0.0',
             description: 'Old description',
             dependencies: this.dependencies,
         })
