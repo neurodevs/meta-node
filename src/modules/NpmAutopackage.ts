@@ -71,6 +71,7 @@ export default class NpmAutopackage implements Autopackage {
         await this.updateGitignore()
         await this.setupVscode()
         await this.updateVscodeTasks()
+        await this.installDefaultDevDependencies()
         await this.openVscode()
     }
 
@@ -441,6 +442,11 @@ export default class NpmAutopackage implements Autopackage {
 
     private async gitCommitUpdateVscodeTasks() {
         await this.exec('git commit -m "patch: update vscode tasks.json"')
+    }
+
+    private async installDefaultDevDependencies() {
+        console.log('Installing default devDependencies...')
+        await this.exec('yarn add -D @neurodevs/generate-id@latest')
     }
 
     private async openVscode() {

@@ -307,10 +307,21 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     @test()
+    protected static async sixteenthInstallsDefaultDevDependencies() {
+        await this.run()
+
+        assert.isEqual(
+            callsToExec[18],
+            'yarn add -D @neurodevs/generate-id@latest',
+            'Did not install default devDependencies!'
+        )
+    }
+
+    @test()
     protected static async lastlyOpensVscodeAtEnd() {
         await this.run()
 
-        assert.isEqual(callsToExec[18], 'code .', 'Did not open vscode at end!')
+        assert.isEqual(callsToExec[19], 'code .', 'Did not open vscode at end!')
     }
 
     @test()
