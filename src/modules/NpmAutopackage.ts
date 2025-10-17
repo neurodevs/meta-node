@@ -445,22 +445,24 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async installDefaultDevDependencies() {
-        const latestVersion = await this.getLatestYarnVersion()
+        const latestVersion = await this.getLatestGenerateIdVersion()
 
-        if (this.currentVersion != latestVersion) {
+        if (this.currentGenerateIdVersion != latestVersion) {
             console.log('Installing default devDependencies...')
             await this.exec('yarn add -D @neurodevs/generate-id@latest')
             await this.commitInstallDevDependencies()
         }
     }
 
-    private get currentVersion() {
-        return this.originalPackageJson.version
+    private get currentGenerateIdVersion() {
+        return (this.originalPackageJson.devDependencies as any)[
+            '@neurodevs/generate-id'
+        ].replace('^', '')
     }
 
-    private async getLatestYarnVersion() {
+    private async getLatestGenerateIdVersion() {
         const { stdout } = await this.exec(
-            `yarn info ${this.scopedPackageName} version --silent`
+            `yarn info @neurodevs/generate-id version --silent`
         )
         return stdout.trim()
     }

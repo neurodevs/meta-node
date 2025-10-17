@@ -468,7 +468,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
     @test()
     protected static async doesNotInstallDevDependenciesIfLatest() {
-        setFakeExecResult(this.checkVersionCmd, {
+        setFakeExecResult(this.checkGenerateIdVersionCmd, {
             stdout: '1.0.0',
         } as unknown as ChildProcess)
 
@@ -512,9 +512,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     private static readonly setupVscodeCmd = 'spruce setup.vscode --all true'
 
-    private static get checkVersionCmd() {
-        return `yarn info ${this.scopedPackageName} version --silent`
-    }
+    private static readonly checkGenerateIdVersionCmd = `yarn info @neurodevs/generate-id version --silent`
 
     private static orderJsonKeys(
         json: Record<string, unknown>,
@@ -579,9 +577,12 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     private static get originalJsonFile() {
         return JSON.stringify({
             name: this.packageName,
-            version: '1.0.0',
+            version: '^1.0.0',
             description: 'Old description',
             dependencies: this.dependencies,
+            devDependencies: {
+                '@neurodevs/generate-id': '^1.0.0',
+            },
         })
     }
 
