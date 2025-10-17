@@ -1,5 +1,6 @@
 import { ChildProcess, exec as execSync } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
+import path from 'path'
 import { promisify } from 'util'
 import { test, assert, generateId } from '@sprucelabs/test-utils'
 import {
@@ -128,7 +129,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqual(
-            callsToExec[1],
+            callsToExec[2],
             this.createModuleCmd,
             'Did not call "spruce create.module"!'
         )
@@ -139,7 +140,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(2, 5),
+            callsToExec.slice(3, 6),
             [
                 'git add .',
                 `git commit -m "patch: create package (@neurodevs/meta-node: ${this.metaNodeVersion})"`,
@@ -164,7 +165,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     protected static async seventhReadPackageJson() {
         await this.run()
 
-        assert.isEqualDeep(callsToReadFile[0], {
+        assert.isEqualDeep(callsToReadFile[1], {
             path: this.packageJsonPath,
             options: { encoding: 'utf-8' },
         })
@@ -223,7 +224,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(5, 8),
+            callsToExec.slice(6, 9),
             [
                 'git add .',
                 `git commit -m "patch: update package.json (@neurodevs/meta-node: ${this.metaNodeVersion})"`,
@@ -253,7 +254,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(8, 11),
+            callsToExec.slice(9, 12),
             [
                 'git add .',
                 `git commit -m "patch: add build dir to gitignore (@neurodevs/meta-node: ${this.metaNodeVersion})"`,
@@ -268,7 +269,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqual(
-            callsToExec[11],
+            callsToExec[12],
             this.setupVscodeCmd,
             'Did not call "spruce setup.vscode"!'
         )
@@ -279,7 +280,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(12, 15),
+            callsToExec.slice(13, 16),
             [
                 'git add .',
                 `git commit -m "patch: setup vscode (@neurodevs/meta-node: ${this.metaNodeVersion})"`,
@@ -305,7 +306,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(15, 18),
+            callsToExec.slice(16, 19),
             [
                 'git add .',
                 `git commit -m "patch: update vscode tasks.json (@neurodevs/meta-node: ${this.metaNodeVersion})"`,
@@ -320,7 +321,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqual(
-            callsToExec[19],
+            callsToExec[20],
             'yarn add -D @neurodevs/generate-id@latest',
             'Did not install default devDependencies!'
         )
@@ -331,7 +332,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(20, 23),
+            callsToExec.slice(21, 24),
             [
                 'git add .',
                 `git commit -m "patch: install default devDependencies (@neurodevs/meta-node: ${this.metaNodeVersion})"`,
@@ -345,7 +346,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     protected static async lastlyOpensVscodeAtEnd() {
         await this.run()
 
-        assert.isEqual(callsToExec[23], 'code .', 'Did not open vscode at end!')
+        assert.isEqual(callsToExec[24], 'code .', 'Did not open vscode at end!')
     }
 
     @test()
@@ -539,6 +540,9 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     private static readonly checkGenerateIdVersionCmd = `yarn info @neurodevs/generate-id version --silent`
 
+    private static readonly yarnGlobalDirCmd = 'yarn global dir'
+    private static readonly fakeGlobalRoot = generateId()
+
     private static orderJsonKeys(
         json: Record<string, unknown>,
         keyOrder: string[]
@@ -570,6 +574,21 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     private static fakeExec() {
         NpmAutopackage.exec = fakeExec as unknown as typeof exec
         resetCallsToExec()
+
+        setFakeExecResult(this.yarnGlobalDirCmd, {
+            stdout: this.fakeGlobalRoot,
+        } as unknown as ChildProcess)
+
+        setFakeReadFileResult(
+            path.join(
+                this.fakeGlobalRoot,
+                'node_modules',
+                '@neurodevs',
+                'meta-node',
+                'package.json'
+            ),
+            JSON.stringify({ version: this.metaNodeVersion })
+        )
     }
 
     private static fakePathExists() {
@@ -620,7 +639,6 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     private static get originalPackageJson() {
         return JSON.stringify({
             name: this.packageName,
-            version: this.metaNodeVersion,
             description: 'Old description',
             dependencies: this.dependencies,
             devDependencies: {

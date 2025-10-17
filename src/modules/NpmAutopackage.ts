@@ -1,5 +1,6 @@
 import { exec as execSync } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
+import path from 'path'
 import { chdir } from 'process'
 import { promisify } from 'util'
 import { pathExists } from 'fs-extra'
@@ -140,9 +141,20 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async setCurrentMetaNodeVersion() {
-        this.metaNodeVersion = await this.getLatestVersion(
-            '@neurodevs/meta-node'
+        const globalRoot = await this.exec('yarn global dir')
+
+        const pkgPath = path.join(
+            globalRoot.stdout.trim(),
+            'node_modules',
+            '@neurodevs',
+            'meta-node',
+            'package.json'
         )
+
+        const raw = await this.readFile(pkgPath, { encoding: 'utf-8' })
+        const pkg = JSON.parse(raw)
+
+        this.metaNodeVersion = pkg.version
     }
 
     private async spruceCreateModule() {
