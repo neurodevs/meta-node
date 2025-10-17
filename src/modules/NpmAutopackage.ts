@@ -15,7 +15,6 @@ export default class NpmAutopackage implements Autopackage {
     public static writeFile = writeFile
 
     private packageName: string
-    private packageVersion!: string
     private description: string
     private gitNamespace: string
     private installDir: string
@@ -25,6 +24,7 @@ export default class NpmAutopackage implements Autopackage {
 
     private originalPackageJson!: Record<string, unknown>
     private originalGitignoreFile!: string
+    private metaNodeVersion!: string
 
     private originalTasksJson!: {
         tasks: unknown[]
@@ -67,7 +67,7 @@ export default class NpmAutopackage implements Autopackage {
         await this.cloneGitRepo()
 
         this.chdirToPackageDir()
-        await this.setCurrentPackageVersion()
+        await this.setCurrentMetaNodeVersion()
         await this.spruceCreateModule()
         await this.updatePackageJson()
         await this.updateGitignore()
@@ -139,9 +139,10 @@ export default class NpmAutopackage implements Autopackage {
         this.chdir(this.packageDir)
     }
 
-    private async setCurrentPackageVersion() {
-        this.originalPackageJson = await this.loadPackageJsonFile()
-        this.packageVersion = this.originalPackageJson.version as string
+    private async setCurrentMetaNodeVersion() {
+        this.metaNodeVersion = await this.getLatestVersion(
+            '@neurodevs/meta-node'
+        )
     }
 
     private async spruceCreateModule() {
@@ -178,7 +179,7 @@ export default class NpmAutopackage implements Autopackage {
 
     private async gitCommitCreatePackage() {
         await this.exec(
-            `git commit -m "patch: create package (@neurodevs/meta-node: ${this.packageVersion})"`
+            `git commit -m "patch: create package (@neurodevs/meta-node: ${this.metaNodeVersion})"`
         )
     }
 
@@ -291,7 +292,7 @@ export default class NpmAutopackage implements Autopackage {
 
     private async gitCommitUpdatePackage() {
         await this.exec(
-            `git commit -m "patch: update package.json (@neurodevs/meta-node: ${this.packageVersion})"`
+            `git commit -m "patch: update package.json (@neurodevs/meta-node: ${this.metaNodeVersion})"`
         )
     }
 
@@ -337,7 +338,7 @@ export default class NpmAutopackage implements Autopackage {
 
     private async gitCommitUpdateGitignore() {
         await this.exec(
-            `git commit -m "patch: add build dir to gitignore (@neurodevs/meta-node: ${this.packageVersion})"`
+            `git commit -m "patch: add build dir to gitignore (@neurodevs/meta-node: ${this.metaNodeVersion})"`
         )
     }
 
@@ -367,7 +368,7 @@ export default class NpmAutopackage implements Autopackage {
 
     private async gitCommitSetupVscode() {
         await this.exec(
-            `git commit -m "patch: setup vscode (@neurodevs/meta-node: ${this.packageVersion})"`
+            `git commit -m "patch: setup vscode (@neurodevs/meta-node: ${this.metaNodeVersion})"`
         )
     }
 
@@ -457,12 +458,12 @@ export default class NpmAutopackage implements Autopackage {
 
     private async gitCommitUpdateVscodeTasks() {
         await this.exec(
-            `git commit -m "patch: update vscode tasks.json (@neurodevs/meta-node: ${this.packageVersion})"`
+            `git commit -m "patch: update vscode tasks.json (@neurodevs/meta-node: ${this.metaNodeVersion})"`
         )
     }
 
     private async installDefaultDevDependencies() {
-        const latestVersion = await this.getLatestGenerateIdVersion(
+        const latestVersion = await this.getLatestVersion(
             '@neurodevs/generate-id'
         )
 
@@ -473,7 +474,7 @@ export default class NpmAutopackage implements Autopackage {
         }
     }
 
-    private async getLatestGenerateIdVersion(scopedPackageName: string) {
+    private async getLatestVersion(scopedPackageName: string) {
         const { stdout } = await this.exec(
             `yarn info ${scopedPackageName} version --silent`
         )
@@ -496,7 +497,7 @@ export default class NpmAutopackage implements Autopackage {
 
     private async gitCommitInstallDevDependencies() {
         await this.exec(
-            `git commit -m "patch: install default devDependencies (@neurodevs/meta-node: ${this.packageVersion})"`
+            `git commit -m "patch: install default devDependencies (@neurodevs/meta-node: ${this.metaNodeVersion})"`
         )
     }
 
