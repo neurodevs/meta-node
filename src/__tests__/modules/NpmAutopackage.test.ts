@@ -485,6 +485,16 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         )
     }
 
+    @test()
+    protected static async doesNotThrowIfGenerateIdNotInPackageJson() {
+        setFakeReadFileResult(
+            this.packageJsonPath,
+            this.originalPackageJson.replace('@neurodevs/generate-id', '')
+        )
+
+        await this.createAndRunAutopackage()
+    }
+
     private static async run() {
         await this.instance.run()
     }
@@ -561,7 +571,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         NpmAutopackage.readFile = fakeReadFile as unknown as typeof readFile
         resetCallsToReadFile()
 
-        setFakeReadFileResult(this.packageJsonPath, this.originalJsonFile)
+        setFakeReadFileResult(this.packageJsonPath, this.originalPackageJson)
 
         setFakeReadFileResult(
             this.tasksJsonPath,
@@ -574,7 +584,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         resetCallsToWriteFile()
     }
 
-    private static get originalJsonFile() {
+    private static get originalPackageJson() {
         return JSON.stringify({
             name: this.packageName,
             version: '^1.0.0',
@@ -605,7 +615,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     private static get updatedPackageJson() {
         return JSON.stringify({
-            ...JSON.parse(this.originalJsonFile),
+            ...JSON.parse(this.originalPackageJson),
             name: this.scopedPackageName,
             description: this.packageDescription,
             keywords: this.keywords,

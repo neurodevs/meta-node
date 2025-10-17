@@ -455,9 +455,11 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private get currentGenerateIdVersion() {
-        return (this.originalPackageJson.devDependencies as any)[
-            '@neurodevs/generate-id'
-        ].replace('^', '')
+        return (
+            (this.originalPackageJson.devDependencies as any)[
+                '@neurodevs/generate-id'
+            ] || ''
+        ).replace('^', '')
     }
 
     private async getLatestGenerateIdVersion() {
