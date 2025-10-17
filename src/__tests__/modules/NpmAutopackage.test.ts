@@ -468,14 +468,18 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
     @test()
     protected static async doesNotInstallDevDependenciesIfLatest() {
-        setFakeExecResult({ stdout: '1.0.0' } as unknown as ChildProcess)
+        setFakeExecResult(this.checkVersionCmd, {
+            stdout: '1.0.0',
+        } as unknown as ChildProcess)
 
         await this.createAndRunAutopackage()
 
+        const calls = callsToExec.filter(
+            (cmd) => cmd === 'yarn add -D @neurodevs/generate-id@latest'
+        )
+
         assert.isEqual(
-            callsToExec.filter(
-                (cmd) => cmd === 'yarn add -D @neurodevs/generate-id@latest'
-            ).length,
+            calls.length,
             0,
             'Should not install default devDependencies if already installed!'
         )
@@ -490,8 +494,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await instance.run()
     }
 
-    private static get scopedPackage() {
-        return `${this.gitNamespace}/${this.packageName}`
+    private static get scopedPackageName() {
+        return `@${this.gitNamespace}/${this.packageName}`
     }
 
     private static get packageDir() {
@@ -507,6 +511,10 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     private static readonly setupVscodeCmd = 'spruce setup.vscode --all true'
+
+    private static get checkVersionCmd() {
+        return `yarn info ${this.scopedPackageName} version --silent`
+    }
 
     private static orderJsonKeys(
         json: Record<string, unknown>,
@@ -539,8 +547,6 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     private static fakeExec() {
         NpmAutopackage.exec = fakeExec as unknown as typeof exec
         resetCallsToExec()
-
-        setFakeExecResult({ stdout: '' } as unknown as ChildProcess)
     }
 
     private static fakePathExists() {
@@ -599,19 +605,19 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     private static get updatedPackageJson() {
         return JSON.stringify({
             ...JSON.parse(this.originalJsonFile),
-            name: `@${this.scopedPackage}`,
+            name: this.scopedPackageName,
             description: this.packageDescription,
             keywords: this.keywords,
             license: this.license,
             author: this.author,
             main: 'build/index.js',
-            homepage: `https://github.com/${this.scopedPackage}`,
+            homepage: `https://github.com/${this.gitNamespace}/${this.packageName}`,
             repository: {
                 type: 'git',
-                url: `git+https://github.com/${this.scopedPackage}.git`,
+                url: `git+https://github.com/${this.gitNamespace}/${this.packageName}.git`,
             },
             bugs: {
-                url: `https://github.com/${this.scopedPackage}/issues`,
+                url: `https://github.com/${this.gitNamespace}/${this.packageName}/issues`,
             },
             dependencies: this.dependencies,
         })

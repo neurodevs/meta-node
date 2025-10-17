@@ -1,6 +1,6 @@
 {
   "name": "@neurodevs/meta-node",
-  "version": "0.10.15",
+  "version": "0.10.16",
   "description": "Meta-layer utilities for maintaining Node.js package ecosystems.",
   "keywords": [
     "nodejs",
@@ -52,7 +52,7 @@
     "jsonc-parser": "^3.3.1"
   },
   "devDependencies": {
-    "@neurodevs/fake-node-core": "^0.3.0",
+    "@neurodevs/fake-node-core": "^0.6.0",
     "@neurodevs/generate-id": "^1.0.0",
     "@sprucelabs/jest-json-reporter": "^9.0.61",
     "@sprucelabs/resolve-path-aliases": "^3.0.28",

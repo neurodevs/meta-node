@@ -460,7 +460,7 @@ export default class NpmAutopackage implements Autopackage {
 
     private async getLatestYarnVersion() {
         const { stdout } = await this.exec(
-            `yarn info ${this.packageName} version --silent`
+            `yarn info ${this.scopedPackageName} version --silent`
         )
         return stdout.trim()
     }
