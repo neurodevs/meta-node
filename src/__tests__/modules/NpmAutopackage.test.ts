@@ -318,10 +318,25 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     @test()
+    protected static async seventeenthCommitsInstallDefaultDevDependencies() {
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToExec.slice(19, 22),
+            [
+                'git add .',
+                'git commit -m "patch: install default devDependencies"',
+                'git push',
+            ],
+            'Did not commit install devDependencies changes!'
+        )
+    }
+
+    @test()
     protected static async lastlyOpensVscodeAtEnd() {
         await this.run()
 
-        assert.isEqual(callsToExec[19], 'code .', 'Did not open vscode at end!')
+        assert.isEqual(callsToExec[22], 'code .', 'Did not open vscode at end!')
     }
 
     @test()

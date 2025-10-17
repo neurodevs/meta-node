@@ -447,6 +447,19 @@ export default class NpmAutopackage implements Autopackage {
     private async installDefaultDevDependencies() {
         console.log('Installing default devDependencies...')
         await this.exec('yarn add -D @neurodevs/generate-id@latest')
+        await this.commitInstallDevDependencies()
+    }
+
+    private async commitInstallDevDependencies() {
+        await this.gitAddAll()
+        await this.gitCommitInstallDevDependencies()
+        await this.gitPush()
+    }
+
+    private async gitCommitInstallDevDependencies() {
+        await this.exec(
+            'git commit -m "patch: install default devDependencies"'
+        )
     }
 
     private async openVscode() {
