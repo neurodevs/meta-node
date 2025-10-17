@@ -23,6 +23,7 @@ export default abstract class AbstractAutomodule implements Automodule {
     private indexFileContent!: string
 
     private originalIndexFile!: string
+    private actualIndexFilePath!: string
 
     protected constructor(options: BaseAutomoduleOptions) {
         const { testSaveDir, moduleSaveDir, fakeSaveDir } = options
@@ -123,22 +124,29 @@ export default abstract class AbstractAutomodule implements Automodule {
 
     private async updateIndexFileExports() {
         this.originalIndexFile = await this.loadOriginalIndexFile()
-
-        await this.writeFile(
-            this.backupIndexFilePath ?? this.usualIndexFilePath,
-            this.sortedIndexFile
-        )
+        await this.writeFile(this.actualIndexFilePath, this.sortedIndexFile)
     }
 
     private async loadOriginalIndexFile() {
         try {
-            return await this.readFile(this.usualIndexFilePath, 'utf-8')
+            return await this.readIndexFileFromUsualLocation()
         } catch {
-            return await this.readFile(this.backupIndexFilePath, 'utf-8')
+            return await this.readIndexFileFromBackupLocation()
         }
     }
 
+    private async readIndexFileFromUsualLocation() {
+        this.actualIndexFilePath = this.usualIndexFilePath
+        return await this.readFile(this.usualIndexFilePath, 'utf-8')
+    }
+
     private readonly usualIndexFilePath = './src/index.ts'
+
+    private async readIndexFileFromBackupLocation() {
+        this.actualIndexFilePath = this.backupIndexFilePath
+        return await this.readFile(this.backupIndexFilePath, 'utf-8')
+    }
+
     private readonly backupIndexFilePath = './src/exports.ts'
 
     private get sortedIndexFile() {
