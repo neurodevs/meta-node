@@ -140,7 +140,11 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         assert.isEqualDeep(
             callsToExec.slice(2, 5),
-            ['git add .', 'git commit -m "patch: create package"', 'git push'],
+            [
+                'git add .',
+                `git commit -m "patch: create package (@neurodevs/meta-node: ${this.packageVersion})"`,
+                'git push',
+            ],
             'Did not commit create package changes!'
         )
     }
@@ -222,7 +226,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
             callsToExec.slice(5, 8),
             [
                 'git add .',
-                'git commit -m "patch: update package.json"',
+                `git commit -m "patch: update package.json (@neurodevs/meta-node: ${this.packageVersion})"`,
                 'git push',
             ],
             'Did not commit update package changes!'
@@ -252,7 +256,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
             callsToExec.slice(8, 11),
             [
                 'git add .',
-                'git commit -m "patch: add build dir to gitignore"',
+                `git commit -m "patch: add build dir to gitignore (@neurodevs/meta-node: ${this.packageVersion})"`,
                 'git push',
             ],
             'Did not commit .gitignore changes!'
@@ -276,7 +280,11 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         assert.isEqualDeep(
             callsToExec.slice(12, 15),
-            ['git add .', 'git commit -m "patch: setup vscode"', 'git push'],
+            [
+                'git add .',
+                `git commit -m "patch: setup vscode (@neurodevs/meta-node: ${this.packageVersion})"`,
+                'git push',
+            ],
             'Did not commit vscode changes!'
         )
     }
@@ -300,7 +308,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
             callsToExec.slice(15, 18),
             [
                 'git add .',
-                'git commit -m "patch: update vscode tasks.json"',
+                `git commit -m "patch: update vscode tasks.json (@neurodevs/meta-node: ${this.packageVersion})"`,
                 'git push',
             ],
             'Did not commit updated vscode tasks.json changes!'
@@ -326,7 +334,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
             callsToExec.slice(20, 23),
             [
                 'git add .',
-                'git commit -m "patch: install default devDependencies"',
+                `git commit -m "patch: install default devDependencies (@neurodevs/meta-node: ${this.packageVersion})"`,
                 'git push',
             ],
             'Did not commit install devDependencies changes!'
@@ -383,7 +391,9 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         assert.isEqual(
             callsToExec.filter(
-                (cmd) => cmd === 'git commit -m "patch: create package"'
+                (cmd) =>
+                    cmd ===
+                    `git commit -m "patch: create package (@neurodevs/meta-node: ${this.packageVersion})"`
             ).length,
             1,
             'Did not commit create package changes once!'
@@ -396,7 +406,9 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         assert.isEqual(
             callsToExec.filter(
-                (cmd) => cmd === 'git commit -m "patch: update package.json"'
+                (cmd) =>
+                    cmd ===
+                    `git commit -m "patch: update package.json (@neurodevs/meta-node: ${this.packageVersion})"`
             ).length,
             1,
             'Did not commit update package changes once!'
@@ -410,7 +422,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         assert.isEqual(
             callsToExec.filter(
                 (cmd) =>
-                    cmd === 'git commit -m "patch: add build dir to gitignore"'
+                    cmd ===
+                    `git commit -m "patch: add build dir to gitignore (@neurodevs/meta-node: ${this.packageVersion})"`
             ).length,
             1,
             'Did not commit gitignore changes once!'
@@ -423,7 +436,9 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         assert.isEqual(
             callsToExec.filter(
-                (cmd) => cmd === 'git commit -m "patch: setup vscode"'
+                (cmd) =>
+                    cmd ===
+                    `git commit -m "patch: setup vscode (@neurodevs/meta-node: ${this.packageVersion})"`
             ).length,
             1,
             'Did not commit vscode changes once!'
@@ -584,24 +599,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         resetCallsToWriteFile()
     }
 
-    private static get originalPackageJson() {
-        return JSON.stringify({
-            name: this.packageName,
-            version: '^1.0.0',
-            description: 'Old description',
-            dependencies: this.dependencies,
-            devDependencies: {
-                '@neurodevs/generate-id': '^1.0.0',
-            },
-        })
-    }
-
-    private static readonly dependencies = {
-        [generateId()]: generateId(),
-        [generateId()]: generateId(),
-    }
-
     private static readonly packageName = generateId()
+    private static readonly packageVersion = generateId()
     private static readonly packageDescription = generateId()
     private static readonly gitNamespace = generateId()
     private static readonly npmNamespace = generateId()
@@ -612,6 +611,23 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     private static readonly githubToken = generateId()
     private static readonly randomId = generateId()
+
+    private static readonly dependencies = {
+        [generateId()]: generateId(),
+        [generateId()]: generateId(),
+    }
+
+    private static get originalPackageJson() {
+        return JSON.stringify({
+            name: this.packageName,
+            version: this.packageVersion,
+            description: 'Old description',
+            dependencies: this.dependencies,
+            devDependencies: {
+                '@neurodevs/generate-id': '^1.0.0',
+            },
+        })
+    }
 
     private static get updatedPackageJson() {
         return JSON.stringify({

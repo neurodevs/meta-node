@@ -15,6 +15,7 @@ export default class NpmAutopackage implements Autopackage {
     public static writeFile = writeFile
 
     private packageName: string
+    private packageVersion!: string
     private description: string
     private gitNamespace: string
     private installDir: string
@@ -66,6 +67,7 @@ export default class NpmAutopackage implements Autopackage {
         await this.cloneGitRepo()
 
         this.chdirToPackageDir()
+        await this.setCurrentPackageVersion()
         await this.spruceCreateModule()
         await this.updatePackageJson()
         await this.updateGitignore()
@@ -137,6 +139,11 @@ export default class NpmAutopackage implements Autopackage {
         this.chdir(this.packageDir)
     }
 
+    private async setCurrentPackageVersion() {
+        this.originalPackageJson = await this.loadPackageJsonFile()
+        this.packageVersion = this.originalPackageJson.version as string
+    }
+
     private async spruceCreateModule() {
         const packageJsonExists = await this.checkIfPackageJsonExists()
 
@@ -170,7 +177,9 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async gitCommitCreatePackage() {
-        await this.exec('git commit -m "patch: create package"')
+        await this.exec(
+            `git commit -m "patch: create package (@neurodevs/meta-node: ${this.packageVersion})"`
+        )
     }
 
     private async gitPush() {
@@ -281,7 +290,9 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async gitCommitUpdatePackage() {
-        await this.exec('git commit -m "patch: update package.json"')
+        await this.exec(
+            `git commit -m "patch: update package.json (@neurodevs/meta-node: ${this.packageVersion})"`
+        )
     }
 
     private async updateGitignore() {
@@ -325,7 +336,9 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async gitCommitUpdateGitignore() {
-        await this.exec('git commit -m "patch: add build dir to gitignore"')
+        await this.exec(
+            `git commit -m "patch: add build dir to gitignore (@neurodevs/meta-node: ${this.packageVersion})"`
+        )
     }
 
     private async setupVscode() {
@@ -353,7 +366,9 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async gitCommitSetupVscode() {
-        await this.exec('git commit -m "patch: setup vscode"')
+        await this.exec(
+            `git commit -m "patch: setup vscode (@neurodevs/meta-node: ${this.packageVersion})"`
+        )
     }
 
     private async updateVscodeTasks() {
@@ -441,17 +456,28 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async gitCommitUpdateVscodeTasks() {
-        await this.exec('git commit -m "patch: update vscode tasks.json"')
+        await this.exec(
+            `git commit -m "patch: update vscode tasks.json (@neurodevs/meta-node: ${this.packageVersion})"`
+        )
     }
 
     private async installDefaultDevDependencies() {
-        const latestVersion = await this.getLatestGenerateIdVersion()
+        const latestVersion = await this.getLatestGenerateIdVersion(
+            '@neurodevs/generate-id'
+        )
 
         if (this.currentGenerateIdVersion != latestVersion) {
             console.log('Installing default devDependencies...')
             await this.exec('yarn add -D @neurodevs/generate-id@latest')
             await this.commitInstallDevDependencies()
         }
+    }
+
+    private async getLatestGenerateIdVersion(scopedPackageName: string) {
+        const { stdout } = await this.exec(
+            `yarn info ${scopedPackageName} version --silent`
+        )
+        return stdout.trim()
     }
 
     private get currentGenerateIdVersion() {
@@ -462,13 +488,6 @@ export default class NpmAutopackage implements Autopackage {
         ).replace('^', '')
     }
 
-    private async getLatestGenerateIdVersion() {
-        const { stdout } = await this.exec(
-            `yarn info @neurodevs/generate-id version --silent`
-        )
-        return stdout.trim()
-    }
-
     private async commitInstallDevDependencies() {
         await this.gitAddAll()
         await this.gitCommitInstallDevDependencies()
@@ -477,7 +496,7 @@ export default class NpmAutopackage implements Autopackage {
 
     private async gitCommitInstallDevDependencies() {
         await this.exec(
-            'git commit -m "patch: install default devDependencies"'
+            `git commit -m "patch: install default devDependencies (@neurodevs/meta-node: ${this.packageVersion})"`
         )
     }
 
