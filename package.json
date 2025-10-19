@@ -1,6 +1,6 @@
 {
   "name": "@neurodevs/meta-node",
-  "version": "0.10.21",
+  "version": "0.11.0",
   "description": "Meta-layer utilities for maintaining Node.js package ecosystems.",
   "keywords": [
     "nodejs",

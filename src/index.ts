@@ -35,3 +35,11 @@ export * from './modules/NpmAutopackage'
 
 export { default as FakeAutopackage } from './testDoubles/Autopackage/FakeAutopackage'
 export * from './testDoubles/Autopackage/FakeAutopackage'
+
+// SnippetKeybinder
+
+export { default as VscodeSnippetKeybinder } from './modules/VscodeSnippetKeybinder'
+export * from './modules/VscodeSnippetKeybinder'
+
+export { default as FakeSnippetKeybinder } from './testDoubles/SnippetKeybinder/FakeSnippetKeybinder'
+export * from './testDoubles/SnippetKeybinder/FakeSnippetKeybinder'
