@@ -21,6 +21,8 @@ export default class VscodeSnippetKeybinderTest extends AbstractPackageTest {
 
         this.setFakeReadFile()
         this.setFakeWriteFile()
+        this.setFakeSnippetsFile()
+        this.setFakeKeybindingsFile()
 
         this.instance = this.VscodeSnippetKeybinder()
     }
@@ -32,18 +34,38 @@ export default class VscodeSnippetKeybinderTest extends AbstractPackageTest {
 
     @test()
     protected static async updatesGlobalSnippetsInVscode() {
-        setFakeReadFileResult(
-            this.snippetsPath,
-            JSON.stringify(this.originalSnippetsFile, null, 4)
-        )
-
-        await this.instance.run()
+        await this.run()
 
         assert.isEqualDeep(callsToWriteFile[0], {
             file: this.snippetsPath,
             data: JSON.stringify(this.updatedSnippetsFile, null, 4),
             options: undefined,
         })
+    }
+
+    @test()
+    protected static async updatesGlobalKeybindingsInVscode() {
+        await this.run()
+
+        assert.isEqualDeep(callsToWriteFile[1], {
+            file: this.keybindingsPath,
+            data: JSON.stringify(this.updatedKeybindingsFile, null, 4),
+            options: undefined,
+        })
+    }
+
+    private static async run() {
+        await this.instance.run()
+    }
+
+    private static toCommandId(name: string) {
+        return name
+            .trim()
+            .toLowerCase()
+            .replace(/[-_\s]+/g, '.')
+            .replace(/[^a-z0-9.]/g, '')
+            .replace(/\.+/g, '.')
+            .replace(/^\.+|\.+$/g, '')
     }
 
     private static setFakeReadFile() {
@@ -57,6 +79,26 @@ export default class VscodeSnippetKeybinderTest extends AbstractPackageTest {
             fakeWriteFile as unknown as typeof writeFile
         resetCallsToWriteFile()
     }
+
+    private static setFakeSnippetsFile() {
+        setFakeReadFileResult(
+            this.snippetsPath,
+            JSON.stringify(this.originalSnippetsFile, null, 4)
+        )
+    }
+
+    private static setFakeKeybindingsFile() {
+        setFakeReadFileResult(
+            this.keybindingsPath,
+            JSON.stringify(this.originalKeybindingsFile, null, 4)
+        )
+    }
+
+    private static readonly fakeName = `${generateId()}-${generateId()}_${generateId()} ${generateId()}`
+    private static readonly fakePrefix = this.toCommandId(this.fakeName)
+    private static readonly fakeLines = [generateId(), generateId()]
+    private static readonly fakeKeybinding = generateId()
+    private static readonly fakeDescription = generateId()
 
     private static readonly vscodeDir =
         '~/Library/Application Support/Code/User'
@@ -83,21 +125,28 @@ export default class VscodeSnippetKeybinderTest extends AbstractPackageTest {
         }
     }
 
-    private static readonly fakeName = `${generateId()}-${generateId()}_${generateId()} ${generateId()}`
-    private static readonly fakePrefix = this.toCommandId(this.fakeName)
-    private static readonly fakeLines = [generateId(), generateId()]
-    private static readonly fakeKeybinding = generateId()
-    private static readonly fakeDescription = generateId()
-
-    private static toCommandId(name: string) {
-        return name
-            .trim()
-            .toLowerCase()
-            .replace(/[-_\s]+/g, '.')
-            .replace(/[^a-z0-9.]/g, '')
-            .replace(/\.+/g, '.')
-            .replace(/^\.+|\.+$/g, '')
+    private static get keybindingsPath() {
+        return `${this.vscodeDir}/keybindings.json`
     }
+
+    private static readonly originalKeybinding = {
+        key: generateId(),
+        command: generateId(),
+    }
+
+    private static readonly originalKeybindingsFile = [this.originalKeybinding]
+
+    private static readonly updatedKeybindingsFile = [
+        this.originalKeybinding,
+        {
+            key: this.fakeKeybinding,
+            command: 'editor.action.insertSnippet',
+            when: 'editorTextFocus',
+            args: {
+                name: this.fakeName,
+            },
+        },
+    ]
 
     private static VscodeSnippetKeybinder() {
         return VscodeSnippetKeybinder.Create({

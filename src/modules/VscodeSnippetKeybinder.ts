@@ -8,13 +8,15 @@ export default class VscodeSnippetKeybinder implements SnippetKeybinder {
     private name: string
     private description: string
     private lines: string[]
+    private keybinding: string
 
     protected constructor(options: SnippetKeybinderOptions) {
-        const { name, description, lines } = options
+        const { name, description, lines, keybinding } = options
 
         this.name = name
         this.description = description
         this.lines = lines
+        this.keybinding = keybinding
     }
 
     public static Create(options: SnippetKeybinderOptions) {
@@ -22,6 +24,11 @@ export default class VscodeSnippetKeybinder implements SnippetKeybinder {
     }
 
     public async run() {
+        await this.updateGlobalSnippets()
+        await this.updateGlobalKeybindings()
+    }
+
+    private async updateGlobalSnippets() {
         const raw = await this.readFile(this.snippetsPath, 'utf-8')
         const snippets = JSON.parse(raw)
 
@@ -41,6 +48,9 @@ export default class VscodeSnippetKeybinder implements SnippetKeybinder {
         )
     }
 
+    private readonly vscodeDir = '~/Library/Application Support/Code/User'
+    private readonly snippetsPath = `${this.vscodeDir}/snippets/custom.code-snippets`
+
     private toCommandId(name: string) {
         return name
             .trim()
@@ -51,9 +61,29 @@ export default class VscodeSnippetKeybinder implements SnippetKeybinder {
             .replace(/^\.+|\.+$/g, '')
     }
 
-    private readonly vscodeDir = '~/Library/Application Support/Code/User'
-    private readonly snippetsDir = `${this.vscodeDir}/snippets`
-    private readonly snippetsPath = `${this.snippetsDir}/custom.code-snippets`
+    private async updateGlobalKeybindings() {
+        const raw = await this.readFile(this.keybindingsPath, 'utf-8')
+        const keybindings = JSON.parse(raw)
+
+        const updated = [
+            ...keybindings,
+            {
+                key: this.keybinding,
+                command: `editor.action.insertSnippet`,
+                when: 'editorTextFocus',
+                args: {
+                    name: this.name,
+                },
+            },
+        ]
+
+        await this.writeFile(
+            this.keybindingsPath,
+            JSON.stringify(updated, null, 4)
+        )
+    }
+
+    private readonly keybindingsPath = `${this.vscodeDir}/keybindings.json`
 
     private get readFile() {
         return VscodeSnippetKeybinder.readFile
