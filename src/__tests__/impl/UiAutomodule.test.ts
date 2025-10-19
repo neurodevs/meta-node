@@ -5,7 +5,7 @@ import {
     setFakeReadFileResult,
     setFakeReadFileThrowsFor,
 } from '@neurodevs/fake-node-core'
-import UiAutomodule from '../../modules/UiAutomodule'
+import UiAutomodule from '../../impl/UiAutomodule'
 import AbstractAutomoduleTest from '../AbstractAutomoduleTest'
 
 export default class UiAutomoduleTest extends AbstractAutomoduleTest {

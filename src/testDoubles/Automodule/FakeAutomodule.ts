@@ -1,5 +1,5 @@
-import { ImplAutomoduleOptions } from '../../modules/ImplAutomodule'
-import { UiAutomoduleOptions } from '../../modules/UiAutomodule'
+import { ImplAutomoduleOptions } from '../../impl/ImplAutomodule'
+import { UiAutomoduleOptions } from '../../impl/UiAutomodule'
 import { Automodule } from '../../types'
 
 export default class FakeImplAutomodule implements Automodule {

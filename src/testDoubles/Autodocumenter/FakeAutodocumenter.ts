@@ -1,4 +1,4 @@
-import { Autodocumenter } from '../../modules/PackageAutodocumenter'
+import { Autodocumenter } from '../../impl/PackageAutodocumenter'
 
 export default class FakeAutodocumenter implements Autodocumenter {
     public static numCallsToConstructor = 0

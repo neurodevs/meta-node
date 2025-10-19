@@ -1,4 +1,4 @@
-import UiAutomodule from '../modules/UiAutomodule'
+import UiAutomodule from '../impl/UiAutomodule'
 import expandHomeDir from './expandHomeDir'
 
 async function main() {

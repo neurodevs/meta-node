@@ -1,4 +1,4 @@
-import { Autocloner, AutoclonerOptions } from '../../modules/GitAutocloner'
+import { Autocloner, AutoclonerOptions } from '../../impl/GitAutocloner'
 
 export default class FakeGitAutocloner implements Autocloner {
     public static numCallsToConstructor = 0

@@ -13,7 +13,7 @@ import {
     resetCallsToWriteFile,
     setPathShouldExist,
 } from '@neurodevs/fake-node-core'
-import AbstractAutomodule from '../modules/AbstractAutomodule'
+import AbstractAutomodule from '../impl/AbstractAutomodule'
 import { Automodule } from '../types'
 import AbstractPackageTest from './AbstractPackageTest'
 

@@ -1,7 +1,7 @@
 import {
     SnippetKeybinder,
     SnippetKeybinderOptions,
-} from '../../modules/VscodeSnippetKeybinder'
+} from '../../impl/VscodeSnippetKeybinder'
 
 export default class FakeSnippetKeybinder implements SnippetKeybinder {
     public static callsToConstructor: SnippetKeybinderOptions[]

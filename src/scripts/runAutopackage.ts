@@ -1,4 +1,4 @@
-import NpmAutopackage from '../modules/NpmAutopackage'
+import NpmAutopackage from '../impl/NpmAutopackage'
 import expandHomeDir from './expandHomeDir'
 
 async function main() {

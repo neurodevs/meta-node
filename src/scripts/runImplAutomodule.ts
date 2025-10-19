@@ -1,4 +1,4 @@
-import ImplAutomodule from '../modules/ImplAutomodule'
+import ImplAutomodule from '../impl/ImplAutomodule'
 import expandHomeDir from './expandHomeDir'
 
 async function main() {

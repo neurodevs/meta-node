@@ -15,7 +15,7 @@ import { pathExists } from 'fs-extra'
 import GitAutocloner, {
     Autocloner,
     AutoclonerOptions,
-} from '../../modules/GitAutocloner'
+} from '../../impl/GitAutocloner'
 import AbstractPackageTest from '../AbstractPackageTest'
 
 const exec = promisify(execSync)

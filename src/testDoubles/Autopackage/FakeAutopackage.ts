@@ -1,4 +1,4 @@
-import { Autopackage, AutopackageOptions } from '../../modules/NpmAutopackage'
+import { Autopackage, AutopackageOptions } from '../../impl/NpmAutopackage'
 
 export default class FakeAutopackage implements Autopackage {
     public static callsToConstructor: AutopackageOptions[] = []

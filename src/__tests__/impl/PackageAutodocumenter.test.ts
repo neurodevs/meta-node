@@ -1,7 +1,7 @@
 import { test, assert } from '@sprucelabs/test-utils'
 import PackageAutodocumenter, {
     Autodocumenter,
-} from '../../modules/PackageAutodocumenter'
+} from '../../impl/PackageAutodocumenter'
 import AbstractPackageTest from '../AbstractPackageTest'
 
 export default class PackageAutodocumenterTest extends AbstractPackageTest {

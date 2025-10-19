@@ -5,7 +5,7 @@ import {
     setFakeReadFileResult,
     setFakeReadFileThrowsFor,
 } from '@neurodevs/fake-node-core'
-import ImplAutomodule from '../../modules/ImplAutomodule'
+import ImplAutomodule from '../../impl/ImplAutomodule'
 import AbstractAutomoduleTest from '../AbstractAutomoduleTest'
 
 export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
@@ -136,7 +136,7 @@ export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
     private static get testFilePattern() {
         return `
             import AbstractSpruceTest, { test, assert } from '@sprucelabs/test-utils'
-            import ${this.implName}, { ${this.interfaceName} } from '../../modules/${this.implName}'
+            import ${this.implName}, { ${this.interfaceName} } from '../../impl/${this.implName}'
 
             export default class ${this.implName}Test extends AbstractSpruceTest {
                 private static instance: ${this.interfaceName}
@@ -179,7 +179,7 @@ export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
 
     private static get fakeFilePattern() {
         return `
-            import { ${this.interfaceName} } from '../../modules/${this.implName}'
+            import { ${this.interfaceName} } from '../../impl/${this.implName}'
 
             export default class Fake${this.interfaceName} implements ${this.interfaceName} {
                 public static numCallsToConstructor = 0
@@ -199,8 +199,8 @@ export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
         return `
             // ${this.interfaceName}
 
-            export { default as ${this.implName} } from './modules/${this.implName}'
-            export * from './modules/${this.implName}'
+            export { default as ${this.implName} } from './impl/${this.implName}'
+            export * from './impl/${this.implName}'
 
             export { default as Fake${this.interfaceName} } from './testDoubles/${this.interfaceName}/Fake${this.interfaceName}'
             export * from './testDoubles/${this.interfaceName}/Fake${this.interfaceName}'

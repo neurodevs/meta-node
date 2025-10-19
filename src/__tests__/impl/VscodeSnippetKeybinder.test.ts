@@ -10,7 +10,7 @@ import {
 } from '@neurodevs/fake-node-core'
 import VscodeSnippetKeybinder, {
     SnippetKeybinder,
-} from '../../modules/VscodeSnippetKeybinder'
+} from '../../impl/VscodeSnippetKeybinder'
 import expandHomeDir from '../../scripts/expandHomeDir'
 import AbstractPackageTest from '../AbstractPackageTest'
 

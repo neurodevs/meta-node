@@ -28,7 +28,7 @@ import {
 import NpmAutopackage, {
     Autopackage,
     AutopackageOptions,
-} from '../../modules/NpmAutopackage'
+} from '../../impl/NpmAutopackage'
 import AbstractPackageTest from '../AbstractPackageTest'
 
 const exec = promisify(execSync)
