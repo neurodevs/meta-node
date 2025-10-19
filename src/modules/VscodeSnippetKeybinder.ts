@@ -31,7 +31,7 @@ export default class VscodeSnippetKeybinder implements SnippetKeybinder {
 
     private async updateGlobalSnippets() {
         const raw = await this.readFile(this.snippetsPath, 'utf-8')
-        const snippets = JSON.parse(raw)
+        const snippets = parse(raw)
 
         const updated = {
             ...snippets,

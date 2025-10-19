@@ -55,6 +55,22 @@ export default class VscodeSnippetKeybinderTest extends AbstractPackageTest {
     }
 
     @test()
+    protected static async updateSnippetsUsesJsoncParserToAllowComments() {
+        setFakeReadFileResult(
+            this.snippetsPath,
+            this.originalSnippetsFileCommented
+        )
+
+        await this.run()
+
+        assert.isEqualDeep(callsToWriteFile[0], {
+            file: this.snippetsPath,
+            data: JSON.stringify(this.updatedSnippetsFile, null, 4),
+            options: undefined,
+        })
+    }
+
+    @test()
     protected static async updateKeybindingsUsesJsoncParserToAllowComments() {
         setFakeReadFileResult(
             this.keybindingsPath,
@@ -141,6 +157,11 @@ export default class VscodeSnippetKeybinderTest extends AbstractPackageTest {
         }
     }
 
+    private static readonly originalSnippetsFileCommented = `
+        // ${generateId()}
+        ${JSON.stringify(this.originalSnippetsFile, null, 4)}
+    `
+
     private static get keybindingsPath() {
         return `${this.vscodeDir}/keybindings.json`
     }
@@ -164,10 +185,8 @@ export default class VscodeSnippetKeybinderTest extends AbstractPackageTest {
         },
     ]
 
-    private static readonly comment = `// ${generateId()}`
-
     private static readonly originalKeybindingsFileCommented = `
-        ${this.comment}
+        // ${generateId()}
         ${JSON.stringify(this.originalKeybindingsFile, null, 4)}
     `
 
