@@ -1,5 +1,6 @@
 import { readFile, writeFile } from 'fs/promises'
 import { parse } from 'jsonc-parser'
+import expandHomeDir from '../scripts/expandHomeDir'
 
 export default class VscodeSnippetKeybinder implements SnippetKeybinder {
     public static Class?: SnippetKeybinderConstructor
@@ -49,7 +50,10 @@ export default class VscodeSnippetKeybinder implements SnippetKeybinder {
         )
     }
 
-    private readonly vscodeDir = '~/Library/Application Support/Code/User'
+    private readonly vscodeDir = expandHomeDir(
+        '~/Library/Application Support/Code/User'
+    )
+
     private readonly snippetsPath = `${this.vscodeDir}/snippets/custom.code-snippets`
 
     private toCommandId(name: string) {

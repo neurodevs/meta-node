@@ -11,6 +11,7 @@ import {
 import VscodeSnippetKeybinder, {
     SnippetKeybinder,
 } from '../../modules/VscodeSnippetKeybinder'
+import expandHomeDir from '../../scripts/expandHomeDir'
 import AbstractPackageTest from '../AbstractPackageTest'
 
 export default class VscodeSnippetKeybinderTest extends AbstractPackageTest {
@@ -132,8 +133,9 @@ export default class VscodeSnippetKeybinderTest extends AbstractPackageTest {
     private static readonly fakeKeybinding = generateId()
     private static readonly fakeDescription = generateId()
 
-    private static readonly vscodeDir =
+    private static readonly vscodeDir = expandHomeDir(
         '~/Library/Application Support/Code/User'
+    )
 
     private static get snippetsPath() {
         return `${this.vscodeDir}/snippets/custom.code-snippets`
