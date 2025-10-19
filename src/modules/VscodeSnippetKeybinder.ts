@@ -1,4 +1,5 @@
 import { readFile, writeFile } from 'fs/promises'
+import { parse } from 'jsonc-parser'
 
 export default class VscodeSnippetKeybinder implements SnippetKeybinder {
     public static Class?: SnippetKeybinderConstructor
@@ -63,7 +64,7 @@ export default class VscodeSnippetKeybinder implements SnippetKeybinder {
 
     private async updateGlobalKeybindings() {
         const raw = await this.readFile(this.keybindingsPath, 'utf-8')
-        const keybindings = JSON.parse(raw)
+        const keybindings = parse(raw)
 
         const updated = [
             ...keybindings,
