@@ -153,7 +153,7 @@ export default class VscodeSnippetKeybinderTest extends AbstractPackageTest {
             [this.fakeName]: {
                 scope: 'javascript,typescript',
                 prefix: this.fakePrefix,
-                body: JSON.stringify(this.fakeLines),
+                body: this.fakeLines,
                 description: this.fakeDescription,
             },
         }

@@ -39,7 +39,7 @@ export default class VscodeSnippetKeybinder implements SnippetKeybinder {
             [this.name]: {
                 scope: 'javascript,typescript',
                 prefix: this.toCommandId(this.name),
-                body: JSON.stringify(this.lines),
+                body: this.lines,
                 description: this.description,
             },
         }
