@@ -132,7 +132,7 @@ export default class VscodeSnippetKeybinderTest extends AbstractPackageTest {
 
     private static readonly originalSnippetsFileCommented = `
         // ${generateId()}
-        ${JSON.stringify(this.originalSnippetsFile, null, 4)}
+        ${JSON.stringify(this.originalSnippets, null, 4)}
     `
 
     private static readonly updatedKeybindingsFile = [
@@ -149,7 +149,7 @@ export default class VscodeSnippetKeybinderTest extends AbstractPackageTest {
 
     private static readonly originalKeybindingsFileCommented = `
         // ${generateId()}
-        ${JSON.stringify(this.originalKeybindingsFile, null, 4)}
+        ${JSON.stringify(this.originalKeybindings, null, 4)}
     `
 
     private static VscodeSnippetKeybinder() {

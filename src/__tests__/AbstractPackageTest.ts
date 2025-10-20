@@ -21,9 +21,15 @@ export default class AbstractPackageTest extends AbstractSpruceTest {
 
     protected static readonly originalSnippet = { [generateId()]: {} }
 
-    protected static readonly originalSnippetsFile = {
+    protected static readonly originalSnippets = {
         ...this.originalSnippet,
     }
+
+    protected static readonly originalSnippetsFile = JSON.stringify(
+        this.originalSnippets,
+        null,
+        4
+    )
 
     protected static get keybindingsPath() {
         return `${this.vscodeDir}/keybindings.json`
@@ -34,21 +40,22 @@ export default class AbstractPackageTest extends AbstractSpruceTest {
         command: generateId(),
     }
 
-    protected static readonly originalKeybindingsFile = [
-        this.originalKeybinding,
-    ]
+    protected static readonly originalKeybindings = [this.originalKeybinding]
+
+    protected static readonly originalKeybindingsFile = JSON.stringify(
+        this.originalKeybindings,
+        null,
+        4
+    )
 
     protected static setFakeSnippetsFile() {
-        setFakeReadFileResult(
-            this.snippetsPath,
-            JSON.stringify(this.originalSnippetsFile, null, 4)
-        )
+        setFakeReadFileResult(this.snippetsPath, this.originalSnippetsFile)
     }
 
     protected static setFakeKeybindingsFile() {
         setFakeReadFileResult(
             this.keybindingsPath,
-            JSON.stringify(this.originalKeybindingsFile, null, 4)
+            this.originalKeybindingsFile
         )
     }
 }
