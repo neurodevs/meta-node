@@ -76,6 +76,21 @@ export default class TypescriptClassSnippetSuiteTest extends AbstractPackageTest
         )
     }
 
+    @test()
+    protected static async doesNotWriteKeybindingsFileIfContentsAreIdentical() {
+        setFakeReadFileResult(this.keybindingsPath, this.updatedKeybindingsFile)
+
+        await this.install()
+
+        assert.isEqual(
+            callsToWriteFile.filter(
+                (call) => call.file === this.keybindingsPath
+            ).length,
+            0,
+            'Should not have written keybindings file!'
+        )
+    }
+
     private static async install() {
         return this.instance.install()
     }

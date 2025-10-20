@@ -97,7 +97,11 @@ export default class TypescriptClassSnippetSuite implements SnippetSuite {
     private async installGlobalKeybindings() {
         this.originalKeybindingsFile = await this.loadKeybindingsFile()
 
-        await this.writeFile(this.keybindingsPath, this.updatedKeybindingFile)
+        if (!this.hasKeybindMarkers) {
+            await this.installFreshKeybindings()
+        } else {
+            await this.updateExistingKeybindings()
+        }
     }
 
     private async loadKeybindingsFile() {
@@ -108,7 +112,26 @@ export default class TypescriptClassSnippetSuite implements SnippetSuite {
         return `${this.vscodeDir}/keybindings.json`
     }
 
-    private get updatedKeybindingFile() {
+    private get hasKeybindMarkers() {
+        return this.keybindStartIdx !== -1 && this.keybindEndIdx !== -1
+    }
+
+    private get keybindStartIdx() {
+        return this.originalKeybindingsFile.indexOf(this.keybindStartMarker)
+    }
+
+    private get keybindEndIdx() {
+        return (
+            this.originalKeybindingsFile.indexOf(this.keybindEndMarker) +
+            this.keybindEndMarker.length
+        )
+    }
+
+    private async installFreshKeybindings() {
+        await this.writeFile(this.keybindingsPath, this.freshKeybindingsFile)
+    }
+
+    private get freshKeybindingsFile() {
         const lastBraceIdx = this.originalKeybindingsFile.lastIndexOf(']')
         const before = this.originalKeybindingsFile.slice(0, lastBraceIdx)
 
@@ -121,6 +144,27 @@ export default class TypescriptClassSnippetSuite implements SnippetSuite {
 
     private keybindStartMarker = '// === TYPESCRIPT CLASS KEYBINDINGS BEGIN ==='
     private keybindEndMarker = '// === TYPESCRIPT CLASS KEYBINDINGS END ==='
+
+    private async updateExistingKeybindings() {
+        const before = this.originalKeybindingsFile.slice(
+            0,
+            this.keybindStartIdx
+        )
+
+        const existing = this.originalKeybindingsFile.slice(
+            this.keybindStartIdx,
+            this.keybindEndIdx
+        )
+
+        const after = this.originalKeybindingsFile.slice(this.keybindEndIdx)
+
+        if (existing.trim() !== this.keybindingBlock.trim()) {
+            await this.writeFile(
+                this.keybindingsPath,
+                `${before}${this.keybindingBlock}${after}`
+            )
+        }
+    }
 
     private get readFile() {
         return TypescriptClassSnippetSuite.readFile
