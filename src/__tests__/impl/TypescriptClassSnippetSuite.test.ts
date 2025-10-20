@@ -100,7 +100,7 @@ export default class TypescriptClassSnippetSuiteTest extends AbstractPackageTest
     }
 
     private static get snippetsBlock() {
-        return `${this.snippetStartMarker}\n${this.snippets}\n${this.snippetEndMarker}`
+        return `    ${this.snippetStartMarker}\n${this.indentedSnippets}\n    ${this.snippetEndMarker}`
     }
 
     private static readonly snippetStartMarker =
@@ -181,6 +181,11 @@ export default class TypescriptClassSnippetSuiteTest extends AbstractPackageTest
         "Private static method": { "scope": "typescript", "prefix": "private.static.method", "body": ["private static newMethod() {}"] },
         "Private static async method": { "scope": "typescript", "prefix": "private.static.async.method", "body": ["private static async newMethod() {}"] }
     `.replace(/^[ \t]+/gm, '')
+
+    private static readonly indentedSnippets = this.snippets
+        .split('\n')
+        .map((line) => (line.trim() ? '    ' + line : line))
+        .join('\n')
 
     private static readonly keybindings = `
         // === PUBLIC (Ctrl+1) ===

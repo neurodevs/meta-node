@@ -73,7 +73,7 @@ export default class TypescriptClassSnippetSuite implements SnippetSuite {
     }
 
     private get snippetsBlock() {
-        return `${this.snippetStartMarker}\n${this.snippets}\n${this.snippetEndMarker}`
+        return `    ${this.snippetStartMarker}\n${this.indentedSnippets}\n    ${this.snippetEndMarker}`
     }
 
     private async updateExistingSnippets() {
@@ -86,7 +86,7 @@ export default class TypescriptClassSnippetSuite implements SnippetSuite {
 
         const after = this.originalSnippetsFile.slice(this.snippetEndIdx)
 
-        if (existing !== this.snippetsBlock) {
+        if (existing.trim() !== this.snippetsBlock.trim()) {
             await this.writeFile(
                 this.snippetsPath,
                 `${before}${this.snippetsBlock}${after}`
@@ -185,6 +185,11 @@ export default class TypescriptClassSnippetSuite implements SnippetSuite {
         "Private static method": { "scope": "typescript", "prefix": "private.static.method", "body": ["private static newMethod() {}"] },
         "Private static async method": { "scope": "typescript", "prefix": "private.static.async.method", "body": ["private static async newMethod() {}"] }
     `.replace(/^[ \t]+/gm, '')
+
+    private readonly indentedSnippets = this.snippets
+        .split('\n')
+        .map((line) => (line.trim() ? '    ' + line : line))
+        .join('\n')
 
     private readonly keybindings = `
         // === PUBLIC (Ctrl+1) ===
