@@ -20,7 +20,11 @@ export default class TypescriptClassSnippetSuite implements SnippetSuite {
             parsed[name] = snippet
         }
 
-        await this.writeFile(this.snippetsPath, JSON.stringify(parsed, null, 4))
+        const updated = JSON.stringify(parsed, null, 4)
+
+        if (original !== updated) {
+            await this.writeFile(this.snippetsPath, updated)
+        }
     }
 
     protected get snippetsPath() {

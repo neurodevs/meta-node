@@ -39,11 +39,31 @@ export default class TypescriptClassSnippetSuiteTest extends AbstractPackageTest
 
         await this.instance.install()
 
-        assert.isEqualDeep(callsToWriteFile[0], {
-            file: this.snippetsPath,
-            data: JSON.stringify(this.updatedSnippetsFile, null, 4),
-            options: undefined,
-        })
+        assert.isEqualDeep(
+            callsToWriteFile[0],
+            {
+                file: this.snippetsPath,
+                data: JSON.stringify(this.updatedSnippetsFile, null, 4),
+                options: undefined,
+            },
+            'Written file data is incorrect!'
+        )
+    }
+
+    @test()
+    protected static async doesNotWriteFileIfContentsAreIdentical() {
+        setFakeReadFileResult(
+            this.snippetsPath,
+            JSON.stringify(this.updatedSnippetsFile, null, 4)
+        )
+
+        await this.instance.install()
+
+        assert.isEqual(
+            callsToWriteFile.length,
+            0,
+            'Should not have written file!'
+        )
     }
 
     private static setFakeReadFile() {
