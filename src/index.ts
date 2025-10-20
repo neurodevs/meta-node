@@ -43,3 +43,11 @@ export * from './impl/VscodeSnippetKeybinder'
 
 export { default as FakeSnippetKeybinder } from './testDoubles/SnippetKeybinder/FakeSnippetKeybinder'
 export * from './testDoubles/SnippetKeybinder/FakeSnippetKeybinder'
+
+// SnippetSuite
+
+export { default as TypescriptClassSnippetSuite } from './impl/TypescriptClassSnippetSuite'
+export * from './impl/TypescriptClassSnippetSuite'
+
+export { default as FakeSnippetSuite } from './testDoubles/SnippetSuite/FakeSnippetSuite'
+export * from './testDoubles/SnippetSuite/FakeSnippetSuite'
