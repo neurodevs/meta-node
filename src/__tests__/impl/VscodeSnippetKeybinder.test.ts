@@ -11,7 +11,6 @@ import {
 import VscodeSnippetKeybinder, {
     SnippetKeybinder,
 } from '../../impl/VscodeSnippetKeybinder'
-import expandHomeDir from '../../scripts/expandHomeDir'
 import AbstractPackageTest from '../AbstractPackageTest'
 
 export default class VscodeSnippetKeybinderTest extends AbstractPackageTest {
@@ -113,39 +112,11 @@ export default class VscodeSnippetKeybinderTest extends AbstractPackageTest {
         resetCallsToWriteFile()
     }
 
-    private static setFakeSnippetsFile() {
-        setFakeReadFileResult(
-            this.snippetsPath,
-            JSON.stringify(this.originalSnippetsFile, null, 4)
-        )
-    }
-
-    private static setFakeKeybindingsFile() {
-        setFakeReadFileResult(
-            this.keybindingsPath,
-            JSON.stringify(this.originalKeybindingsFile, null, 4)
-        )
-    }
-
     private static readonly fakeName = `${generateId()}-${generateId()}_${generateId()} ${generateId()}`
     private static readonly fakePrefix = this.toCommandId(this.fakeName)
     private static readonly fakeLines = [generateId(), generateId()]
     private static readonly fakeKeybinding = generateId()
     private static readonly fakeDescription = generateId()
-
-    private static readonly vscodeDir = expandHomeDir(
-        '~/Library/Application Support/Code/User'
-    )
-
-    private static get snippetsPath() {
-        return `${this.vscodeDir}/snippets/custom.code-snippets`
-    }
-
-    private static readonly originalSnippet = { [generateId()]: {} }
-
-    private static readonly originalSnippetsFile = {
-        ...this.originalSnippet,
-    }
 
     private static get updatedSnippetsFile() {
         return {
@@ -163,17 +134,6 @@ export default class VscodeSnippetKeybinderTest extends AbstractPackageTest {
         // ${generateId()}
         ${JSON.stringify(this.originalSnippetsFile, null, 4)}
     `
-
-    private static get keybindingsPath() {
-        return `${this.vscodeDir}/keybindings.json`
-    }
-
-    private static readonly originalKeybinding = {
-        key: generateId(),
-        command: generateId(),
-    }
-
-    private static readonly originalKeybindingsFile = [this.originalKeybinding]
 
     private static readonly updatedKeybindingsFile = [
         this.originalKeybinding,
