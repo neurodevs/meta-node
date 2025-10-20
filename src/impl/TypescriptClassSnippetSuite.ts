@@ -116,7 +116,7 @@ export default class TypescriptClassSnippetSuite implements SnippetSuite {
     }
 
     private get keybindingBlock() {
-        return `${this.keybindStartMarker}\n${this.keybindings}\n${this.keybindEndMarker}`
+        return `    ${this.keybindStartMarker}\n${this.indentedKeybindings}\n    ${this.keybindEndMarker}`
     }
 
     private keybindStartMarker = '// === TYPESCRIPT CLASS KEYBINDINGS BEGIN ==='
@@ -246,6 +246,11 @@ export default class TypescriptClassSnippetSuite implements SnippetSuite {
         { "key": "ctrl+3 alt+f6", "command": "editor.action.insertSnippet", "args": { "name": "Private static method" } },
         { "key": "ctrl+3 alt+f7", "command": "editor.action.insertSnippet", "args": { "name": "Private static async method" } }
     `.replace(/^[ \t]+/gm, '')
+
+    private readonly indentedKeybindings = this.keybindings
+        .split('\n')
+        .map((line) => (line.trim() ? '    ' + line : line))
+        .join('\n')
 }
 
 export interface SnippetSuite {

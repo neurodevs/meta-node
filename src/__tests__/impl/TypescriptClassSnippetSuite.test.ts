@@ -117,7 +117,7 @@ export default class TypescriptClassSnippetSuiteTest extends AbstractPackageTest
     }
 
     private static get keybindingBlock() {
-        return `${this.keybindingStartMarker}\n${this.keybindings}\n${this.keybindingEndMarker}`
+        return `    ${this.keybindingStartMarker}\n${this.indentedKeybindings}\n    ${this.keybindingEndMarker}`
     }
 
     private static readonly keybindingStartMarker =
@@ -242,6 +242,11 @@ export default class TypescriptClassSnippetSuiteTest extends AbstractPackageTest
         { "key": "ctrl+3 alt+f6", "command": "editor.action.insertSnippet", "args": { "name": "Private static method" } },
         { "key": "ctrl+3 alt+f7", "command": "editor.action.insertSnippet", "args": { "name": "Private static async method" } }
     `.replace(/^[ \t]+/gm, '')
+
+    private static readonly indentedKeybindings = this.keybindings
+        .split('\n')
+        .map((line) => (line.trim() ? '    ' + line : line))
+        .join('\n')
 
     private static TypescriptClassSnippetSuite() {
         return TypescriptClassSnippetSuite.Create()
