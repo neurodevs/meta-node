@@ -22,6 +22,7 @@ import {
     resetCallsToReadFile,
     resetCallsToWriteFile,
     setFakeExecResult,
+    setFakeFetchResponse,
     setFakeReadFileResult,
     setPathShouldExist,
 } from '@neurodevs/fake-node-core'
@@ -45,6 +46,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         this.fakeFetch()
         this.fakeReadFile()
         this.fakeWriteFile()
+
+        this.fakeFetchForRepoNotFound()
 
         process.env.GITHUB_TOKEN = this.githubToken
 
@@ -76,8 +79,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         assert.isEqualDeep(
             {
-                passedUrl: callsToFetch[0]?.input,
-                passedInit: callsToFetch[0]?.init,
+                passedUrl: callsToFetch[1]?.input,
+                passedInit: callsToFetch[1]?.init,
             },
             {
                 passedUrl: `https://api.github.com/orgs/${this.gitNamespace}/repos`,
@@ -350,6 +353,24 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     @test()
+    protected static async doesNotCreateRepoInGithubOrgIfDone() {
+        const fakeResponse = new Response(null, {
+            status: 200,
+            statusText: 'OK',
+        })
+
+        setFakeFetchResponse(this.reposUrl, fakeResponse)
+
+        await this.createAndRunAutopackage()
+
+        const numCalls = callsToFetch.filter(
+            (call) => call.input === this.orgsUrl
+        ).length
+
+        assert.isEqual(numCalls, 0, 'Should not have created repo!')
+    }
+
+    @test()
     protected static async doesNotCloneRepoIfDone() {
         await this.createAndRunAutopackage()
 
@@ -618,6 +639,15 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         resetCallsToWriteFile()
     }
 
+    private static fakeFetchForRepoNotFound() {
+        const fakeResponse = new Response(null, {
+            status: 404,
+            statusText: 'Not Found',
+        })
+
+        setFakeFetchResponse(this.reposUrl, fakeResponse)
+    }
+
     private static readonly packageName = generateId()
     private static readonly packageDescription = generateId()
     private static readonly gitNamespace = generateId()
@@ -630,6 +660,14 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     private static readonly githubToken = generateId()
     private static readonly metaNodeVersion = generateId()
     private static readonly randomId = generateId()
+
+    private static get reposUrl() {
+        return `https://api.github.com/repos/${this.gitNamespace}/${this.packageName}`
+    }
+
+    private static get orgsUrl() {
+        return `https://api.github.com/orgs/${this.gitNamespace}/repos`
+    }
 
     private static readonly dependencies = {
         [generateId()]: generateId(),

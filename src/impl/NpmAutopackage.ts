@@ -89,6 +89,29 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async createRepoInGithubOrg() {
+        const repoExists = await this.checkIfRepoExists()
+
+        if (!repoExists) {
+            console.log('Creating repository in GitHub organization...')
+            await this.submitCreateRepoRequest()
+        }
+    }
+
+    private async checkIfRepoExists() {
+        const response = await this.fetch(
+            `https://api.github.com/repos/${this.gitNamespace}/${this.packageName}`,
+            {
+                method: 'GET',
+                headers: {
+                    Authorization: `token ${this.githubToken}`,
+                    Accept: 'application/vnd.github+json',
+                },
+            }
+        )
+        return response.status === 200
+    }
+
+    private async submitCreateRepoRequest() {
         await this.fetch(
             `https://api.github.com/orgs/${this.gitNamespace}/repos`,
             {
