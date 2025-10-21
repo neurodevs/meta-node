@@ -1,5 +1,5 @@
 import NpmAutopackage from '../impl/NpmAutopackage'
-import expandHomeDir from './expandHomeDir'
+import expandHomeDir from '../functions/expandHomeDir'
 
 async function main() {
     console.log('Running autopackage...')

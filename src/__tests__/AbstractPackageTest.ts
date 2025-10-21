@@ -1,6 +1,6 @@
 import AbstractSpruceTest, { generateId } from '@sprucelabs/test-utils'
 import { setFakeReadFileResult } from '@neurodevs/fake-node-core'
-import expandHomeDir from '../scripts/expandHomeDir'
+import expandHomeDir from '../functions/expandHomeDir'
 
 export default class AbstractPackageTest extends AbstractSpruceTest {
     protected static async beforeEach() {

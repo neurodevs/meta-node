@@ -1,5 +1,5 @@
 import UiAutomodule from '../impl/UiAutomodule'
-import expandHomeDir from './expandHomeDir'
+import expandHomeDir from '../functions/expandHomeDir'
 
 async function main() {
     console.log('\nRunning automodule...')
