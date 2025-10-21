@@ -2,7 +2,7 @@ import { ChildProcess, exec as execSync } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
 import path from 'path'
 import { promisify } from 'util'
-import { test, assert, generateId } from '@sprucelabs/test-utils'
+import { test, assert } from '@sprucelabs/test-utils'
 import {
     callsToChdir,
     callsToExec,
@@ -26,6 +26,7 @@ import {
     setFakeReadFileResult,
     setPathShouldExist,
 } from '@neurodevs/fake-node-core'
+import generateId from '@neurodevs/generate-id'
 import NpmAutopackage, {
     Autopackage,
     AutopackageOptions,

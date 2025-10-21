@@ -1,10 +1,11 @@
-import { test, assert, generateId } from '@sprucelabs/test-utils'
+import { test, assert } from '@sprucelabs/test-utils'
 import {
     callsToExec,
     callsToWriteFile,
     setFakeReadFileResult,
     setFakeReadFileThrowsFor,
 } from '@neurodevs/fake-node-core'
+import generateId from '@neurodevs/generate-id'
 import UiAutomodule from '../../impl/UiAutomodule'
 import AbstractAutomoduleTest from '../AbstractAutomoduleTest'
 

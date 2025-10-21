@@ -1,5 +1,5 @@
 import { readFile, writeFile } from 'fs/promises'
-import { test, assert, generateId } from '@sprucelabs/test-utils'
+import { test, assert } from '@sprucelabs/test-utils'
 import {
     callsToWriteFile,
     fakeReadFile,
@@ -8,6 +8,7 @@ import {
     resetCallsToWriteFile,
     setFakeReadFileResult,
 } from '@neurodevs/fake-node-core'
+import generateId from '@neurodevs/generate-id'
 import VscodeSnippetKeybinder, {
     SnippetKeybinder,
 } from '../../impl/VscodeSnippetKeybinder'

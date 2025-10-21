@@ -1,5 +1,6 @@
-import AbstractSpruceTest, { generateId } from '@sprucelabs/test-utils'
+import AbstractSpruceTest from '@sprucelabs/test-utils'
 import { setFakeReadFileResult } from '@neurodevs/fake-node-core'
+import generateId from '@neurodevs/generate-id'
 import expandHomeDir from '../functions/expandHomeDir'
 
 export default class AbstractPackageTest extends AbstractSpruceTest {

@@ -1,7 +1,7 @@
 import { exec as execSync } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
 import { promisify } from 'util'
-import { assert, generateId } from '@sprucelabs/test-utils'
+import { assert } from '@sprucelabs/test-utils'
 import {
     fakeExec,
     fakePathExists,
@@ -13,6 +13,7 @@ import {
     resetCallsToWriteFile,
     setPathShouldExist,
 } from '@neurodevs/fake-node-core'
+import generateId from '@neurodevs/generate-id'
 import AbstractAutomodule from '../impl/AbstractAutomodule'
 import { Automodule } from '../types'
 import AbstractPackageTest from './AbstractPackageTest'
