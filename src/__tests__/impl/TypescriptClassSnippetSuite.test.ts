@@ -143,7 +143,7 @@ export default class TypescriptClassSnippetSuiteTest extends AbstractPackageTest
 
     private static readonly snippets = `
         // === PUBLIC ===
-        "Public constructor": { "scope": "typescript", "prefix": "public.constructor", "body": ["public constructor(\${1:args}) {\${2:} }"] },
+        "Public constructor": { "scope": "typescript", "prefix": "public.constructor", "body": ["public constructor(\${1:}) {\${2:} }"] },
         "Public field": { "scope": "typescript", "prefix": "public.field", "body": ["public \${1:newField} = \${2:undefined}"] },
         "Public readonly field": { "scope": "typescript", "prefix": "public.readonly.field", "body": ["public readonly \${1:newField} = \${2:undefined}"] },
         "Public getter": { "scope": "typescript", "prefix": "public.getter", "body": ["public get \${1:newProperty}() { return \${2:undefined} }"] },
@@ -153,7 +153,7 @@ export default class TypescriptClassSnippetSuiteTest extends AbstractPackageTest
         "Public abstract method": { "scope": "typescript", "prefix": "public.abstract.method", "body": ["public abstract \${1:newMethod}(\${2:}): \${3:unknown}"] },
 
         // === PROTECTED ===
-        "Protected constructor": { "scope": "typescript", "prefix": "protected.constructor", "body": ["protected constructor(\${1:args}) {\${2:} }"] },
+        "Protected constructor": { "scope": "typescript", "prefix": "protected.constructor", "body": ["protected constructor(\${1:}) {\${2:} }"] },
         "Protected field": { "scope": "typescript", "prefix": "protected.field", "body": ["protected \${1:newField} = \${2:undefined}"] },
         "Protected readonly field": { "scope": "typescript", "prefix": "protected.readonly.field", "body": ["protected readonly \${1:newField} = \${2:undefined}"] },
         "Protected getter": { "scope": "typescript", "prefix": "protected.getter", "body": ["protected get \${1:newProperty}() { return \${2:undefined} }"] },
@@ -163,7 +163,7 @@ export default class TypescriptClassSnippetSuiteTest extends AbstractPackageTest
         "Protected abstract method": { "scope": "typescript", "prefix": "protected.abstract.method", "body": ["protected abstract \${1:newMethod}(\${2:}): \${3:unknown}"] },
 
         // === PRIVATE ===
-        "Private constructor": { "scope": "typescript", "prefix": "private.constructor", "body": ["private constructor(\${1:args}) {\${2:} }"] },
+        "Private constructor": { "scope": "typescript", "prefix": "private.constructor", "body": ["private constructor(\${1:}) {\${2:} }"] },
         "Private field": { "scope": "typescript", "prefix": "private.field", "body": ["private \${1:newField} = \${2:undefined}"] },
         "Private readonly field": { "scope": "typescript", "prefix": "private.readonly.field", "body": ["private readonly \${1:newField} = \${2:undefined}"] },
         "Private getter": { "scope": "typescript", "prefix": "private.getter", "body": ["private get \${1:newProperty}() { return \${2:undefined} }"] },
