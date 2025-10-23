@@ -37,7 +37,7 @@ export default class VscodeSnippetKeybinder implements SnippetKeybinder {
         const updated = {
             ...snippets,
             [this.name]: {
-                scope: 'javascript,typescript',
+                scope: 'javascript,typescript,typescriptreact,javascriptreact',
                 prefix: this.toCommandId(this.name),
                 body: this.lines,
                 description: this.description,
