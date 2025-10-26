@@ -555,7 +555,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     private static readonly buildDirGitignorePattern = '\nbuild/\n'
 
     private static get createModuleCmd() {
-        return `spruce create.module --name "${this.packageName}" --destination "${this.packageDir}" --description "${this.packageDescription}"`
+        return `spruce create.module --name "${this.packageName}" --destination "." --description "${this.packageDescription}"`
     }
 
     private static readonly setupVscodeCmd = 'spruce setup.vscode --all true'

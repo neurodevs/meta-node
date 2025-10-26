@@ -198,7 +198,7 @@ export default class NpmAutopackage implements Autopackage {
 
     private async execSpruceCreateModule() {
         await this.exec(
-            `spruce create.module --name "${this.packageName}" --destination "${this.packageName}" --description "${this.description}"`
+            `spruce create.module --name "${this.packageName}" --destination "." --description "${this.description}"`
         )
     }
 
