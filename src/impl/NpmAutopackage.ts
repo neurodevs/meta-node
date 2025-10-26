@@ -66,9 +66,9 @@ export default class NpmAutopackage implements Autopackage {
 
         this.chdirToInstallDir()
         await this.cloneGitRepo()
-        await this.gitPull()
 
         this.chdirToPackageDir()
+        await this.gitPull()
         await this.setCurrentMetaNodeVersion()
         await this.spruceCreateModule()
         await this.updatePackageJson()
