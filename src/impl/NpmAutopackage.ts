@@ -66,6 +66,7 @@ export default class NpmAutopackage implements Autopackage {
 
         this.chdirToInstallDir()
         await this.cloneGitRepo()
+        await this.gitPull()
 
         this.chdirToPackageDir()
         await this.setCurrentMetaNodeVersion()
@@ -157,6 +158,10 @@ export default class NpmAutopackage implements Autopackage {
 
     private get gitUrl() {
         return `https://github.com/${this.gitNamespace}/${this.packageName}.git`
+    }
+
+    private async gitPull() {
+        await this.exec('git pull')
     }
 
     private chdirToPackageDir() {
