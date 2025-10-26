@@ -68,7 +68,7 @@ export default class NpmAutopackage implements Autopackage {
         await this.cloneGitRepo()
 
         this.chdirToPackageDir()
-        await this.gitPull()
+        await this.resetMainToOrigin()
         await this.setCurrentMetaNodeVersion()
         await this.spruceCreateModule()
         await this.updatePackageJson()
@@ -160,8 +160,9 @@ export default class NpmAutopackage implements Autopackage {
         return `https://github.com/${this.gitNamespace}/${this.packageName}.git`
     }
 
-    private async gitPull() {
-        await this.exec('git pull')
+    private async resetMainToOrigin() {
+        await this.exec('git fetch origin')
+        await this.exec('git reset --hard origin/main')
     }
 
     private chdirToPackageDir() {

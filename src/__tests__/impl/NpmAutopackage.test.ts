@@ -140,10 +140,25 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     @test()
-    protected static async thenGitPull() {
+    protected static async thenGitFetchOrigin() {
         await this.run()
 
-        assert.isEqual(callsToExec[1], `git pull`, 'Did not call git pull!')
+        assert.isEqual(
+            callsToExec[1],
+            `git fetch origin`,
+            'Did not call git fetch origin!'
+        )
+    }
+
+    @test()
+    protected static async thenGitFetchResetHard() {
+        await this.run()
+
+        assert.isEqual(
+            callsToExec[2],
+            `git reset --hard origin/main`,
+            'Did not call git reset hard!'
+        )
     }
 
     @test()
@@ -151,7 +166,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqual(
-            callsToExec[3],
+            callsToExec[4],
             this.createModuleCmd,
             'Did not call "spruce create.module"!'
         )
@@ -162,7 +177,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(4, 7),
+            callsToExec.slice(5, 8),
             [
                 'git add .',
                 `git commit -m "patch: create package (@neurodevs/meta-node: ${this.metaNodeVersion})"`,
@@ -235,7 +250,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(7, 10),
+            callsToExec.slice(8, 11),
             [
                 'git add .',
                 `git commit -m "patch: update package.json (@neurodevs/meta-node: ${this.metaNodeVersion})"`,
@@ -265,7 +280,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(10, 13),
+            callsToExec.slice(11, 14),
             [
                 'git add .',
                 `git commit -m "patch: add build dir to gitignore (@neurodevs/meta-node: ${this.metaNodeVersion})"`,
@@ -280,7 +295,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqual(
-            callsToExec[13],
+            callsToExec[14],
             this.setupVscodeCmd,
             'Did not call "spruce setup.vscode"!'
         )
@@ -291,7 +306,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(14, 17),
+            callsToExec.slice(15, 18),
             [
                 'git add .',
                 `git commit -m "patch: setup vscode (@neurodevs/meta-node: ${this.metaNodeVersion})"`,
@@ -317,7 +332,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(17, 20),
+            callsToExec.slice(18, 21),
             [
                 'git add .',
                 `git commit -m "patch: update vscode tasks.json (@neurodevs/meta-node: ${this.metaNodeVersion})"`,
@@ -332,7 +347,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqual(
-            callsToExec[21],
+            callsToExec[22],
             'yarn add -D @neurodevs/generate-id@latest',
             'Did not install default devDependencies!'
         )
@@ -343,7 +358,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(22, 25),
+            callsToExec.slice(23, 26),
             [
                 'git add .',
                 `git commit -m "patch: install default devDependencies (@neurodevs/meta-node: ${this.metaNodeVersion})"`,
@@ -357,7 +372,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     protected static async lastlyOpensVscodeAtEnd() {
         await this.run()
 
-        assert.isEqual(callsToExec[25], 'code .', 'Did not open vscode at end!')
+        assert.isEqual(callsToExec[26], 'code .', 'Did not open vscode at end!')
     }
 
     @test()
