@@ -1,6 +1,6 @@
 {
   "name": "@neurodevs/meta-node",
-  "version": "0.14.11",
+  "version": "0.14.12",
   "description": "Meta-layer utilities for maintaining Node.js package ecosystems.",
   "type": "module",
   "keywords": [
@@ -56,10 +56,6 @@
     "@neurodevs/fake-node-core": "^0.6.1",
     "@neurodevs/generate-id": "^1.0.8",
     "@neurodevs/node-tdd": "^0.1.2",
-    "@sprucelabs/jest-json-reporter": "^9.0.61",
-    "@sprucelabs/resolve-path-aliases": "^3.0.28",
-    "@sprucelabs/test": "^10.0.24",
-    "@sprucelabs/test-utils": "^6.0.94",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^24.6.2",
     "@types/node-fetch": "^2.6.13",
