@@ -1,8 +1,9 @@
-import { test, assert } from '@sprucelabs/test-utils'
+import { test, assert } from '@neurodevs/node-tdd'
+
 import PackageAutodocumenter, {
     Autodocumenter,
-} from '../../impl/PackageAutodocumenter'
-import AbstractPackageTest from '../AbstractPackageTest'
+} from '../../impl/PackageAutodocumenter.js'
+import AbstractPackageTest from '../AbstractPackageTest.js'
 
 export default class PackageAutodocumenterTest extends AbstractPackageTest {
     private static instance: Autodocumenter

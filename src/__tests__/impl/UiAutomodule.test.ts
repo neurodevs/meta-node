@@ -1,4 +1,3 @@
-import { test, assert } from '@sprucelabs/test-utils'
 import {
     callsToExec,
     callsToWriteFile,
@@ -6,8 +5,10 @@ import {
     setFakeReadFileThrowsFor,
 } from '@neurodevs/fake-node-core'
 import generateId from '@neurodevs/generate-id'
-import UiAutomodule from '../../impl/UiAutomodule'
-import AbstractAutomoduleTest from '../AbstractAutomoduleTest'
+import { test, assert } from '@neurodevs/node-tdd'
+
+import UiAutomodule from '../../impl/UiAutomodule.js'
+import AbstractAutomoduleTest from '../AbstractAutomoduleTest.js'
 
 export default class UiAutomoduleTest extends AbstractAutomoduleTest {
     protected static async beforeEach() {
@@ -133,7 +134,7 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
 
     private static get testFilePattern() {
         return `
-            import { test, assert } from '@sprucelabs/test-utils'
+            import { test, assert } from '@neurodevs/node-tdd'
             import { render, RenderResult } from '@testing-library/react'
             import ${this.componentName} from '../../ui/${this.componentName}'
             import AbstractPackageTest from '../AbstractPackageTest'

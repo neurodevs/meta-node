@@ -1,53 +1,53 @@
 // Autocloner
 
-export { default as GitAutocloner } from './impl/GitAutocloner'
-export * from './impl/GitAutocloner'
+export { default as GitAutocloner } from './impl/GitAutocloner.js'
+export * from './impl/GitAutocloner.js'
 
-export { default as FakeAutocloner } from './testDoubles/Autocloner/FakeAutocloner'
-export * from './testDoubles/Autocloner/FakeAutocloner'
+export { default as FakeAutocloner } from './testDoubles/Autocloner/FakeAutocloner.js'
+export * from './testDoubles/Autocloner/FakeAutocloner.js'
 
 // Autodocumenter
 
-export { default as PackageAutodocumenter } from './impl/PackageAutodocumenter'
-export * from './impl/PackageAutodocumenter'
+export { default as PackageAutodocumenter } from './impl/PackageAutodocumenter.js'
+export * from './impl/PackageAutodocumenter.js'
 
-export { default as FakeAutodocumenter } from './testDoubles/Autodocumenter/FakeAutodocumenter'
-export * from './testDoubles/Autodocumenter/FakeAutodocumenter'
+export { default as FakeAutodocumenter } from './testDoubles/Autodocumenter/FakeAutodocumenter.js'
+export * from './testDoubles/Autodocumenter/FakeAutodocumenter.js'
 
 // Automodule
 
-export { default as AbstractAutomodule } from './impl/AbstractAutomodule'
-export * from './impl/AbstractAutomodule'
+export { default as AbstractAutomodule } from './impl/AbstractAutomodule.js'
+export * from './impl/AbstractAutomodule.js'
 
-export { default as ImplAutomodule } from './impl/ImplAutomodule'
-export * from './impl/ImplAutomodule'
+export { default as ImplAutomodule } from './impl/ImplAutomodule.js'
+export * from './impl/ImplAutomodule.js'
 
-export { default as UiAutomodule } from './impl/UiAutomodule'
-export * from './impl/UiAutomodule'
+export { default as UiAutomodule } from './impl/UiAutomodule.js'
+export * from './impl/UiAutomodule.js'
 
-export { default as FakeAutomodule } from './testDoubles/Automodule/FakeAutomodule'
-export * from './testDoubles/Automodule/FakeAutomodule'
+export { default as FakeAutomodule } from './testDoubles/Automodule/FakeAutomodule.js'
+export * from './testDoubles/Automodule/FakeAutomodule.js'
 
 // Autopackage
 
-export { default as NpmAutopackage } from './impl/NpmAutopackage'
-export * from './impl/NpmAutopackage'
+export { default as NpmAutopackage } from './impl/NpmAutopackage.js'
+export * from './impl/NpmAutopackage.js'
 
-export { default as FakeAutopackage } from './testDoubles/Autopackage/FakeAutopackage'
-export * from './testDoubles/Autopackage/FakeAutopackage'
+export { default as FakeAutopackage } from './testDoubles/Autopackage/FakeAutopackage.js'
+export * from './testDoubles/Autopackage/FakeAutopackage.js'
 
 // SnippetKeybinder
 
-export { default as VscodeSnippetKeybinder } from './impl/VscodeSnippetKeybinder'
-export * from './impl/VscodeSnippetKeybinder'
+export { default as VscodeSnippetKeybinder } from './impl/VscodeSnippetKeybinder.js'
+export * from './impl/VscodeSnippetKeybinder.js'
 
-export { default as FakeSnippetKeybinder } from './testDoubles/SnippetKeybinder/FakeSnippetKeybinder'
-export * from './testDoubles/SnippetKeybinder/FakeSnippetKeybinder'
+export { default as FakeSnippetKeybinder } from './testDoubles/SnippetKeybinder/FakeSnippetKeybinder.js'
+export * from './testDoubles/SnippetKeybinder/FakeSnippetKeybinder.js'
 
 // SnippetSuite
 
-export { default as TypescriptClassSnippetSuite } from './impl/TypescriptClassSnippetSuite'
-export * from './impl/TypescriptClassSnippetSuite'
+export { default as TypescriptClassSnippetSuite } from './impl/TypescriptClassSnippetSuite.js'
+export * from './impl/TypescriptClassSnippetSuite.js'
 
-export { default as FakeSnippetSuite } from './testDoubles/SnippetSuite/FakeSnippetSuite'
-export * from './testDoubles/SnippetSuite/FakeSnippetSuite'
+export { default as FakeSnippetSuite } from './testDoubles/SnippetSuite/FakeSnippetSuite.js'
+export * from './testDoubles/SnippetSuite/FakeSnippetSuite.js'

@@ -1,6 +1,7 @@
 import { pathExists } from 'fs-extra'
-import { Automodule, BaseAutomoduleOptions } from '../types'
-import AbstractAutomodule from './AbstractAutomodule'
+
+import { Automodule, BaseAutomoduleOptions } from '../types.js'
+import AbstractAutomodule from './AbstractAutomodule.js'
 
 export default class UiAutomodule extends AbstractAutomodule {
     public static Class?: UiAutomoduleConstructor
@@ -52,7 +53,7 @@ export default class UiAutomodule extends AbstractAutomodule {
 
     private get testFileTemplate() {
         return `
-            import { test, assert } from '@sprucelabs/test-utils'
+            import { test, assert } from '@neurodevs/node-tdd'
             import { render, RenderResult } from '@testing-library/react'
             import ${this.componentName} from '../../ui/${this.componentName}'
             import AbstractPackageTest from '../AbstractPackageTest'

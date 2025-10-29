@@ -2,7 +2,6 @@ import { ChildProcess, exec as execSync } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
 import path from 'path'
 import { promisify } from 'util'
-import { test, assert } from '@sprucelabs/test-utils'
 import {
     callsToChdir,
     callsToExec,
@@ -27,11 +26,13 @@ import {
     setPathShouldExist,
 } from '@neurodevs/fake-node-core'
 import generateId from '@neurodevs/generate-id'
+import { test, assert } from '@neurodevs/node-tdd'
+
 import NpmAutopackage, {
     Autopackage,
     AutopackageOptions,
-} from '../../impl/NpmAutopackage'
-import AbstractPackageTest from '../AbstractPackageTest'
+} from '../../impl/NpmAutopackage.js'
+import AbstractPackageTest from '../AbstractPackageTest.js'
 
 const exec = promisify(execSync)
 

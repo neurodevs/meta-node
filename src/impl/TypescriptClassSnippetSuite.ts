@@ -1,5 +1,5 @@
 import { readFile, writeFile } from 'fs/promises'
-import expandHomeDir from '../functions/expandHomeDir'
+import expandHomeDir from '../functions/expandHomeDir.js'
 
 export default class TypescriptClassSnippetSuite implements SnippetSuite {
     public static Class?: SnippetSuiteConstructor

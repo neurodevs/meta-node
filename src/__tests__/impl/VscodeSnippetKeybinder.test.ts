@@ -1,5 +1,4 @@
 import { readFile, writeFile } from 'fs/promises'
-import { test, assert } from '@sprucelabs/test-utils'
 import {
     callsToWriteFile,
     fakeReadFile,
@@ -9,10 +8,12 @@ import {
     setFakeReadFileResult,
 } from '@neurodevs/fake-node-core'
 import generateId from '@neurodevs/generate-id'
+import { test, assert } from '@neurodevs/node-tdd'
+
 import VscodeSnippetKeybinder, {
     SnippetKeybinder,
-} from '../../impl/VscodeSnippetKeybinder'
-import AbstractPackageTest from '../AbstractPackageTest'
+} from '../../impl/VscodeSnippetKeybinder.js'
+import AbstractPackageTest from '../AbstractPackageTest.js'
 
 export default class VscodeSnippetKeybinderTest extends AbstractPackageTest {
     private static instance: SnippetKeybinder

@@ -1,5 +1,5 @@
-import expandHomeDir from '../functions/expandHomeDir'
-import ImplAutomodule from '../impl/ImplAutomodule'
+import expandHomeDir from '../functions/expandHomeDir.js'
+import ImplAutomodule from '../impl/ImplAutomodule.js'
 
 async function main() {
     console.log('\nRunning automodule...')

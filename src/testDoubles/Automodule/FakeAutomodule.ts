@@ -1,6 +1,6 @@
-import { ImplAutomoduleOptions } from '../../impl/ImplAutomodule'
-import { UiAutomoduleOptions } from '../../impl/UiAutomodule'
-import { Automodule } from '../../types'
+import { ImplAutomoduleOptions } from '../../impl/ImplAutomodule.js'
+import { UiAutomoduleOptions } from '../../impl/UiAutomodule.js'
+import { Automodule } from '../../types.js'
 
 export default class FakeImplAutomodule implements Automodule {
     public static callsToConstructor: FakeAutomoduleOptions[] = []

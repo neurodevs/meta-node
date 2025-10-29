@@ -1,4 +1,3 @@
-import { test, assert } from '@sprucelabs/test-utils'
 import {
     callsToExec,
     callsToWriteFile,
@@ -6,8 +5,10 @@ import {
     setFakeReadFileThrowsFor,
 } from '@neurodevs/fake-node-core'
 import generateId from '@neurodevs/generate-id'
-import ImplAutomodule from '../../impl/ImplAutomodule'
-import AbstractAutomoduleTest from '../AbstractAutomoduleTest'
+import { test, assert } from '@neurodevs/node-tdd'
+
+import ImplAutomodule from '../../impl/ImplAutomodule.js'
+import AbstractAutomoduleTest from '../AbstractAutomoduleTest.js'
 
 export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
     protected static async beforeEach() {
@@ -136,7 +137,7 @@ export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
 
     private static get testFilePattern() {
         return `
-            import AbstractSpruceTest, { test, assert } from '@sprucelabs/test-utils'
+            import AbstractSpruceTest, { test, assert } from '@neurodevs/node-tdd'
             import ${this.implName}, { ${this.interfaceName} } from '../../impl/${this.implName}'
 
             export default class ${this.implName}Test extends AbstractSpruceTest {

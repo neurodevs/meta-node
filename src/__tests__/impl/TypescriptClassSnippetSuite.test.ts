@@ -1,5 +1,4 @@
 import { readFile, writeFile } from 'fs/promises'
-import { test, assert } from '@sprucelabs/test-utils'
 import {
     callsToWriteFile,
     fakeReadFile,
@@ -8,10 +7,12 @@ import {
     resetCallsToWriteFile,
     setFakeReadFileResult,
 } from '@neurodevs/fake-node-core'
+import { test, assert } from '@neurodevs/node-tdd'
+
 import TypescriptClassSnippetSuite, {
     SnippetSuite,
-} from '../../impl/TypescriptClassSnippetSuite'
-import AbstractPackageTest from '../AbstractPackageTest'
+} from '../../impl/TypescriptClassSnippetSuite.js'
+import AbstractPackageTest from '../AbstractPackageTest.js'
 
 export default class TypescriptClassSnippetSuiteTest extends AbstractPackageTest {
     private static instance: SnippetSuite

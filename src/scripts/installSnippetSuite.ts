@@ -1,4 +1,4 @@
-import TypescriptClassSnippetSuite from '../impl/TypescriptClassSnippetSuite'
+import TypescriptClassSnippetSuite from '../impl/TypescriptClassSnippetSuite.js'
 
 async function main() {
     console.log('Installing TypeScript Class Snippet Suite...')

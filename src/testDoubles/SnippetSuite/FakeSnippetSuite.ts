@@ -1,4 +1,4 @@
-import { SnippetSuite } from '../../impl/TypescriptClassSnippetSuite'
+import { SnippetSuite } from '../../impl/TypescriptClassSnippetSuite.js'
 
 export default class FakeSnippetSuite implements SnippetSuite {
     public static numCallsToConstructor = 0

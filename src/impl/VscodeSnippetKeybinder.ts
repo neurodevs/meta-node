@@ -1,6 +1,7 @@
 import { readFile, writeFile } from 'fs/promises'
 import { parse } from 'jsonc-parser'
-import expandHomeDir from '../functions/expandHomeDir'
+
+import expandHomeDir from '../functions/expandHomeDir.js'
 
 export default class VscodeSnippetKeybinder implements SnippetKeybinder {
     public static Class?: SnippetKeybinderConstructor

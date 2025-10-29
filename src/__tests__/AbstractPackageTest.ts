@@ -1,9 +1,10 @@
-import AbstractSpruceTest from '@sprucelabs/test-utils'
 import { setFakeReadFileResult } from '@neurodevs/fake-node-core'
 import generateId from '@neurodevs/generate-id'
-import expandHomeDir from '../functions/expandHomeDir'
+import AbstractModuleTest from '@neurodevs/node-tdd'
 
-export default class AbstractPackageTest extends AbstractSpruceTest {
+import expandHomeDir from '../functions/expandHomeDir.js'
+
+export default class AbstractPackageTest extends AbstractModuleTest {
     protected static async beforeEach() {
         await super.beforeEach()
     }

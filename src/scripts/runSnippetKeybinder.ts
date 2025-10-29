@@ -1,4 +1,4 @@
-import VscodeSnippetKeybinder from '../impl/VscodeSnippetKeybinder'
+import VscodeSnippetKeybinder from '../impl/VscodeSnippetKeybinder.js'
 
 async function main() {
     console.log('Running VscodeSnippetKeybinder...')

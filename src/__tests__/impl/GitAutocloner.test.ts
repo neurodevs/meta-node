@@ -1,6 +1,5 @@
 import { exec as execSync } from 'child_process'
 import { promisify } from 'util'
-import { test, assert } from '@sprucelabs/test-utils'
 import {
     callsToChdir,
     callsToExec,
@@ -12,12 +11,14 @@ import {
     setPathShouldExist,
 } from '@neurodevs/fake-node-core'
 import generateId from '@neurodevs/generate-id'
+import { test, assert } from '@neurodevs/node-tdd'
 import { pathExists } from 'fs-extra'
+
 import GitAutocloner, {
     Autocloner,
     AutoclonerOptions,
-} from '../../impl/GitAutocloner'
-import AbstractPackageTest from '../AbstractPackageTest'
+} from '../../impl/GitAutocloner.js'
+import AbstractPackageTest from '../AbstractPackageTest.js'
 
 const exec = promisify(execSync)
 

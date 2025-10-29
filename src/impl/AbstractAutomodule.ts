@@ -2,7 +2,8 @@ import { exec as execSync } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
 import { promisify } from 'util'
 import { pathExists } from 'fs-extra'
-import { Automodule, BaseAutomoduleOptions } from '../types'
+
+import { Automodule, BaseAutomoduleOptions } from '../types.js'
 
 export default abstract class AbstractAutomodule implements Automodule {
     public static exec = promisify(execSync)

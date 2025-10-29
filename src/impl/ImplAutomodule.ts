@@ -1,5 +1,5 @@
-import { Automodule, BaseAutomoduleOptions } from '../types'
-import AbstractAutomodule from './AbstractAutomodule'
+import { Automodule, BaseAutomoduleOptions } from '../types.js'
+import AbstractAutomodule from './AbstractAutomodule.js'
 
 export default class ImplAutomodule extends AbstractAutomodule {
     public static Class?: ImplAutomoduleConstructor
@@ -44,7 +44,7 @@ export default class ImplAutomodule extends AbstractAutomodule {
 
     private get testFilePattern() {
         return `
-            import AbstractSpruceTest, { test, assert } from '@sprucelabs/test-utils'
+            import AbstractSpruceTest, { test, assert } from '@neurodevs/node-tdd'
             import ${this.implName}, { ${this.interfaceName} } from '../../impl/${this.implName}'
 
             export default class ${this.implName}Test extends AbstractSpruceTest {
