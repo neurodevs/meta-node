@@ -12,7 +12,6 @@ import {
     resetCallsToWriteFile,
     setPathShouldExist,
 } from '@neurodevs/fake-node-core'
-import generateId from '@neurodevs/generate-id'
 import { assert } from '@neurodevs/node-tdd'
 
 import AbstractAutomodule from '../impl/AbstractAutomodule.js'
@@ -72,15 +71,15 @@ export default class AbstractAutomoduleTest extends AbstractPackageTest {
         return this.instance.run()
     }
 
-    protected static readonly testSaveDir = generateId()
-    protected static readonly moduleSaveDir = generateId()
-    protected static readonly fakeSaveDir = generateId()
+    protected static readonly testSaveDir = this.generateId()
+    protected static readonly moduleSaveDir = this.generateId()
+    protected static readonly fakeSaveDir = this.generateId()
     protected static readonly indexFilePath = './src/index.ts'
 
     protected static readonly originalIndexFile = `
-        // C-${generateId()}
+        // C-${this.generateId()}
         
-        // A-${generateId()}
+        // A-${this.generateId()}
     `
 
     protected static setFakeExec() {

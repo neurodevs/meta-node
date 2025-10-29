@@ -25,7 +25,6 @@ import {
     setFakeReadFileResult,
     setPathShouldExist,
 } from '@neurodevs/fake-node-core'
-import generateId from '@neurodevs/generate-id'
 import { test, assert } from '@neurodevs/node-tdd'
 
 import NpmAutopackage, {
@@ -586,7 +585,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     private static readonly checkGenerateIdVersionCmd = `yarn info @neurodevs/generate-id version --silent`
 
     private static readonly yarnGlobalDirCmd = 'yarn global dir'
-    private static readonly fakeGlobalRoot = generateId()
+    private static readonly fakeGlobalRoot = this.generateId()
 
     private static orderJsonKeys(
         json: Record<string, unknown>,
@@ -672,18 +671,18 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         setFakeFetchResponse(this.reposUrl, fakeResponse)
     }
 
-    private static readonly packageName = generateId()
-    private static readonly packageDescription = generateId()
-    private static readonly gitNamespace = generateId()
-    private static readonly npmNamespace = generateId()
-    private static readonly installDir = generateId()
-    private static readonly keywords = [generateId(), generateId()]
-    private static readonly license = generateId()
-    private static readonly author = generateId()
+    private static readonly packageName = this.generateId()
+    private static readonly packageDescription = this.generateId()
+    private static readonly gitNamespace = this.generateId()
+    private static readonly npmNamespace = this.generateId()
+    private static readonly installDir = this.generateId()
+    private static readonly keywords = [this.generateId(), this.generateId()]
+    private static readonly license = this.generateId()
+    private static readonly author = this.generateId()
 
-    private static readonly githubToken = generateId()
-    private static readonly metaNodeVersion = generateId()
-    private static readonly randomId = generateId()
+    private static readonly githubToken = this.generateId()
+    private static readonly metaNodeVersion = this.generateId()
+    private static readonly randomId = this.generateId()
 
     private static get reposUrl() {
         return `https://api.github.com/repos/${this.gitNamespace}/${this.packageName}`
@@ -694,8 +693,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     private static readonly dependencies = {
-        [generateId()]: generateId(),
-        [generateId()]: generateId(),
+        [this.generateId()]: this.generateId(),
+        [this.generateId()]: this.generateId(),
     }
 
     private static get originalPackageJson() {

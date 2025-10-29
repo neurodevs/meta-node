@@ -4,7 +4,6 @@ import {
     setFakeReadFileResult,
     setFakeReadFileThrowsFor,
 } from '@neurodevs/fake-node-core'
-import generateId from '@neurodevs/generate-id'
 import { test, assert } from '@neurodevs/node-tdd'
 
 import ImplAutomodule from '../../impl/ImplAutomodule.js'
@@ -128,8 +127,8 @@ export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
         )
     }
 
-    private static readonly interfaceName = `B-${generateId()}`
-    private static readonly implName = generateId()
+    private static readonly interfaceName = `B-${this.generateId()}`
+    private static readonly implName = this.generateId()
 
     private static setFakeIndexFileOnReadFile() {
         setFakeReadFileResult(this.indexFilePath, this.originalIndexFile)

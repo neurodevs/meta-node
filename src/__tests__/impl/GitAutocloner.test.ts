@@ -10,7 +10,6 @@ import {
     resetCallsToExec,
     setPathShouldExist,
 } from '@neurodevs/fake-node-core'
-import generateId from '@neurodevs/generate-id'
 import { test, assert } from '@neurodevs/node-tdd'
 import { pathExists } from 'fs-extra'
 
@@ -105,7 +104,7 @@ export default class AutoclonerTest extends AbstractPackageTest {
 
     @test()
     protected static async worksWithPeriodInRepoName() {
-        const repoName = `/${generateId()}.${generateId()}.git`
+        const repoName = `/${this.generateId()}.${this.generateId()}.git`
         await this.run({ urls: [repoName] })
     }
 
@@ -140,7 +139,7 @@ export default class AutoclonerTest extends AbstractPackageTest {
     }
 
     private static generateUrl() {
-        return `https://github.com/${generateId()}.git`
+        return `https://github.com/${this.generateId()}.git`
     }
 
     private static get gitCloneFailedMessage() {
@@ -148,8 +147,8 @@ export default class AutoclonerTest extends AbstractPackageTest {
     }
 
     private static readonly urls = [this.generateUrl(), this.generateUrl()]
-    private static readonly validDirPath = generateId()
-    private static readonly invalidDirPath = generateId()
+    private static readonly validDirPath = this.generateId()
+    private static readonly invalidDirPath = this.generateId()
     private static readonly gitCloneFailedError = 'Failed to clone repo!'
     private static readonly regexForRepoName = /\/([a-zA-Z0-9_.-]+)\.git/
 

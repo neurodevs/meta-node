@@ -7,7 +7,6 @@ import {
     resetCallsToWriteFile,
     setFakeReadFileResult,
 } from '@neurodevs/fake-node-core'
-import generateId from '@neurodevs/generate-id'
 import { test, assert } from '@neurodevs/node-tdd'
 
 import VscodeSnippetKeybinder, {
@@ -114,11 +113,11 @@ export default class VscodeSnippetKeybinderTest extends AbstractPackageTest {
         resetCallsToWriteFile()
     }
 
-    private static readonly fakeName = `${generateId()}-${generateId()}_${generateId()} ${generateId()}`
+    private static readonly fakeName = `${this.generateId()}-${this.generateId()}_${this.generateId()} ${this.generateId()}`
     private static readonly fakePrefix = this.toCommandId(this.fakeName)
-    private static readonly fakeLines = [generateId(), generateId()]
-    private static readonly fakeKeybinding = generateId()
-    private static readonly fakeDescription = generateId()
+    private static readonly fakeLines = [this.generateId(), this.generateId()]
+    private static readonly fakeKeybinding = this.generateId()
+    private static readonly fakeDescription = this.generateId()
 
     private static get updatedSnippetsFile() {
         return {
@@ -133,7 +132,7 @@ export default class VscodeSnippetKeybinderTest extends AbstractPackageTest {
     }
 
     private static readonly originalSnippetsFileCommented = `
-        // ${generateId()}
+        // ${this.generateId()}
         ${JSON.stringify(this.originalSnippets, null, 4)}
     `
 
@@ -150,7 +149,7 @@ export default class VscodeSnippetKeybinderTest extends AbstractPackageTest {
     ]
 
     private static readonly originalKeybindingsFileCommented = `
-        // ${generateId()}
+        // ${this.generateId()}
         ${JSON.stringify(this.originalKeybindings, null, 4)}
     `
 

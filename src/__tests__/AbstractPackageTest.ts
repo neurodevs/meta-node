@@ -1,5 +1,4 @@
 import { setFakeReadFileResult } from '@neurodevs/fake-node-core'
-import generateId from '@neurodevs/generate-id'
 import AbstractModuleTest from '@neurodevs/node-tdd'
 
 import expandHomeDir from '../functions/expandHomeDir.js'
@@ -21,7 +20,7 @@ export default class AbstractPackageTest extends AbstractModuleTest {
         return `${this.vscodeDir}/snippets/custom.code-snippets`
     }
 
-    protected static readonly originalSnippet = { [generateId()]: {} }
+    protected static readonly originalSnippet = { [this.generateId()]: {} }
 
     protected static readonly originalSnippets = {
         ...this.originalSnippet,
@@ -38,8 +37,8 @@ export default class AbstractPackageTest extends AbstractModuleTest {
     }
 
     protected static readonly originalKeybinding = {
-        key: generateId(),
-        command: generateId(),
+        key: this.generateId(),
+        command: this.generateId(),
     }
 
     protected static readonly originalKeybindings = [this.originalKeybinding]

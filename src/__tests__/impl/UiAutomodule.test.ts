@@ -4,7 +4,6 @@ import {
     setFakeReadFileResult,
     setFakeReadFileThrowsFor,
 } from '@neurodevs/fake-node-core'
-import generateId from '@neurodevs/generate-id'
 import { test, assert } from '@neurodevs/node-tdd'
 
 import UiAutomodule from '../../impl/UiAutomodule.js'
@@ -126,7 +125,7 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
         )
     }
 
-    private static readonly componentName = generateId()
+    private static readonly componentName = this.generateId()
 
     private static readonly componentNameKebabCase = this.toKebabCase(
         this.componentName
