@@ -45,7 +45,8 @@ export default class ImplAutomodule extends AbstractAutomodule {
     private get testFilePattern() {
         return `
             import AbstractSpruceTest, { test, assert } from '@neurodevs/node-tdd'
-            import ${this.implName}, { ${this.interfaceName} } from '../../impl/${this.implName}'
+
+            import ${this.implName}, { ${this.interfaceName} } from '../../impl/${this.implName}.js'
 
             export default class ${this.implName}Test extends AbstractSpruceTest {
                 private static instance: ${this.interfaceName}
@@ -88,7 +89,7 @@ export default class ImplAutomodule extends AbstractAutomodule {
 
     private get fakeFilePattern() {
         return `
-            import { ${this.interfaceName} } from '../../impl/${this.implName}'
+            import { ${this.interfaceName} } from '../../impl/${this.implName}.js'
 
             export default class Fake${this.interfaceName} implements ${this.interfaceName} {
                 public static numCallsToConstructor = 0
@@ -108,11 +109,11 @@ export default class ImplAutomodule extends AbstractAutomodule {
         return `
             // ${this.interfaceName}
 
-            export { default as ${this.implName} } from './impl/${this.implName}'
-            export * from './impl/${this.implName}'
+            export { default as ${this.implName} } from './impl/${this.implName}.js'
+            export * from './impl/${this.implName}.js'
 
-            export { default as Fake${this.interfaceName} } from './testDoubles/${this.interfaceName}/Fake${this.interfaceName}'
-            export * from './testDoubles/${this.interfaceName}/Fake${this.interfaceName}'
+            export { default as Fake${this.interfaceName} } from './testDoubles/${this.interfaceName}/Fake${this.interfaceName}.js'
+            export * from './testDoubles/${this.interfaceName}/Fake${this.interfaceName}.js'
         `
     }
 }

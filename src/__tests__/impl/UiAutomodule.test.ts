@@ -136,8 +136,9 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
         return `
             import { test, assert } from '@neurodevs/node-tdd'
             import { render, RenderResult } from '@testing-library/react'
-            import ${this.componentName} from '../../ui/${this.componentName}'
-            import AbstractPackageTest from '../AbstractPackageTest'
+
+            import ${this.componentName} from '../../ui/${this.componentName}.js'
+            import AbstractPackageTest from '../AbstractPackageTest.js'
 
             export default class ${this.componentName}Test extends AbstractPackageTest {
                 private static result: RenderResult
@@ -201,7 +202,8 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
     private static get fakeFilePattern() {
         return `
             import React from 'react'
-            import { ${this.componentName}Props } from '../../ui/${this.componentName}'
+
+            import { ${this.componentName}Props } from '../../ui/${this.componentName}.js'
 
             export let last${this.componentName}Props: ${this.componentName}Props | undefined
 
@@ -223,11 +225,11 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
         return `
             // ${this.componentName}
 
-            export { default as ${this.componentName} } from './ui/${this.componentName}'
-            export * from './ui/${this.componentName}'
+            export { default as ${this.componentName} } from './ui/${this.componentName}.js'
+            export * from './ui/${this.componentName}.js'
 
-            export { default as Fake${this.componentName} } from './testDoubles/${this.componentName}/Fake${this.componentName}'
-            export * from './testDoubles/${this.componentName}/Fake${this.componentName}'
+            export { default as Fake${this.componentName} } from './testDoubles/${this.componentName}/Fake${this.componentName}.js'
+            export * from './testDoubles/${this.componentName}/Fake${this.componentName}.js'
 
         `
     }
