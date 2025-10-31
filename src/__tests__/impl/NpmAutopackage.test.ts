@@ -855,14 +855,14 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     private static readonly abstractPackageTestPath =
         'src/__tests__/AbstractPackageTest.ts'
 
-    private static readonly abstractPackageTestFile = `
-import AbstractModuleTest from '@neurodevs/node-tdd'
+    private static readonly abstractPackageTestFile = `import AbstractModuleTest from '@neurodevs/node-tdd'
 
 export default abstract class AbstractPackageTest extends AbstractModuleTest {
     protected static async beforeEach() {
         await super.beforeEach()
     }
-}`
+}
+`
 
     private static readonly defaultOptions = {
         name: this.packageName,
