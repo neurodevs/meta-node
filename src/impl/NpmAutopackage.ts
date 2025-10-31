@@ -76,6 +76,7 @@ export default class NpmAutopackage implements Autopackage {
         await this.setupVscode()
         await this.updateVscodeTasks()
         await this.installDefaultDevDependencies()
+        await this.installAbstractPackageTest()
         await this.openVscode()
     }
 
@@ -541,6 +542,27 @@ export default class NpmAutopackage implements Autopackage {
             `git commit -m "patch: install default devDependencies (@neurodevs/meta-node: ${this.metaNodeVersion})"`
         )
     }
+
+    private async installAbstractPackageTest() {
+        console.log('Installing AbstractPackageTest...')
+        await this.writeFile(
+            this.abstractPackageTestPath,
+            this.abstractPackageTestFile,
+            { encoding: 'utf-8' }
+        )
+    }
+
+    private readonly abstractPackageTestPath = `__tests__/AbstractPackageTest.ts`
+
+    private readonly abstractPackageTestFile = `
+        import AbstractModuleTest from '@neurodevs/node-tdd'
+
+        export default abstract class AbstractPackageTest extends AbstractModuleTest {
+            protected static async beforeEach() {
+                await super.beforeEach()
+            }
+        }
+    `
 
     private async openVscode() {
         if (this.shouldOpenVscode) {

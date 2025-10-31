@@ -369,6 +369,21 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     @test()
+    protected static async thenInstallsAbstractPackageTest() {
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToWriteFile[3],
+            {
+                file: '__tests__/AbstractPackageTest.ts',
+                data: this.abstractPackageTestFile,
+                options: { encoding: 'utf-8' },
+            },
+            'Did not install AbstractPackageTest!'
+        )
+    }
+
+    @test()
     protected static async lastlyOpensVscodeAtEnd() {
         await this.run()
 
@@ -778,6 +793,16 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
             4
         )
     }
+
+    private static readonly abstractPackageTestFile = `
+        import AbstractModuleTest from '@neurodevs/node-tdd'
+
+        export default abstract class AbstractPackageTest extends AbstractModuleTest {
+            protected static async beforeEach() {
+                await super.beforeEach()
+            }
+        }
+    `
 
     private static readonly defaultOptions = {
         name: this.packageName,
