@@ -352,7 +352,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqual(
-            callsToExec[22],
+            callsToExec[23],
             this.yarnInstallDevDepsCommand,
             'Did not install default devDependencies!'
         )
@@ -363,7 +363,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(23, 26),
+            callsToExec.slice(24, 27),
             [
                 'git add .',
                 `git commit -m "patch: install default devDependencies (@neurodevs/meta-node: ${this.metaNodeVersion})"`,
@@ -407,7 +407,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(26, 29),
+            callsToExec.slice(27, 30),
             [
                 'git add .',
                 `git commit -m "patch: install AbstractPackageTest (@neurodevs/meta-node: ${this.metaNodeVersion})"`,
@@ -421,7 +421,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     protected static async lastlyOpensVscodeAtEnd() {
         await this.run()
 
-        assert.isEqual(callsToExec[29], 'code .', 'Did not open vscode at end!')
+        assert.isEqual(callsToExec[30], 'code .', 'Did not open vscode at end!')
     }
 
     @test()
@@ -575,10 +575,11 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
             'Should not open vscode if not cloned!'
         )
     }
+
     @test()
-    protected static async doesNotInstallDevDependenciesIfLatest() {
+    protected static async installsDevDependenciesIfGenerateIdNotLatest() {
         setFakeExecResult(this.checkGenerateIdVersionCmd, {
-            stdout: '1.0.0',
+            stdout: '0.0.1',
         } as unknown as ChildProcess)
 
         await this.createAndRunAutopackage()
@@ -589,7 +590,30 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         assert.isEqual(
             calls.length,
-            0,
+            1,
+            'Should not install default devDependencies if already installed!'
+        )
+    }
+
+    @test()
+    protected static async installsDevDependenciesIfNodeTddNotLatest() {
+        setFakeExecResult(this.checkGenerateIdVersionCmd, {
+            stdout: '1.0.0',
+        } as unknown as ChildProcess)
+
+        setFakeExecResult(this.checkNodeTddVersionCmd, {
+            stdout: '0.0.1',
+        } as unknown as ChildProcess)
+
+        await this.createAndRunAutopackage()
+
+        const calls = callsToExec.filter(
+            (cmd) => cmd === this.yarnInstallDevDepsCommand
+        )
+
+        assert.isEqual(
+            calls.length,
+            1,
             'Should not install default devDependencies if already installed!'
         )
     }
@@ -649,6 +673,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     private static readonly setupVscodeCmd = 'spruce setup.vscode --all true'
 
     private static readonly checkGenerateIdVersionCmd = `yarn info @neurodevs/generate-id version --silent`
+    private static readonly checkNodeTddVersionCmd = `yarn info @neurodevs/node-tdd version --silent`
 
     private static readonly yarnGlobalDirCmd = 'yarn global dir'
     private static readonly fakeGlobalRoot = this.generateId()
@@ -777,6 +802,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
             dependencies: this.dependencies,
             devDependencies: {
                 '@neurodevs/generate-id': '^1.0.0',
+                '@neurodevs/node-tdd': '^1.0.0',
             },
         })
     }

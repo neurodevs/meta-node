@@ -506,11 +506,18 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async installDefaultDevDependencies() {
-        const latestVersion = await this.getLatestVersion(
+        const generateIdVersion = await this.getLatestVersion(
             '@neurodevs/generate-id'
         )
 
-        if (this.currentGenerateIdVersion != latestVersion) {
+        const nodeTddVersion = await this.getLatestVersion(
+            '@neurodevs/node-tdd'
+        )
+
+        if (
+            this.currentGenerateIdVersion != generateIdVersion ||
+            this.currentNodeTddVersion != nodeTddVersion
+        ) {
             console.log('Installing default devDependencies...')
 
             await this.exec(
@@ -531,6 +538,14 @@ export default class NpmAutopackage implements Autopackage {
         return (
             (this.originalPackageJson.devDependencies as any)[
                 '@neurodevs/generate-id'
+            ] || ''
+        ).replace('^', '')
+    }
+
+    private get currentNodeTddVersion() {
+        return (
+            (this.originalPackageJson.devDependencies as any)[
+                '@neurodevs/node-tdd'
             ] || ''
         ).replace('^', '')
     }
