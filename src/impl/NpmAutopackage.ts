@@ -512,7 +512,10 @@ export default class NpmAutopackage implements Autopackage {
 
         if (this.currentGenerateIdVersion != latestVersion) {
             console.log('Installing default devDependencies...')
-            await this.exec('yarn add -D @neurodevs/generate-id@latest')
+
+            await this.exec(
+                'yarn add -D @neurodevs/generate-id@latest @neurodevs/node-tdd@latest'
+            )
             await this.commitInstallDevDependencies()
         }
     }

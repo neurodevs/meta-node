@@ -353,7 +353,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         assert.isEqual(
             callsToExec[22],
-            'yarn add -D @neurodevs/generate-id@latest',
+            this.yarnInstallDevDepsCommand,
             'Did not install default devDependencies!'
         )
     }
@@ -584,7 +584,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.createAndRunAutopackage()
 
         const calls = callsToExec.filter(
-            (cmd) => cmd === 'yarn add -D @neurodevs/generate-id@latest'
+            (cmd) => cmd === this.yarnInstallDevDepsCommand
         )
 
         assert.isEqual(
@@ -851,6 +851,9 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
             4
         )
     }
+
+    private static readonly yarnInstallDevDepsCommand =
+        'yarn add -D @neurodevs/generate-id@latest @neurodevs/node-tdd@latest'
 
     private static readonly abstractPackageTestPath =
         'src/__tests__/AbstractPackageTest.ts'
