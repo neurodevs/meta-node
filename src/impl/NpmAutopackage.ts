@@ -554,6 +554,8 @@ export default class NpmAutopackage implements Autopackage {
                 this.abstractPackageTestFile,
                 { encoding: 'utf-8' }
             )
+
+            await this.commitInstallAbstractPackageTest()
         }
     }
 
@@ -568,6 +570,18 @@ export default class NpmAutopackage implements Autopackage {
             }
         }
     `
+
+    private async commitInstallAbstractPackageTest() {
+        await this.gitAddAll()
+        await this.gitCommitInstallAbstractPackageTest()
+        await this.gitPush()
+    }
+
+    private async gitCommitInstallAbstractPackageTest() {
+        await this.exec(
+            `git commit -m "patch: install AbstractPackageTest (@neurodevs/meta-node: ${this.metaNodeVersion})"`
+        )
+    }
 
     private async openVscode() {
         if (this.shouldOpenVscode) {
