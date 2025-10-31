@@ -554,7 +554,7 @@ export default class NpmAutopackage implements Autopackage {
 
             await this.writeFile(
                 this.abstractPackageTestPath,
-                this.abstractPackageTestFile,
+                JSON.stringify(this.abstractPackageTestFile, null, 4) + '\n',
                 { encoding: 'utf-8' }
             )
 
