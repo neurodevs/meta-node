@@ -572,7 +572,7 @@ export default class NpmAutopackage implements Autopackage {
                 await super.beforeEach()
             }
         }
-    `
+    `.replace(/^[ \t]+/gm, '')
 
     private async commitInstallAbstractPackageTest() {
         await this.gitAddAll()

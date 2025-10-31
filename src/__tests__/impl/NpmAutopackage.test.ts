@@ -865,7 +865,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
                 await super.beforeEach()
             }
         }
-    `
+    `.replace(/^[ \t]+/gm, '')
 
     private static readonly defaultOptions = {
         name: this.packageName,
