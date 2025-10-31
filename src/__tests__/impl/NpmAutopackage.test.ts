@@ -395,9 +395,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
             callsToWriteFile[3],
             {
                 file: this.abstractPackageTestPath,
-                data:
-                    JSON.stringify(this.abstractPackageTestFile, null, 4) +
-                    '\n',
+                data: this.abstractPackageTestFile,
                 options: { encoding: 'utf-8' },
             },
             'Did not install AbstractPackageTest!'
