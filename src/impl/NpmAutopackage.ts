@@ -1,5 +1,5 @@
 import { exec as execSync } from 'child_process'
-import { readFile, writeFile } from 'fs/promises'
+import { mkdir, readFile, writeFile } from 'fs/promises'
 import path from 'path'
 import { chdir } from 'process'
 import { promisify } from 'util'
@@ -11,6 +11,7 @@ export default class NpmAutopackage implements Autopackage {
     public static chdir = chdir
     public static exec = promisify(execSync)
     public static fetch = fetch
+    public static mkdir = mkdir
     public static pathExists = pathExists
     public static readFile = readFile
     public static writeFile = writeFile
@@ -549,6 +550,8 @@ export default class NpmAutopackage implements Autopackage {
         if (!fileExists) {
             console.log(`Installing ${this.abstractPackageTestPath}...`)
 
+            await this.mkdir('src/__tests__', { recursive: true })
+
             await this.writeFile(
                 this.abstractPackageTestPath,
                 this.abstractPackageTestFile,
@@ -559,7 +562,7 @@ export default class NpmAutopackage implements Autopackage {
         }
     }
 
-    private readonly abstractPackageTestPath = `__tests__/AbstractPackageTest.ts`
+    private readonly abstractPackageTestPath = `src/__tests__/AbstractPackageTest.ts`
 
     private readonly abstractPackageTestFile = `
         import AbstractModuleTest from '@neurodevs/node-tdd'
@@ -597,12 +600,16 @@ export default class NpmAutopackage implements Autopackage {
         return NpmAutopackage.exec
     }
 
-    private get pathExists() {
-        return NpmAutopackage.pathExists
-    }
-
     private get fetch() {
         return NpmAutopackage.fetch
+    }
+
+    private get mkdir() {
+        return NpmAutopackage.mkdir
+    }
+
+    private get pathExists() {
+        return NpmAutopackage.pathExists
     }
 
     private get readFile() {

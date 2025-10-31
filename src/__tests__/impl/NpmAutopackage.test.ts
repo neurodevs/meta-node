@@ -1,22 +1,26 @@
 import { ChildProcess, exec as execSync } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
+import { mkdir } from 'fs/promises'
 import path from 'path'
 import { promisify } from 'util'
 import {
     callsToChdir,
     callsToExec,
     callsToFetch,
+    callsToMkdir,
     callsToReadFile,
     callsToWriteFile,
     fakeChdir,
     fakeExec,
     fakeFetch,
+    fakeMkdir,
     fakePathExists,
     fakeReadFile,
     fakeWriteFile,
     resetCallsToChdir,
     resetCallsToExec,
     resetCallsToFetch,
+    resetCallsToMkdir,
     resetCallsToPathExists,
     resetCallsToReadFile,
     resetCallsToWriteFile,
@@ -43,8 +47,9 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         this.fakeChdir()
         this.fakeExec()
-        this.fakePathExists()
         this.fakeFetch()
+        this.fakeMkdir()
+        this.fakePathExists()
         this.fakeReadFile()
         this.fakeWriteFile()
 
@@ -369,6 +374,20 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     @test()
+    protected static async thenInstallsTestsDirectory() {
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToMkdir[0],
+            {
+                path: 'src/__tests__',
+                options: { recursive: true },
+            },
+            'Did not install tests directory!'
+        )
+    }
+
+    @test()
     protected static async thenInstallsAbstractPackageTest() {
         await this.run()
 
@@ -682,14 +701,21 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         )
     }
 
-    private static fakePathExists() {
-        NpmAutopackage.pathExists = fakePathExists
-        resetCallsToPathExists()
-    }
-
     private static fakeFetch() {
         NpmAutopackage.fetch = fakeFetch as unknown as typeof fetch
         resetCallsToFetch()
+    }
+
+    private static fakeMkdir() {
+        NpmAutopackage.mkdir = fakeMkdir as unknown as typeof mkdir
+        resetCallsToMkdir()
+    }
+
+    private static fakePathExists() {
+        NpmAutopackage.pathExists = fakePathExists
+        resetCallsToPathExists()
+
+        setPathShouldExist(this.abstractPackageTestPath, false)
     }
 
     private static fakeReadFile() {
@@ -827,7 +853,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     private static readonly abstractPackageTestPath =
-        '__tests__/AbstractPackageTest.ts'
+        'src/__tests__/AbstractPackageTest.ts'
 
     private static readonly abstractPackageTestFile = `
         import AbstractModuleTest from '@neurodevs/node-tdd'
