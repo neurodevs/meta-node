@@ -375,7 +375,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         assert.isEqualDeep(
             callsToWriteFile[3],
             {
-                file: '__tests__/AbstractPackageTest.ts',
+                file: this.abstractPackageTestPath,
                 data: this.abstractPackageTestFile,
                 options: { encoding: 'utf-8' },
             },
@@ -568,6 +568,23 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         )
 
         await this.createAndRunAutopackage()
+    }
+
+    @test()
+    protected static async doesNotInstallAbstractPackageTestIfExists() {
+        setPathShouldExist(this.abstractPackageTestPath, true)
+
+        await this.createAndRunAutopackage()
+
+        const calls = callsToWriteFile.filter(
+            (call) => call.file === this.abstractPackageTestPath
+        )
+
+        assert.isEqual(
+            calls.length,
+            0,
+            'Should not install AbstractPackageTest if already exists!'
+        )
     }
 
     private static async run() {
@@ -793,6 +810,9 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
             4
         )
     }
+
+    private static readonly abstractPackageTestPath =
+        '__tests__/AbstractPackageTest.ts'
 
     private static readonly abstractPackageTestFile = `
         import AbstractModuleTest from '@neurodevs/node-tdd'

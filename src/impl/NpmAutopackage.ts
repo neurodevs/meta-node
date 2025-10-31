@@ -544,12 +544,17 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async installAbstractPackageTest() {
-        console.log('Installing AbstractPackageTest...')
-        await this.writeFile(
-            this.abstractPackageTestPath,
-            this.abstractPackageTestFile,
-            { encoding: 'utf-8' }
-        )
+        const fileExists = await this.pathExists(this.abstractPackageTestPath)
+
+        if (!fileExists) {
+            console.log(`Installing ${this.abstractPackageTestPath}...`)
+
+            await this.writeFile(
+                this.abstractPackageTestPath,
+                this.abstractPackageTestFile,
+                { encoding: 'utf-8' }
+            )
+        }
     }
 
     private readonly abstractPackageTestPath = `__tests__/AbstractPackageTest.ts`
