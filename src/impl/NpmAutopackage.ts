@@ -20,7 +20,7 @@ export default class NpmAutopackage implements Autopackage {
     private packageName: string
     private description: string
     private gitNamespace: string
-    private npmNamespace: string
+    private npmNamespace?: string
     private keywords?: string[]
     private license?: string
     private author?: string
@@ -307,7 +307,9 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private get scopedPackageName() {
-        return `@${this.npmNamespace}/${this.packageName}`
+        return this.npmNamespace
+            ? `@${this.npmNamespace}/${this.packageName}`
+            : this.packageName
     }
 
     private orderJsonKeys(json: Record<string, unknown>, keyOrder: string[]) {
@@ -650,7 +652,7 @@ export interface AutopackageOptions {
     name: string
     description: string
     gitNamespace: string
-    npmNamespace: string
+    npmNamespace?: string
     keywords?: string[]
     license?: string
     author?: string

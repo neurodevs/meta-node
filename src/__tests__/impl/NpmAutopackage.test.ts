@@ -98,9 +98,9 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        name: this.packageName,
+                        name: this.name,
                         private: false,
-                        description: this.packageDescription,
+                        description: this.description,
                         auto_init: true,
                         gitignore_template: 'Node',
                         license_template: 'mit',
@@ -128,7 +128,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         assert.isEqual(
             callsToExec[0],
-            `git clone https://github.com/${this.gitNamespace}/${this.packageName}.git`,
+            `git clone https://github.com/${this.gitNamespace}/${this.name}.git`,
             'Did not call git clone!'
         )
     }
@@ -450,7 +450,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
             callsToExec.filter(
                 (cmd) =>
                     cmd ===
-                    `git clone https://github.com/${this.gitNamespace}/${this.packageName}.git`
+                    `git clone https://github.com/${this.gitNamespace}/${this.name}.git`
             ).length,
             1,
             'Did not clone repo once!'
@@ -566,7 +566,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     @test()
     protected static async doesNotOpenVscodeIfNotCloned() {
-        setPathShouldExist(this.packageName, true)
+        setPathShouldExist(this.name, true)
 
         await this.createAndRunAutopackage()
 
@@ -645,6 +645,23 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         )
     }
 
+    @test()
+    protected static async makeNpmNamespaceOptional() {
+        resetCallsToWriteFile()
+
+        const instance = this.NpmAutopackage({
+            npmNamespace: undefined,
+        })
+
+        await instance.run()
+
+        assert.doesInclude(
+            callsToWriteFile[0]?.data,
+            `"name": "${this.name}"`,
+            'Did not handle missing npmNamespace!'
+        )
+    }
+
     private static async run() {
         await this.instance.run()
     }
@@ -655,11 +672,11 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     private static get scopedPackageName() {
-        return `@${this.npmNamespace}/${this.packageName}`
+        return `@${this.npmNamespace}/${this.name}`
     }
 
     private static get packageDir() {
-        return this.packageName
+        return this.name
     }
 
     private static readonly packageJsonPath = 'package.json'
@@ -667,7 +684,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     private static readonly buildDirGitignorePattern = '\nbuild/\n'
 
     private static get createModuleCmd() {
-        return `spruce create.module --name "${this.packageName}" --destination "." --description "${this.packageDescription}"`
+        return `spruce create.module --name "${this.name}" --destination "." --description "${this.description}"`
     }
 
     private static readonly setupVscodeCmd = 'spruce setup.vscode --all true'
@@ -769,11 +786,11 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         setFakeFetchResponse(this.reposUrl, fakeResponse)
     }
 
-    private static readonly packageName = this.generateId()
-    private static readonly packageDescription = this.generateId()
+    private static readonly installDir = this.generateId()
+    private static readonly name = this.generateId()
+    private static readonly description = this.generateId()
     private static readonly gitNamespace = this.generateId()
     private static readonly npmNamespace = this.generateId()
-    private static readonly installDir = this.generateId()
     private static readonly keywords = [this.generateId(), this.generateId()]
     private static readonly license = this.generateId()
     private static readonly author = this.generateId()
@@ -783,7 +800,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     private static readonly randomId = this.generateId()
 
     private static get reposUrl() {
-        return `https://api.github.com/repos/${this.gitNamespace}/${this.packageName}`
+        return `https://api.github.com/repos/${this.gitNamespace}/${this.name}`
     }
 
     private static get orgsUrl() {
@@ -797,7 +814,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     private static get originalPackageJson() {
         return JSON.stringify({
-            name: this.packageName,
+            name: this.name,
             description: 'Old description',
             dependencies: this.dependencies,
             devDependencies: {
@@ -811,18 +828,18 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         return JSON.stringify({
             ...JSON.parse(this.originalPackageJson),
             name: this.scopedPackageName,
-            description: this.packageDescription,
+            description: this.description,
             keywords: this.keywords,
             license: this.license,
             author: this.author,
             main: 'build/index.js',
-            homepage: `https://github.com/${this.gitNamespace}/${this.packageName}`,
+            homepage: `https://github.com/${this.gitNamespace}/${this.name}`,
             repository: {
                 type: 'git',
-                url: `git+https://github.com/${this.gitNamespace}/${this.packageName}.git`,
+                url: `git+https://github.com/${this.gitNamespace}/${this.name}.git`,
             },
             bugs: {
-                url: `https://github.com/${this.gitNamespace}/${this.packageName}/issues`,
+                url: `https://github.com/${this.gitNamespace}/${this.name}/issues`,
             },
             dependencies: this.dependencies,
         })
@@ -894,11 +911,11 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 `
 
     private static readonly defaultOptions = {
-        name: this.packageName,
-        description: this.packageDescription,
+        installDir: this.installDir,
+        name: this.name,
+        description: this.description,
         gitNamespace: this.gitNamespace,
         npmNamespace: this.npmNamespace,
-        installDir: this.installDir,
         keywords: this.keywords,
         license: this.license,
         author: this.author,
