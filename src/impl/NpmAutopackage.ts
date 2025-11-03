@@ -16,10 +16,11 @@ export default class NpmAutopackage implements Autopackage {
     public static readFile = readFile
     public static writeFile = writeFile
 
+    private installDir: string
     private packageName: string
     private description: string
     private gitNamespace: string
-    private installDir: string
+    private npmNamespace: string
     private keywords?: string[]
     private license?: string
     private author?: string
@@ -38,19 +39,21 @@ export default class NpmAutopackage implements Autopackage {
 
     protected constructor(options: AutopackageOptions) {
         const {
+            installDir,
             name,
             description,
             gitNamespace,
-            installDir,
+            npmNamespace,
             license,
             author,
             keywords,
         } = options
 
+        this.installDir = installDir
         this.packageName = name
         this.description = description
         this.gitNamespace = gitNamespace
-        this.installDir = installDir
+        this.npmNamespace = npmNamespace
         this.keywords = keywords
         this.license = license
         this.author = author
@@ -304,7 +307,7 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private get scopedPackageName() {
-        return `@${this.gitNamespace}/${this.packageName}`
+        return `@${this.npmNamespace}/${this.packageName}`
     }
 
     private orderJsonKeys(json: Record<string, unknown>, keyOrder: string[]) {
@@ -643,11 +646,11 @@ export interface Autopackage {
 }
 
 export interface AutopackageOptions {
+    installDir: string
     name: string
     description: string
     gitNamespace: string
     npmNamespace: string
-    installDir: string
     keywords?: string[]
     license?: string
     author?: string

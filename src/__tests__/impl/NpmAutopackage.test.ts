@@ -655,7 +655,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     private static get scopedPackageName() {
-        return `@${this.gitNamespace}/${this.packageName}`
+        return `@${this.npmNamespace}/${this.packageName}`
     }
 
     private static get packageDir() {
