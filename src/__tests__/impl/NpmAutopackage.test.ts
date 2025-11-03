@@ -629,7 +629,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     @test()
-    protected static async doesNotInstallAbstractPackageTestIfExists() {
+    protected static async doesNotInstallAbstractPackageTestIfTsExists() {
         setPathShouldExist(this.abstractPackageTestPath, true)
 
         await this.createAndRunAutopackage()
@@ -641,7 +641,24 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         assert.isEqual(
             calls.length,
             0,
-            'Should not install AbstractPackageTest if already exists!'
+            'Should not install AbstractPackageTest.ts if already exists!'
+        )
+    }
+
+    @test()
+    protected static async doesNotInstallAbstractPackageTestIfTsxExists() {
+        setPathShouldExist(`${this.abstractPackageTestPath}x`, true)
+
+        await this.createAndRunAutopackage()
+
+        const calls = callsToWriteFile.filter(
+            (call) => call.file === this.abstractPackageTestPath
+        )
+
+        assert.isEqual(
+            calls.length,
+            0,
+            'Should not install AbstractPackageTest.tsx if already exists!'
         )
     }
 

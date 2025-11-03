@@ -568,15 +568,15 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async installAbstractPackageTest() {
-        const fileExists = await this.pathExists(this.abstractPackageTestPath)
+        const fileExists = await this.checkIfAbstractPackageTestExists()
 
         if (!fileExists) {
-            console.log(`Installing ${this.abstractPackageTestPath}...`)
+            console.log(`Installing ${this.abstractTestPath}...`)
 
             await this.mkdir('src/__tests__', { recursive: true })
 
             await this.writeFile(
-                this.abstractPackageTestPath,
+                this.abstractTestPath,
                 this.abstractPackageTestFile,
                 { encoding: 'utf-8' }
             )
@@ -585,7 +585,14 @@ export default class NpmAutopackage implements Autopackage {
         }
     }
 
-    private readonly abstractPackageTestPath = `src/__tests__/AbstractPackageTest.ts`
+    private async checkIfAbstractPackageTestExists() {
+        const doesTsExist = await this.pathExists(this.abstractTestPath)
+        const doesTsxExist = await this.pathExists(`${this.abstractTestPath}x`)
+
+        return doesTsExist || doesTsxExist
+    }
+
+    private readonly abstractTestPath = `src/__tests__/AbstractPackageTest.ts`
 
     private readonly abstractPackageTestFile = `import AbstractModuleTest from '@neurodevs/node-tdd'
 
