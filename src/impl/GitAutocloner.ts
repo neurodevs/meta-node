@@ -54,6 +54,8 @@ export default class GitAutocloner implements Autocloner {
     }
 
     private async runForEachUrl() {
+        this.log.info(`Running GitAutocloner for ${this.urls.length} repos...`)
+
         for (const url of this.urls) {
             this.currentUrl = url
             await this.runCurrentUrl()
@@ -64,14 +66,15 @@ export default class GitAutocloner implements Autocloner {
         const currentRepoExists = await this.checkIfCurrentRepoExists()
 
         if (!currentRepoExists) {
-            this.log.info(`Cloning repo: ${this.currentUrl}...`)
+            this.log.info(`\tCloning repo: ${this.currentUrl}...`)
             await this.tryToCloneRepo()
             await this.runYarnInstall()
         } else {
-            this.log.info(`Repo exists, pulling: ${this.currentRepoName}...`)
+            this.log.info(`\tRepo exists, pulling: ${this.currentRepoName}...`)
             const { stdout } = await this.runGitPull()
 
             if (!stdout.includes('Already up to date')) {
+                this.log.info('\t\tChanges were pulled...')
                 await this.runYarnInstall()
             }
         }
@@ -105,7 +108,7 @@ export default class GitAutocloner implements Autocloner {
     }
 
     private async runYarnInstall() {
-        this.log.info('\tRunning yarn install...')
+        this.log.info('\t\tRunning yarn install...')
         await this.exec(`yarn --cwd ./${this.currentRepoName} install`)
     }
 
