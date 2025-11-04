@@ -24,6 +24,18 @@ const exec = promisify(execSync)
 export default class AutoclonerTest extends AbstractPackageTest {
     private static instance: Autocloner
 
+    private static packageNameA = this.generateId()
+    private static packageNameB = this.generateId()
+
+    private static urlA = this.generateUrl(this.packageNameA)
+    private static urlB = this.generateUrl(this.packageNameB)
+
+    private static generateUrl(packageName: string) {
+        return `https://github.com/${packageName}.git`
+    }
+
+    private static readonly urls = [this.urlA, this.urlB]
+
     protected static async beforeEach() {
         await super.beforeEach()
 
@@ -108,6 +120,28 @@ export default class AutoclonerTest extends AbstractPackageTest {
         await this.run({ urls: [repoName] })
     }
 
+    @test()
+    protected static async callsYarnInstallAfterCloningFirstRepo() {
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToExec[1],
+            `yarn --cwd ./${this.packageNameA} install`,
+            'Should call yarn install after cloning first package!'
+        )
+    }
+
+    @test()
+    protected static async callsYarnInstallAfterCloningSecondRepo() {
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToExec[3],
+            `yarn --cwd ./${this.packageNameB} install`,
+            'Should call yarn install after cloning second package!'
+        )
+    }
+
     private static run(options?: Partial<AutoclonerOptions>) {
         return this.instance.run({
             urls: this.urls,
@@ -138,15 +172,10 @@ export default class AutoclonerTest extends AbstractPackageTest {
         })
     }
 
-    private static generateUrl() {
-        return `https://github.com/${this.generateId()}.git`
-    }
-
     private static get gitCloneFailedMessage() {
         return `Git clone failed for repo: ${this.urls[0]}! Error: \n\n${this.gitCloneFailedError}\n\n`
     }
 
-    private static readonly urls = [this.generateUrl(), this.generateUrl()]
     private static readonly validDirPath = this.generateId()
     private static readonly invalidDirPath = this.generateId()
     private static readonly gitCloneFailedError = 'Failed to clone repo!'

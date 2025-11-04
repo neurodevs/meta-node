@@ -66,6 +66,7 @@ export default class GitAutocloner implements Autocloner {
         if (!currentRepoExists) {
             this.log.info(`Cloning repo: ${this.currentUrl}...`)
             await this.tryToCloneRepo()
+            await this.runYarnInstall()
         } else {
             this.log.info(`Repo exists, skipping: ${this.currentRepoName}!`)
         }
@@ -96,6 +97,10 @@ export default class GitAutocloner implements Autocloner {
 
     private get gitCloneFailedMessage() {
         return `Git clone failed for repo: ${this.currentUrl}!\n\n${this.currentError}\n\n`
+    }
+
+    private async runYarnInstall() {
+        await this.exec(`yarn --cwd ./${this.currentRepoName} install`)
     }
 
     private get chdir() {
