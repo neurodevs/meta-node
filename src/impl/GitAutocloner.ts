@@ -69,7 +69,11 @@ export default class GitAutocloner implements Autocloner {
             await this.runYarnInstall()
         } else {
             this.log.info(`Repo exists, pulling: ${this.currentRepoName}...`)
-            await this.runGitPull()
+            const { stdout } = await this.runGitPull()
+
+            if (!stdout.includes('asdf')) {
+                await this.runYarnInstall()
+            }
         }
     }
 
@@ -105,7 +109,7 @@ export default class GitAutocloner implements Autocloner {
     }
 
     private async runGitPull() {
-        await this.exec(`git --cwd ./${this.currentRepoName} pull`)
+        return await this.exec(`git --cwd ./${this.currentRepoName} pull`)
     }
 
     private get chdir() {

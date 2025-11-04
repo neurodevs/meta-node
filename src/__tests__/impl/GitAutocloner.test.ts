@@ -1,4 +1,4 @@
-import { exec as execSync } from 'child_process'
+import { ChildProcess, exec as execSync } from 'child_process'
 import { promisify } from 'util'
 import {
     callsToChdir,
@@ -8,6 +8,7 @@ import {
     fakePathExists,
     resetCallsToChdir,
     resetCallsToExec,
+    setFakeExecResult,
     setPathShouldExist,
 } from '@neurodevs/fake-node-core'
 import { test, assert } from '@neurodevs/node-tdd'
@@ -35,6 +36,14 @@ export default class AutoclonerTest extends AbstractPackageTest {
     }
 
     private static readonly urls = [this.urlA, this.urlB]
+
+    private static get gitPullPackageA() {
+        return `git --cwd ./${this.packageNameA} pull`
+    }
+
+    private static get gitPullPackageB() {
+        return `git --cwd ./${this.packageNameB} pull`
+    }
 
     protected static async beforeEach() {
         await super.beforeEach()
@@ -146,7 +155,7 @@ export default class AutoclonerTest extends AbstractPackageTest {
 
         assert.isEqualDeep(
             callsToExec[0],
-            `git --cwd ./${this.packageNameA} pull`,
+            this.gitPullPackageA,
             'Should call git pull if first repo exists!'
         )
     }
@@ -156,9 +165,43 @@ export default class AutoclonerTest extends AbstractPackageTest {
         await this.setUrlsShouldExistAndRun()
 
         assert.isEqualDeep(
-            callsToExec[1],
-            `git --cwd ./${this.packageNameB} pull`,
+            callsToExec[2],
+            this.gitPullPackageB,
             'Should call git pull if second repo exists!'
+        )
+    }
+
+    @test()
+    protected static async callsYarnInstallIfFirstChangesWerePulled() {
+        const fakeResult = {
+            stdout: 'Already up to date.',
+        } as unknown as ChildProcess
+
+        setFakeExecResult(this.gitPullPackageA, fakeResult)
+
+        await this.setUrlsShouldExistAndRun()
+
+        assert.isEqualDeep(
+            callsToExec[1],
+            `yarn --cwd ./${this.packageNameA} install`,
+            'Should call yarn install after pulling first package!'
+        )
+    }
+
+    @test()
+    protected static async callsYarnInstallIfSecondChangesWerePulled() {
+        const fakeResult = {
+            stdout: 'Already up to date.',
+        } as unknown as ChildProcess
+
+        setFakeExecResult(this.gitPullPackageB, fakeResult)
+
+        await this.setUrlsShouldExistAndRun()
+
+        assert.isEqualDeep(
+            callsToExec[3],
+            `yarn --cwd ./${this.packageNameB} install`,
+            'Should call yarn install after pulling second package!'
         )
     }
 
