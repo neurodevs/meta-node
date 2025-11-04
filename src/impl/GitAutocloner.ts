@@ -71,7 +71,7 @@ export default class GitAutocloner implements Autocloner {
             this.log.info(`Repo exists, pulling: ${this.currentRepoName}...`)
             const { stdout } = await this.runGitPull()
 
-            if (!stdout.includes('asdf')) {
+            if (!stdout.includes('Already up to date')) {
                 await this.runYarnInstall()
             }
         }

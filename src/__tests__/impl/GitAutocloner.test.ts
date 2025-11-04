@@ -173,12 +173,7 @@ export default class AutoclonerTest extends AbstractPackageTest {
 
     @test()
     protected static async callsYarnInstallIfFirstChangesWerePulled() {
-        const fakeResult = {
-            stdout: 'Already up to date.',
-        } as unknown as ChildProcess
-
-        setFakeExecResult(this.gitPullPackageA, fakeResult)
-
+        this.fakeGitPullChanges()
         await this.setUrlsShouldExistAndRun()
 
         assert.isEqualDeep(
@@ -190,18 +185,25 @@ export default class AutoclonerTest extends AbstractPackageTest {
 
     @test()
     protected static async callsYarnInstallIfSecondChangesWerePulled() {
-        const fakeResult = {
-            stdout: 'Already up to date.',
-        } as unknown as ChildProcess
-
-        setFakeExecResult(this.gitPullPackageB, fakeResult)
-
+        this.fakeGitPullChanges()
         await this.setUrlsShouldExistAndRun()
 
         assert.isEqualDeep(
             callsToExec[3],
             `yarn --cwd ./${this.packageNameB} install`,
             'Should call yarn install after pulling second package!'
+        )
+    }
+
+    @test()
+    protected static async doesNotCallYarnInstallIfNoChangesPulled() {
+        this.fakeGitPullUpToDate()
+        await this.setUrlsShouldExistAndRun()
+
+        assert.isLength(
+            callsToExec.filter((call) => call.startsWith('yarn --cwd ./')),
+            0,
+            'Should not call yarn install if no changes were pulled!'
         )
     }
 
@@ -224,6 +226,24 @@ export default class AutoclonerTest extends AbstractPackageTest {
         this.urls.forEach((url) => {
             setPathShouldExist(url.match(this.regexForRepoName)![1], true)
         })
+    }
+
+    private static fakeGitPullChanges() {
+        const fakeResult = {
+            stdout: this.generateId(),
+        } as unknown as ChildProcess
+
+        setFakeExecResult(this.gitPullPackageA, fakeResult)
+        setFakeExecResult(this.gitPullPackageB, fakeResult)
+    }
+
+    private static fakeGitPullUpToDate() {
+        const fakeResult = {
+            stdout: 'Already up to date.',
+        } as unknown as ChildProcess
+
+        setFakeExecResult(this.gitPullPackageA, fakeResult)
+        setFakeExecResult(this.gitPullPackageB, fakeResult)
     }
 
     private static setFakeChdir() {
