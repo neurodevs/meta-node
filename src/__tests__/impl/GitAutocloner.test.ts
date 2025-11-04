@@ -86,12 +86,7 @@ export default class AutoclonerTest extends AbstractPackageTest {
 
     @test()
     protected static async doesNotCallGitCloneIfUrlExists() {
-        await this.run()
-
-        this.urls.forEach((url) => {
-            setPathShouldExist(url.match(this.regexForRepoName)![1], true)
-        })
-
+        this.setUrlsShouldExist()
         resetCallsToExec()
 
         await this.run()
@@ -145,11 +140,46 @@ export default class AutoclonerTest extends AbstractPackageTest {
         )
     }
 
+    @test()
+    protected static async callsGitPullIfFirstRepoExists() {
+        await this.setUrlsShouldExistAndRun()
+
+        assert.isEqualDeep(
+            callsToExec[0],
+            `git --cwd ./${this.packageNameA} pull`,
+            'Should call git pull if first repo exists!'
+        )
+    }
+
+    @test()
+    protected static async callsGitPullIfSecondRepoExists() {
+        await this.setUrlsShouldExistAndRun()
+
+        assert.isEqualDeep(
+            callsToExec[1],
+            `git --cwd ./${this.packageNameB} pull`,
+            'Should call git pull if second repo exists!'
+        )
+    }
+
     private static run(options?: Partial<AutoclonerOptions>) {
         return this.instance.run({
             urls: this.urls,
             dirPath: this.validDirPath,
             ...options,
+        })
+    }
+
+    private static async setUrlsShouldExistAndRun() {
+        this.setUrlsShouldExist()
+        resetCallsToExec()
+
+        await this.run()
+    }
+
+    private static setUrlsShouldExist() {
+        this.urls.forEach((url) => {
+            setPathShouldExist(url.match(this.regexForRepoName)![1], true)
         })
     }
 

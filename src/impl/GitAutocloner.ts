@@ -28,9 +28,9 @@ export default class GitAutocloner implements Autocloner {
         this.dirPath = dirPath
 
         await this.throwIfDirPathDoesNotExist()
+        this.chdirToDirPath()
 
-        this.changeDirectoryToDirPath()
-        await this.cloneReposFromUrls()
+        await this.runForEachUrl()
     }
 
     private async throwIfDirPathDoesNotExist() {
@@ -49,18 +49,18 @@ export default class GitAutocloner implements Autocloner {
         throw new Error(`dirPath does not exist: ${this.dirPath}!`)
     }
 
-    private changeDirectoryToDirPath() {
+    private chdirToDirPath() {
         this.chdir(this.dirPath)
     }
 
-    private async cloneReposFromUrls() {
+    private async runForEachUrl() {
         for (const url of this.urls) {
             this.currentUrl = url
-            await this.cloneCurrentUrl()
+            await this.runCurrentUrl()
         }
     }
 
-    private async cloneCurrentUrl() {
+    private async runCurrentUrl() {
         const currentRepoExists = await this.checkIfCurrentRepoExists()
 
         if (!currentRepoExists) {
@@ -68,7 +68,8 @@ export default class GitAutocloner implements Autocloner {
             await this.tryToCloneRepo()
             await this.runYarnInstall()
         } else {
-            this.log.info(`Repo exists, skipping: ${this.currentRepoName}!`)
+            this.log.info(`Repo exists, pulling: ${this.currentRepoName}...`)
+            await this.runGitPull()
         }
     }
 
@@ -101,6 +102,10 @@ export default class GitAutocloner implements Autocloner {
 
     private async runYarnInstall() {
         await this.exec(`yarn --cwd ./${this.currentRepoName} install`)
+    }
+
+    private async runGitPull() {
+        await this.exec(`git --cwd ./${this.currentRepoName} pull`)
     }
 
     private get chdir() {
