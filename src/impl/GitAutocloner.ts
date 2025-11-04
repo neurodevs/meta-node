@@ -105,6 +105,7 @@ export default class GitAutocloner implements Autocloner {
     }
 
     private async runYarnInstall() {
+        this.log.info('\tRunning yarn install...')
         await this.exec(`yarn --cwd ./${this.currentRepoName} install`)
     }
 
