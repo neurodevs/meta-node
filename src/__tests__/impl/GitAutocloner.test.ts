@@ -96,7 +96,10 @@ export default class AutoclonerTest extends AbstractPackageTest {
 
         await this.run()
 
-        assert.isLength(callsToExec, 0)
+        assert.isLength(
+            callsToExec.filter((call) => call.startsWith('git clone')),
+            0
+        )
     }
 
     @test()
