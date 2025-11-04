@@ -110,7 +110,7 @@ export default class GitAutocloner implements Autocloner {
     }
 
     private async runGitPull() {
-        return await this.exec(`git --cwd ./${this.currentRepoName} pull`)
+        return await this.exec(`git -C ./${this.currentRepoName} pull`)
     }
 
     private get chdir() {

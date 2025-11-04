@@ -38,11 +38,11 @@ export default class AutoclonerTest extends AbstractPackageTest {
     private static readonly urls = [this.urlA, this.urlB]
 
     private static get gitPullPackageA() {
-        return `git --cwd ./${this.packageNameA} pull`
+        return `git -C ./${this.packageNameA} pull`
     }
 
     private static get gitPullPackageB() {
-        return `git --cwd ./${this.packageNameB} pull`
+        return `git -C ./${this.packageNameB} pull`
     }
 
     protected static async beforeEach() {
