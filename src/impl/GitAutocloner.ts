@@ -64,6 +64,7 @@ export default class GitAutocloner implements Autocloner {
         const currentRepoExists = await this.checkIfCurrentRepoExists()
 
         if (!currentRepoExists) {
+            this.log.info(`Cloning repo: ${this.currentUrl}...`)
             await this.tryToCloneRepo()
         } else {
             this.log.info(`Repo exists, skipping: ${this.currentRepoName}!`)
