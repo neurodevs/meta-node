@@ -136,11 +136,11 @@ export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
 
     private static get testFilePattern() {
         return `
-            import AbstractSpruceTest, { test, assert } from '@neurodevs/node-tdd'
+            import AbstractModuleTest, { test, assert } from '@neurodevs/node-tdd'
 
             import ${this.implName}, { ${this.interfaceName} } from '../../impl/${this.implName}.js'
 
-            export default class ${this.implName}Test extends AbstractSpruceTest {
+            export default class ${this.implName}Test extends AbstractModuleTest {
                 private static instance: ${this.interfaceName}
 
                 protected static async beforeEach() {
