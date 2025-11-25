@@ -5,9 +5,9 @@ async function main() {
     console.log('\nRunning automodule...')
 
     const instance = ImplAutomodule.Create({
-        testSaveDir: expandHomeDir('~/dev/meta-node/src/__tests__/modules'),
-        moduleSaveDir: expandHomeDir('~/dev/meta-node/src/modules'),
-        fakeSaveDir: expandHomeDir('~/dev/meta-node/src/testDoubles/Interface'),
+        testSaveDir: expandHomeDir('~/dev/meta-node/src/__tests__/impl'),
+        moduleSaveDir: expandHomeDir('~/dev/meta-node/src/impl'),
+        fakeSaveDir: expandHomeDir('~/dev/meta-node/src/testDoubles'),
         interfaceName: 'Interface',
         implName: 'InterfaceImpl',
     })
