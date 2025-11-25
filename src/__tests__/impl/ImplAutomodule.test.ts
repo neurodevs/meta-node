@@ -211,18 +211,44 @@ export default class ImplAutomoduleTest extends AbstractAutomoduleTest {
     }
 
     private static get sortedIndexFile() {
-        const blocks = `${this.originalIndexFile}${this.indexFilePattern}`
+        const blocks = this.originalIndexFile
             .split(/(?=\/\/)/)
             .map((s) => s.trim())
             .filter(Boolean)
 
-        blocks.sort((a, b) => {
-            const aKey = a.match(/^\/\/\s*([^\n]*)/)?.[1]?.trim() ?? ''
-            const bKey = b.match(/^\/\/\s*([^\n]*)/)?.[1]?.trim() ?? ''
-            return aKey.localeCompare(bKey)
-        })
+        const newBlock = this.indexFilePattern.trim()
 
-        return blocks.join('\n\n')
+        const newKey =
+            newBlock
+                .match(/^\/\/\s*([^\n]*)/)?.[1]
+                ?.trim()
+                .toLowerCase() ?? ''
+
+        let inserted = false
+        const result: string[] = []
+
+        for (const block of blocks) {
+            if (!inserted) {
+                const blockKey =
+                    block
+                        .match(/^\/\/\s*([^\n]*)/)?.[1]
+                        ?.trim()
+                        .toLowerCase() ?? ''
+
+                if (newKey.localeCompare(blockKey) < 0) {
+                    result.push(newBlock)
+                    inserted = true
+                }
+            }
+
+            result.push(block)
+        }
+
+        if (!inserted) {
+            result.push(newBlock)
+        }
+
+        return result.join('\n\n')
     }
 
     private static ImplAutomodule() {
