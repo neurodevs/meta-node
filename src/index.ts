@@ -36,6 +36,14 @@ export * from './impl/NpmAutopackage.js'
 export { default as FakeAutopackage } from './testDoubles/Autopackage/FakeAutopackage.js'
 export * from './testDoubles/Autopackage/FakeAutopackage.js'
 
+// ReleasePropagator
+
+export { default as NpmReleasePropagator } from './impl/NpmReleasePropagator.js'
+export * from './impl/NpmReleasePropagator.js'
+
+export { default as FakeReleasePropagator } from './testDoubles/ReleasePropagator/FakeReleasePropagator.js'
+export * from './testDoubles/ReleasePropagator/FakeReleasePropagator.js'
+
 // SnippetKeybinder
 
 export { default as VscodeSnippetKeybinder } from './impl/VscodeSnippetKeybinder.js'
