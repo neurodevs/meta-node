@@ -6,6 +6,8 @@ import { promisify } from 'util'
 import { pathExists } from 'fs-extra'
 import { parse } from 'jsonc-parser'
 
+import GitAutocommit from './GitAutocommit.js'
+
 export default class NpmAutopackage implements Autopackage {
     public static Class?: AutopackageConstructor
     public static chdir = chdir
@@ -214,23 +216,9 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async commitCreatePackage() {
-        await this.gitAddAll()
-        await this.gitCommitCreatePackage()
-        await this.gitPush()
-    }
-
-    private async gitAddAll() {
-        await this.exec('git add .')
-    }
-
-    private async gitCommitCreatePackage() {
-        await this.exec(
-            `git commit -m "patch: create package (@neurodevs/meta-node: ${this.metaNodeVersion})"`
+        await this.GitAutocommit(
+            `patch: create package (@neurodevs/meta-node: ${this.metaNodeVersion})`
         )
-    }
-
-    private async gitPush() {
-        await this.exec('git push')
     }
 
     private async updatePackageJson() {
@@ -333,14 +321,8 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async commitUpdatePackageJson() {
-        await this.gitAddAll()
-        await this.gitCommitUpdatePackage()
-        await this.gitPush()
-    }
-
-    private async gitCommitUpdatePackage() {
-        await this.exec(
-            `git commit -m "patch: update package.json (@neurodevs/meta-node: ${this.metaNodeVersion})"`
+        await this.GitAutocommit(
+            `patch: update package.json (@neurodevs/meta-node: ${this.metaNodeVersion})`
         )
     }
 
@@ -379,14 +361,8 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async commitUpdateGitignore() {
-        await this.gitAddAll()
-        await this.gitCommitUpdateGitignore()
-        await this.gitPush()
-    }
-
-    private async gitCommitUpdateGitignore() {
-        await this.exec(
-            `git commit -m "patch: add build dir to gitignore (@neurodevs/meta-node: ${this.metaNodeVersion})"`
+        await this.GitAutocommit(
+            `patch: add build dir to gitignore (@neurodevs/meta-node: ${this.metaNodeVersion})`
         )
     }
 
@@ -409,14 +385,8 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async commitSetupVscode() {
-        await this.gitAddAll()
-        await this.gitCommitSetupVscode()
-        await this.gitPush()
-    }
-
-    private async gitCommitSetupVscode() {
-        await this.exec(
-            `git commit -m "patch: setup vscode (@neurodevs/meta-node: ${this.metaNodeVersion})"`
+        await this.GitAutocommit(
+            `patch: setup vscode (@neurodevs/meta-node: ${this.metaNodeVersion})`
         )
     }
 
@@ -499,14 +469,8 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async commitUpdateVscodeTasks() {
-        await this.gitAddAll()
-        await this.gitCommitUpdateVscodeTasks()
-        await this.gitPush()
-    }
-
-    private async gitCommitUpdateVscodeTasks() {
-        await this.exec(
-            `git commit -m "patch: update vscode tasks.json (@neurodevs/meta-node: ${this.metaNodeVersion})"`
+        await this.GitAutocommit(
+            `patch: update vscode tasks.json (@neurodevs/meta-node: ${this.metaNodeVersion})`
         )
     }
 
@@ -556,14 +520,8 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private async commitInstallDevDependencies() {
-        await this.gitAddAll()
-        await this.gitCommitInstallDevDependencies()
-        await this.gitPush()
-    }
-
-    private async gitCommitInstallDevDependencies() {
-        await this.exec(
-            `git commit -m "patch: install default devDependencies (@neurodevs/meta-node: ${this.metaNodeVersion})"`
+        await this.GitAutocommit(
+            `patch: install default devDependencies (@neurodevs/meta-node: ${this.metaNodeVersion})`
         )
     }
 
@@ -604,14 +562,8 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 `
 
     private async commitInstallAbstractPackageTest() {
-        await this.gitAddAll()
-        await this.gitCommitInstallAbstractPackageTest()
-        await this.gitPush()
-    }
-
-    private async gitCommitInstallAbstractPackageTest() {
-        await this.exec(
-            `git commit -m "patch: install AbstractPackageTest (@neurodevs/meta-node: ${this.metaNodeVersion})"`
+        await this.GitAutocommit(
+            `patch: install AbstractPackageTest (@neurodevs/meta-node: ${this.metaNodeVersion})`
         )
     }
 
@@ -647,6 +599,10 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 
     private get writeFile() {
         return NpmAutopackage.writeFile
+    }
+
+    private GitAutocommit(commitMessage: string) {
+        return GitAutocommit.Create(commitMessage)
     }
 }
 

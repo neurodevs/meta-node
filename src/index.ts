@@ -6,6 +6,14 @@ export * from './impl/GitAutocloner.js'
 export { default as FakeAutocloner } from './testDoubles/Autocloner/FakeAutocloner.js'
 export * from './testDoubles/Autocloner/FakeAutocloner.js'
 
+// Autocommit
+
+export { default as GitAutocommit } from './impl/GitAutocommit.js'
+export * from './impl/GitAutocommit.js'
+
+export { default as FakeAutocommit } from './testDoubles/Autocommit/FakeAutocommit.js'
+export * from './testDoubles/Autocommit/FakeAutocommit.js'
+
 // Autodocumenter
 
 export { default as PackageAutodocumenter } from './impl/PackageAutodocumenter.js'

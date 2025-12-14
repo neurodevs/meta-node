@@ -31,10 +31,12 @@ import {
 } from '@neurodevs/fake-node-core'
 import { test, assert } from '@neurodevs/node-tdd'
 
+import GitAutocommit from '../../impl/GitAutocommit.js'
 import NpmAutopackage, {
     Autopackage,
     AutopackageOptions,
 } from '../../impl/NpmAutopackage.js'
+import FakeAutocommit from '../../testDoubles/Autocommit/FakeAutocommit.js'
 import AbstractPackageTest from '../AbstractPackageTest.js'
 
 const exec = promisify(execSync)
@@ -52,6 +54,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         this.fakePathExists()
         this.fakeReadFile()
         this.fakeWriteFile()
+
+        this.setFakeAutocommit()
 
         this.fakeFetchForRepoNotFound()
 
@@ -798,6 +802,11 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     private static fakeWriteFile() {
         NpmAutopackage.writeFile = fakeWriteFile as unknown as typeof writeFile
         resetCallsToWriteFile()
+    }
+
+    private static setFakeAutocommit() {
+        GitAutocommit.Class = FakeAutocommit
+        FakeAutocommit.resetTestDouble()
     }
 
     private static fakeFetchForRepoNotFound() {
