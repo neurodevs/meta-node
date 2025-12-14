@@ -89,7 +89,9 @@ export default class AutoclonerTest extends AbstractPackageTest {
         await this.run()
 
         this.urls.forEach((url) => {
-            assert.doesInclude(callsToExec, `git clone ${url}`)
+            assert.isTrue(
+                callsToExec.some((call) => call?.command === `git clone ${url}`)
+            )
         })
     }
 
@@ -101,7 +103,7 @@ export default class AutoclonerTest extends AbstractPackageTest {
         await this.run()
 
         assert.isLength(
-            callsToExec.filter((call) => call.startsWith('git clone')),
+            callsToExec.filter((call) => call?.command.startsWith('git clone')),
             0
         )
     }
@@ -132,7 +134,7 @@ export default class AutoclonerTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[1],
+            callsToExec[1]?.command,
             `yarn --cwd ./${this.packageNameA} install`,
             'Should call yarn install after cloning first package!'
         )
@@ -143,7 +145,7 @@ export default class AutoclonerTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[3],
+            callsToExec[3]?.command,
             `yarn --cwd ./${this.packageNameB} install`,
             'Should call yarn install after cloning second package!'
         )
@@ -154,7 +156,7 @@ export default class AutoclonerTest extends AbstractPackageTest {
         await this.setUrlsShouldExistAndRun()
 
         assert.isEqualDeep(
-            callsToExec[0],
+            callsToExec[0]?.command,
             this.gitPullPackageA,
             'Should call git pull if first repo exists!'
         )
@@ -165,7 +167,7 @@ export default class AutoclonerTest extends AbstractPackageTest {
         await this.setUrlsShouldExistAndRun()
 
         assert.isEqualDeep(
-            callsToExec[2],
+            callsToExec[2]?.command,
             this.gitPullPackageB,
             'Should call git pull if second repo exists!'
         )
@@ -177,7 +179,7 @@ export default class AutoclonerTest extends AbstractPackageTest {
         await this.setUrlsShouldExistAndRun()
 
         assert.isEqualDeep(
-            callsToExec[1],
+            callsToExec[1]?.command,
             `yarn --cwd ./${this.packageNameA} install`,
             'Should call yarn install after pulling first package!'
         )
@@ -189,7 +191,7 @@ export default class AutoclonerTest extends AbstractPackageTest {
         await this.setUrlsShouldExistAndRun()
 
         assert.isEqualDeep(
-            callsToExec[3],
+            callsToExec[3]?.command,
             `yarn --cwd ./${this.packageNameB} install`,
             'Should call yarn install after pulling second package!'
         )
@@ -201,7 +203,9 @@ export default class AutoclonerTest extends AbstractPackageTest {
         await this.setUrlsShouldExistAndRun()
 
         assert.isLength(
-            callsToExec.filter((call) => call.startsWith('yarn --cwd ./')),
+            callsToExec.filter((call) =>
+                call?.command.startsWith('yarn --cwd ./')
+            ),
             0,
             'Should not call yarn install if no changes were pulled!'
         )

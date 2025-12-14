@@ -119,7 +119,7 @@ export default class UiAutomoduleTest extends AbstractAutomoduleTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[0],
+            callsToExec[0]?.command,
             'yarn version --minor --no-git-tag-version',
             'Did not bump minor version!'
         )
