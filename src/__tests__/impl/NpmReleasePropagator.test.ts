@@ -44,10 +44,16 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
     protected static async runInstallsReleaseForEachRepoPath() {
         await this.run()
 
-        const expectedCalls = this.repoPaths.map((repoPath) => ({
-            command: `yarn add ${this.packageName}@${this.packageVersion}`,
-            options: { cwd: repoPath },
-        }))
+        const expectedCalls = [
+            {
+                command: `yarn add ${this.packageName}@${this.packageVersion}`,
+                options: { cwd: this.repoPaths[0] },
+            },
+            {
+                command: `yarn add -D ${this.packageName}@${this.packageVersion}`,
+                options: { cwd: this.repoPaths[1] },
+            },
+        ]
 
         assert.isEqualDeep(
             callsToExec,
