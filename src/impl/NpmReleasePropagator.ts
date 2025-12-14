@@ -29,17 +29,20 @@ export default class NpmReleasePropagator implements ReleasePropagator {
         for (const repoPath of this.repoPaths) {
             this.currentRepoPath = repoPath
 
-            await this.throwIfPriorReleaseNotFound()
+            await this.throwIfPreviousReleaseNotFound()
             await this.installReleaseForCurrentRepo()
         }
     }
 
-    private async throwIfPriorReleaseNotFound() {
+    private async throwIfPreviousReleaseNotFound() {
         const packageJson = await this.loadCurrentPackageJson()
 
-        if (!packageJson?.dependencies?.[this.packageName]) {
+        const inDeps = packageJson.dependencies?.[this.packageName]
+        const inDevDeps = packageJson.devDependencies?.[this.packageName]
+
+        if (!(inDeps || inDevDeps)) {
             throw new Error(
-                `Cannot propagate release for ${this.packageName} because it is not listed in dependencies! Install it in the target repository before running propagation.`
+                `Cannot propagate release for ${this.packageName} because it is not listed in either dependencies or devDependencies! Install it in the target repository before running propagation.`
             )
         }
     }

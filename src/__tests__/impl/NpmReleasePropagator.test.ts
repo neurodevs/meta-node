@@ -1,6 +1,5 @@
 import { exec as execSync } from 'node:child_process'
 import { readFile } from 'node:fs/promises'
-import path from 'node:path'
 import { promisify } from 'node:util'
 import {
     callsToExec,
@@ -67,7 +66,7 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
 
         await assert.doesThrowAsync(async () => {
             await this.run()
-        }, `Cannot propagate release for ${missingPackageName} because it is not listed in dependencies! Install it in the target repository before running propagation.`)
+        }, `Cannot propagate release for ${missingPackageName} because it is not listed in either dependencies or devDependencies! Install it in the target repository before running propagation.`)
     }
 
     private static async run() {
@@ -84,18 +83,23 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
             fakeReadFile as unknown as typeof readFile
         resetCallsToReadFile()
 
-        this.repoPaths.forEach((repoPath) => {
-            const packageJsonPath = path.join(repoPath, 'package.json')
+        setFakeReadFileResult(
+            `${this.repoPaths[0]}/package.json`,
+            JSON.stringify({
+                dependencies: {
+                    [this.packageName]: this.generateId(),
+                },
+            })
+        )
 
-            setFakeReadFileResult(
-                packageJsonPath,
-                JSON.stringify({
-                    dependencies: {
-                        [this.packageName]: this.generateId(),
-                    },
-                })
-            )
-        })
+        setFakeReadFileResult(
+            `${this.repoPaths[1]}/package.json`,
+            JSON.stringify({
+                devDependencies: {
+                    [this.packageName]: this.generateId(),
+                },
+            })
+        )
     }
 
     private static NpmReleasePropagator(
