@@ -56,10 +56,6 @@ export default class NpmReleasePropagator implements ReleasePropagator {
         return `${this.currentRepoPath}/package.json`
     }
 
-    private get readFile() {
-        return NpmReleasePropagator.readFile
-    }
-
     private async installReleaseForCurrentRepo() {
         await this.exec(`yarn add ${this.packageName}@${this.packageVersion}`, {
             cwd: this.currentRepoPath,
@@ -68,6 +64,10 @@ export default class NpmReleasePropagator implements ReleasePropagator {
 
     private get exec() {
         return NpmReleasePropagator.exec
+    }
+
+    private get readFile() {
+        return NpmReleasePropagator.readFile
     }
 }
 
