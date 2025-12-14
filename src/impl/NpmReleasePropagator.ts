@@ -42,7 +42,7 @@ export default class NpmReleasePropagator implements ReleasePropagator {
 
         if (!(inDeps || inDevDeps)) {
             throw new Error(
-                `Cannot propagate release for ${this.packageName} because it is not listed in either dependencies or devDependencies! Install it in the target repository before running propagation.`
+                `Cannot propagate release for ${this.packageName} because it is not listed in either dependencies or devDependencies! Please install it in the target repository before running propagation.`
             )
         }
     }

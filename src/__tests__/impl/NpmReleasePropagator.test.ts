@@ -66,7 +66,7 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
 
         await assert.doesThrowAsync(async () => {
             await this.run()
-        }, `Cannot propagate release for ${missingPackageName} because it is not listed in either dependencies or devDependencies! Install it in the target repository before running propagation.`)
+        }, `Cannot propagate release for ${missingPackageName} because it is not listed in either dependencies or devDependencies! Please install it in the target repository before running propagation.`)
     }
 
     private static async run() {
