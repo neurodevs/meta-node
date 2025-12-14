@@ -1,9 +1,14 @@
 import { exec as execSync } from 'node:child_process'
+import { readFile } from 'node:fs/promises'
+import path from 'node:path'
 import { promisify } from 'node:util'
 import {
     callsToExec,
     fakeExec,
+    fakeReadFile,
     resetCallsToExec,
+    resetCallsToReadFile,
+    setFakeReadFileResult,
 } from '@neurodevs/fake-node-core'
 import { test, assert } from '@neurodevs/node-tdd'
 
@@ -18,10 +23,15 @@ const exec = promisify(execSync)
 export default class NpmReleasePropagatorTest extends AbstractPackageTest {
     private static instance: ReleasePropagator
 
+    private static readonly packageName = this.generateId()
+    private static readonly packageVersion = this.generateId()
+    private static readonly repoPaths = [this.generateId(), this.generateId()]
+
     protected static async beforeEach() {
         await super.beforeEach()
 
         this.setFakeExec()
+        this.setFakeReadFile()
 
         this.instance = this.NpmReleasePropagator()
     }
@@ -32,7 +42,7 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
     }
 
     @test()
-    protected static async installsReleaseForEachRepoPath() {
+    protected static async runInstallsReleaseForEachRepoPath() {
         await this.run()
 
         const expectedCalls = this.repoPaths.map((repoPath) => ({
@@ -47,6 +57,19 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
         )
     }
 
+    @test()
+    protected static async runThrowsIfRepoDoesNotHavePreviousRelease() {
+        const missingPackageName = this.generateId()
+
+        this.instance = this.NpmReleasePropagator({
+            packageName: missingPackageName,
+        })
+
+        await assert.doesThrowAsync(async () => {
+            await this.run()
+        }, `Cannot propagate release for ${missingPackageName} because it is not listed in dependencies! Install it in the target repository before running propagation.`)
+    }
+
     private static async run() {
         await this.instance.run()
     }
@@ -56,9 +79,24 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
         resetCallsToExec()
     }
 
-    private static readonly packageName = this.generateId()
-    private static readonly packageVersion = this.generateId()
-    private static readonly repoPaths = [this.generateId(), this.generateId()]
+    private static setFakeReadFile() {
+        NpmReleasePropagator.readFile =
+            fakeReadFile as unknown as typeof readFile
+        resetCallsToReadFile()
+
+        this.repoPaths.forEach((repoPath) => {
+            const packageJsonPath = path.join(repoPath, 'package.json')
+
+            setFakeReadFileResult(
+                packageJsonPath,
+                JSON.stringify({
+                    dependencies: {
+                        [this.packageName]: this.generateId(),
+                    },
+                })
+            )
+        })
+    }
 
     private static NpmReleasePropagator(
         options?: Partial<ReleasePropagatorOptions>
