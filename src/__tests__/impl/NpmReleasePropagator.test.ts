@@ -85,8 +85,14 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
         assert.isEqualDeep(
             FakeAutocommit.callsToConstructor,
             [
-                `patch: propagate ${this.packageName}@${this.packageVersion} (@neurodevs/meta-node: ${this.metaNodeVersion})`,
-                `patch: propagate ${this.packageName}@${this.packageVersion} (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+                {
+                    commitMessage: `patch: propagate ${this.packageName}@${this.packageVersion} (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+                    cwd: this.repoPaths[0],
+                },
+                {
+                    commitMessage: `patch: propagate ${this.packageName}@${this.packageVersion} (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+                    cwd: this.repoPaths[1],
+                },
             ],
             'Did not commit changes to git for each repo path!'
         )

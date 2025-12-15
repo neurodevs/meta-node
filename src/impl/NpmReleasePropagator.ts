@@ -110,7 +110,7 @@ export default class NpmReleasePropagator implements ReleasePropagator {
     }
 
     private GitAutocommit(commitMessage: string) {
-        return GitAutocommit.Create(commitMessage)
+        return GitAutocommit.Create(commitMessage, this.currentRepoPath)
     }
 }
 

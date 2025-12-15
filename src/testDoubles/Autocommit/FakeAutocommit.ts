@@ -1,11 +1,18 @@
 import { Autocommit } from '../../impl/GitAutocommit.js'
 
 export default class FakeAutocommit implements Autocommit {
-    public static callsToConstructor: (string | undefined)[] = []
+    public static callsToConstructor: {
+        commitMessage?: string
+        cwd?: string
+    }[] = []
+
     public static numCallsToRun = 0
 
-    public constructor(commitMessage?: string) {
-        FakeAutocommit.callsToConstructor.push(commitMessage)
+    public constructor(commitMessage?: string, cwd?: string) {
+        FakeAutocommit.callsToConstructor.push({
+            commitMessage,
+            cwd,
+        })
     }
 
     public async run() {

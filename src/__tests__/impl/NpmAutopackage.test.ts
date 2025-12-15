@@ -185,7 +185,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[0],
+            FakeAutocommit.callsToConstructor[0]?.commitMessage,
             `patch: create package (@neurodevs/meta-node: ${this.metaNodeVersion})`,
             'Did not commit create package changes!'
         )
@@ -254,7 +254,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[1],
+            FakeAutocommit.callsToConstructor[1]?.commitMessage,
             `patch: update package.json (@neurodevs/meta-node: ${this.metaNodeVersion})`,
             'Did not commit update package changes!'
         )
@@ -280,7 +280,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[2],
+            FakeAutocommit.callsToConstructor[2]?.commitMessage,
             `patch: add build dir to gitignore (@neurodevs/meta-node: ${this.metaNodeVersion})`,
             'Did not commit .gitignore changes!'
         )
@@ -302,7 +302,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[3],
+            FakeAutocommit.callsToConstructor[3]?.commitMessage,
             `patch: setup vscode (@neurodevs/meta-node: ${this.metaNodeVersion})`,
             'Did not commit vscode changes!'
         )
@@ -324,7 +324,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[4],
+            FakeAutocommit.callsToConstructor[4]?.commitMessage,
             `patch: update vscode tasks.json (@neurodevs/meta-node: ${this.metaNodeVersion})`,
             'Did not commit updated vscode tasks.json changes!'
         )
@@ -346,7 +346,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[5],
+            FakeAutocommit.callsToConstructor[5]?.commitMessage,
             `patch: install default devDependencies (@neurodevs/meta-node: ${this.metaNodeVersion})`,
             'Did not commit install devDependencies changes!'
         )
@@ -386,7 +386,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[6],
+            FakeAutocommit.callsToConstructor[6]?.commitMessage,
             `patch: install AbstractPackageTest (@neurodevs/meta-node: ${this.metaNodeVersion})`,
             'Did not commit install AbstractPackageTest changes!'
         )
@@ -466,8 +466,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         assert.isEqual(
             FakeAutocommit.callsToConstructor.filter(
-                (commitMessage) =>
-                    commitMessage ===
+                (call) =>
+                    call?.commitMessage ===
                     `patch: create package (@neurodevs/meta-node: ${this.metaNodeVersion})`
             ).length,
             1,
@@ -481,8 +481,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         assert.isEqual(
             FakeAutocommit.callsToConstructor.filter(
-                (commitMessage) =>
-                    commitMessage ===
+                (call) =>
+                    call?.commitMessage ===
                     `patch: update package.json (@neurodevs/meta-node: ${this.metaNodeVersion})`
             ).length,
             1,
@@ -496,8 +496,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         assert.isEqual(
             FakeAutocommit.callsToConstructor.filter(
-                (commitMessage) =>
-                    commitMessage ===
+                (call) =>
+                    call?.commitMessage ===
                     `patch: add build dir to gitignore (@neurodevs/meta-node: ${this.metaNodeVersion})`
             ).length,
             1,
@@ -511,8 +511,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
         assert.isEqual(
             FakeAutocommit.callsToConstructor.filter(
-                (commitMessage) =>
-                    commitMessage ===
+                (call) =>
+                    call?.commitMessage ===
                     `patch: setup vscode (@neurodevs/meta-node: ${this.metaNodeVersion})`
             ).length,
             1,
