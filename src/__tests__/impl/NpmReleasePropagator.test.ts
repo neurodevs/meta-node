@@ -11,10 +11,12 @@ import {
 } from '@neurodevs/fake-node-core'
 import { test, assert } from '@neurodevs/node-tdd'
 
+import GitAutocommit from '../../impl/GitAutocommit.js'
 import NpmReleasePropagator, {
     ReleasePropagator,
     ReleasePropagatorOptions,
 } from '../../impl/NpmReleasePropagator.js'
+import { FakeAutocommit } from '../../index.js'
 import AbstractPackageTest from '../AbstractPackageTest.js'
 
 const exec = promisify(execSync)
@@ -31,6 +33,7 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
 
         this.setFakeExec()
         this.setFakeReadFile()
+        this.setFakeAutocommit()
 
         this.instance = this.NpmReleasePropagator()
     }
@@ -56,7 +59,7 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
         ]
 
         assert.isEqualDeep(
-            callsToExec,
+            [callsToExec[0], callsToExec[2]],
             expectedCalls,
             'Did not install release in each repo path!'
         )
@@ -75,6 +78,20 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
         }, `Cannot propagate release for ${missingPackageName} because it is not listed in either dependencies or devDependencies! Please install it in the target repository before running propagation.`)
     }
 
+    @test()
+    protected static async commitsChangesToGit() {
+        await this.run()
+
+        assert.isEqualDeep(
+            FakeAutocommit.callsToConstructor,
+            [
+                `patch: propagate ${this.packageName}@${this.packageVersion} (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+                `patch: propagate ${this.packageName}@${this.packageVersion} (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+            ],
+            'Did not commit changes to git for each repo path!'
+        )
+    }
+
     private static async run() {
         await this.instance.run()
     }
@@ -82,6 +99,8 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
     private static setFakeExec() {
         NpmReleasePropagator.exec = fakeExec as unknown as typeof exec
         resetCallsToExec()
+
+        this.setFakeMetaNodeVersion()
     }
 
     private static setFakeReadFile() {
@@ -106,6 +125,11 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
                 },
             })
         )
+    }
+
+    private static setFakeAutocommit() {
+        GitAutocommit.Class = FakeAutocommit
+        FakeAutocommit.resetTestDouble()
     }
 
     private static NpmReleasePropagator(

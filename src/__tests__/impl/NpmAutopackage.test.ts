@@ -1,7 +1,6 @@
 import { ChildProcess, exec as execSync } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
 import { mkdir } from 'fs/promises'
-import path from 'path'
 import { promisify } from 'util'
 import {
     callsToChdir,
@@ -186,12 +185,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(5, 8).map((call) => call?.command),
-            [
-                'git add .',
-                `git commit -m "patch: create package (@neurodevs/meta-node: ${this.metaNodeVersion})"`,
-                'git push',
-            ],
+            FakeAutocommit.callsToConstructor[0],
+            `patch: create package (@neurodevs/meta-node: ${this.metaNodeVersion})`,
             'Did not commit create package changes!'
         )
     }
@@ -259,12 +254,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(8, 11).map((call) => call?.command),
-            [
-                'git add .',
-                `git commit -m "patch: update package.json (@neurodevs/meta-node: ${this.metaNodeVersion})"`,
-                'git push',
-            ],
+            FakeAutocommit.callsToConstructor[1],
+            `patch: update package.json (@neurodevs/meta-node: ${this.metaNodeVersion})`,
             'Did not commit update package changes!'
         )
     }
@@ -289,12 +280,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(11, 14).map((call) => call?.command),
-            [
-                'git add .',
-                `git commit -m "patch: add build dir to gitignore (@neurodevs/meta-node: ${this.metaNodeVersion})"`,
-                'git push',
-            ],
+            FakeAutocommit.callsToConstructor[2],
+            `patch: add build dir to gitignore (@neurodevs/meta-node: ${this.metaNodeVersion})`,
             'Did not commit .gitignore changes!'
         )
     }
@@ -304,7 +291,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqual(
-            callsToExec[14]?.command,
+            callsToExec[5]?.command,
             this.setupVscodeCmd,
             'Did not call "spruce setup.vscode"!'
         )
@@ -315,12 +302,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(15, 18).map((call) => call?.command),
-            [
-                'git add .',
-                `git commit -m "patch: setup vscode (@neurodevs/meta-node: ${this.metaNodeVersion})"`,
-                'git push',
-            ],
+            FakeAutocommit.callsToConstructor[3],
+            `patch: setup vscode (@neurodevs/meta-node: ${this.metaNodeVersion})`,
             'Did not commit vscode changes!'
         )
     }
@@ -341,12 +324,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(18, 21).map((call) => call?.command),
-            [
-                'git add .',
-                `git commit -m "patch: update vscode tasks.json (@neurodevs/meta-node: ${this.metaNodeVersion})"`,
-                'git push',
-            ],
+            FakeAutocommit.callsToConstructor[4],
+            `patch: update vscode tasks.json (@neurodevs/meta-node: ${this.metaNodeVersion})`,
             'Did not commit updated vscode tasks.json changes!'
         )
     }
@@ -356,7 +335,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqual(
-            callsToExec[23]?.command,
+            callsToExec[8]?.command,
             this.yarnInstallDevDepsCommand,
             'Did not install default devDependencies!'
         )
@@ -367,12 +346,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(24, 27).map((call) => call?.command),
-            [
-                'git add .',
-                `git commit -m "patch: install default devDependencies (@neurodevs/meta-node: ${this.metaNodeVersion})"`,
-                'git push',
-            ],
+            FakeAutocommit.callsToConstructor[5],
+            `patch: install default devDependencies (@neurodevs/meta-node: ${this.metaNodeVersion})`,
             'Did not commit install devDependencies changes!'
         )
     }
@@ -411,12 +386,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec.slice(27, 30).map((call) => call?.command),
-            [
-                'git add .',
-                `git commit -m "patch: install AbstractPackageTest (@neurodevs/meta-node: ${this.metaNodeVersion})"`,
-                'git push',
-            ],
+            FakeAutocommit.callsToConstructor[6],
+            `patch: install AbstractPackageTest (@neurodevs/meta-node: ${this.metaNodeVersion})`,
             'Did not commit install AbstractPackageTest changes!'
         )
     }
@@ -426,7 +397,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqual(
-            callsToExec[30]?.command,
+            callsToExec[9]?.command,
             'code .',
             'Did not open vscode at end!'
         )
@@ -494,10 +465,10 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.createAndRunAutopackage()
 
         assert.isEqual(
-            callsToExec.filter(
-                (call) =>
-                    call?.command ===
-                    `git commit -m "patch: create package (@neurodevs/meta-node: ${this.metaNodeVersion})"`
+            FakeAutocommit.callsToConstructor.filter(
+                (commitMessage) =>
+                    commitMessage ===
+                    `patch: create package (@neurodevs/meta-node: ${this.metaNodeVersion})`
             ).length,
             1,
             'Did not commit create package changes once!'
@@ -509,10 +480,10 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.createAndRunAutopackage()
 
         assert.isEqual(
-            callsToExec.filter(
-                (call) =>
-                    call?.command ===
-                    `git commit -m "patch: update package.json (@neurodevs/meta-node: ${this.metaNodeVersion})"`
+            FakeAutocommit.callsToConstructor.filter(
+                (commitMessage) =>
+                    commitMessage ===
+                    `patch: update package.json (@neurodevs/meta-node: ${this.metaNodeVersion})`
             ).length,
             1,
             'Did not commit update package changes once!'
@@ -524,10 +495,10 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.createAndRunAutopackage()
 
         assert.isEqual(
-            callsToExec.filter(
-                (call) =>
-                    call?.command ===
-                    `git commit -m "patch: add build dir to gitignore (@neurodevs/meta-node: ${this.metaNodeVersion})"`
+            FakeAutocommit.callsToConstructor.filter(
+                (commitMessage) =>
+                    commitMessage ===
+                    `patch: add build dir to gitignore (@neurodevs/meta-node: ${this.metaNodeVersion})`
             ).length,
             1,
             'Did not commit gitignore changes once!'
@@ -539,10 +510,10 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.createAndRunAutopackage()
 
         assert.isEqual(
-            callsToExec.filter(
-                (call) =>
-                    call?.command ===
-                    `git commit -m "patch: setup vscode (@neurodevs/meta-node: ${this.metaNodeVersion})"`
+            FakeAutocommit.callsToConstructor.filter(
+                (commitMessage) =>
+                    commitMessage ===
+                    `patch: setup vscode (@neurodevs/meta-node: ${this.metaNodeVersion})`
             ).length,
             1,
             'Did not commit vscode changes once!'
@@ -719,9 +690,6 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     private static readonly checkGenerateIdVersionCmd = `yarn info @neurodevs/generate-id version --silent`
     private static readonly checkNodeTddVersionCmd = `yarn info @neurodevs/node-tdd version --silent`
 
-    private static readonly yarnGlobalDirCmd = 'yarn global dir'
-    private static readonly fakeGlobalRoot = this.generateId()
-
     private static orderJsonKeys(
         json: Record<string, unknown>,
         keyOrder: string[]
@@ -754,20 +722,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         NpmAutopackage.exec = fakeExec as unknown as typeof exec
         resetCallsToExec()
 
-        setFakeExecResult(this.yarnGlobalDirCmd, {
-            stdout: this.fakeGlobalRoot,
-        } as unknown as ChildProcess)
-
-        setFakeReadFileResult(
-            path.join(
-                this.fakeGlobalRoot,
-                'node_modules',
-                '@neurodevs',
-                'meta-node',
-                'package.json'
-            ),
-            JSON.stringify({ version: this.metaNodeVersion })
-        )
+        this.setFakeMetaNodeVersion()
     }
 
     private static fakeFetch() {
@@ -828,7 +783,6 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     private static readonly author = this.generateId()
 
     private static readonly githubToken = this.generateId()
-    private static readonly metaNodeVersion = this.generateId()
     private static readonly randomId = this.generateId()
 
     private static get reposUrl() {

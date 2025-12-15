@@ -1,6 +1,9 @@
 import { exec as execSync } from 'node:child_process'
 import { readFile } from 'node:fs/promises'
+import path from 'node:path'
 import { promisify } from 'node:util'
+
+import GitAutocommit from './GitAutocommit.js'
 
 export default class NpmReleasePropagator implements ReleasePropagator {
     public static Class?: ReleasePropagatorConstructor
@@ -13,6 +16,7 @@ export default class NpmReleasePropagator implements ReleasePropagator {
 
     private currentRepoPath!: string
     private currentPackageJson!: PackageJson
+    private metaNodeVersion!: string
 
     protected constructor(options: ReleasePropagatorOptions) {
         const { packageName, packageVersion, repoPaths } = options
@@ -32,6 +36,7 @@ export default class NpmReleasePropagator implements ReleasePropagator {
 
             await this.throwIfPreviousReleaseNotFound()
             await this.installReleaseForCurrentRepo()
+            await this.gitCommitChanges()
         }
     }
 
@@ -71,12 +76,41 @@ export default class NpmReleasePropagator implements ReleasePropagator {
         )
     }
 
+    private async gitCommitChanges() {
+        await this.setCurrentMetaNodeVersion()
+
+        await this.GitAutocommit(
+            `patch: propagate ${this.packageName}@${this.packageVersion} (@neurodevs/meta-node: ${this.metaNodeVersion})`
+        )
+    }
+
+    private async setCurrentMetaNodeVersion() {
+        const globalRoot = await this.exec('yarn global dir')
+
+        const pkgPath = path.join(
+            globalRoot.stdout.trim(),
+            'node_modules',
+            '@neurodevs',
+            'meta-node',
+            'package.json'
+        )
+
+        const raw = await this.readFile(pkgPath, { encoding: 'utf-8' })
+        const pkg = JSON.parse(raw)
+
+        this.metaNodeVersion = pkg.version
+    }
+
     private get exec() {
         return NpmReleasePropagator.exec
     }
 
     private get readFile() {
         return NpmReleasePropagator.readFile
+    }
+
+    private GitAutocommit(commitMessage: string) {
+        return GitAutocommit.Create(commitMessage)
     }
 }
 

@@ -1,9 +1,18 @@
-import { setFakeReadFileResult } from '@neurodevs/fake-node-core'
+import { ChildProcess } from 'child_process'
+import path from 'path'
+import {
+    setFakeExecResult,
+    setFakeReadFileResult,
+} from '@neurodevs/fake-node-core'
 import AbstractModuleTest from '@neurodevs/node-tdd'
 
 import expandHomeDir from '../functions/expandHomeDir.js'
 
 export default class AbstractPackageTest extends AbstractModuleTest {
+    protected static readonly yarnGlobalDirCmd = 'yarn global dir'
+    protected static readonly fakeGlobalRoot = this.generateId()
+    protected static readonly metaNodeVersion = this.generateId()
+
     protected static async beforeEach() {
         await super.beforeEach()
     }
@@ -57,6 +66,23 @@ export default class AbstractPackageTest extends AbstractModuleTest {
         setFakeReadFileResult(
             this.keybindingsPath,
             this.originalKeybindingsFile
+        )
+    }
+
+    protected static setFakeMetaNodeVersion() {
+        setFakeExecResult(this.yarnGlobalDirCmd, {
+            stdout: this.fakeGlobalRoot,
+        } as unknown as ChildProcess)
+
+        setFakeReadFileResult(
+            path.join(
+                this.fakeGlobalRoot,
+                'node_modules',
+                '@neurodevs',
+                'meta-node',
+                'package.json'
+            ),
+            JSON.stringify({ version: this.metaNodeVersion })
         )
     }
 }
