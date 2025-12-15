@@ -1,7 +1,11 @@
 import { exec as execSync } from 'node:child_process'
 import { promisify } from 'node:util'
 
-import { fakeExec } from '@neurodevs/fake-node-core'
+import {
+    callsToExec,
+    fakeExec,
+    resetCallsToExec,
+} from '@neurodevs/fake-node-core'
 import AbstractModuleTest, { test, assert } from '@neurodevs/node-tdd'
 
 import GitAutocommit, { Autocommit } from '../../impl/GitAutocommit.js'
@@ -12,6 +16,7 @@ export default class GitAutocommitTest extends AbstractModuleTest {
     private static instance: Autocommit
 
     private static readonly commitMessage = this.generateId()
+    private static readonly currentWorkingDir = this.generateId()
 
     protected static async beforeEach() {
         await super.beforeEach()
@@ -26,11 +31,30 @@ export default class GitAutocommitTest extends AbstractModuleTest {
         assert.isTruthy(this.instance, 'Failed to create instance!')
     }
 
-    private static setFakeExec() {
-        GitAutocommit.exec = fakeExec as unknown as typeof exec
+    @test()
+    protected static async callsExecThreeTimes() {
+        assert.isEqualDeep(callsToExec, [
+            { command: 'git add .', options: { cwd: this.currentWorkingDir } },
+            {
+                command: `git commit -m "${this.commitMessage}"`,
+                options: { cwd: this.currentWorkingDir },
+            },
+            { command: 'git push', options: { cwd: this.currentWorkingDir } },
+        ])
     }
 
-    private static async GitAutocommit(commitMessage?: string) {
-        return GitAutocommit.Create(commitMessage ?? this.commitMessage)
+    private static setFakeExec() {
+        GitAutocommit.exec = fakeExec as unknown as typeof exec
+        resetCallsToExec()
+    }
+
+    private static async GitAutocommit(
+        commitMessage?: string,
+        workingDir?: string
+    ) {
+        return GitAutocommit.Create(
+            commitMessage ?? this.commitMessage,
+            workingDir ?? this.currentWorkingDir
+        )
     }
 }
