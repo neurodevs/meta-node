@@ -44,6 +44,14 @@ export * from './impl/NpmAutopackage.js'
 export { default as FakeAutopackage } from './testDoubles/Autopackage/FakeAutopackage.js'
 export * from './testDoubles/Autopackage/FakeAutopackage.js'
 
+// PropagationCoordinator
+
+export { default as NpmPropagationCoordinator } from './impl/NpmPropagationCoordinator.js'
+export * from './impl/NpmPropagationCoordinator.js'
+
+export { default as FakePropagationCoordinator } from './testDoubles/PropagationCoordinator/FakePropagationCoordinator.js'
+export * from './testDoubles/PropagationCoordinator/FakePropagationCoordinator.js'
+
 // ReleasePropagator
 
 export { default as NpmReleasePropagator } from './impl/NpmReleasePropagator.js'
