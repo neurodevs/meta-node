@@ -16,7 +16,9 @@ import FakeReleasePropagator from '../../testDoubles/ReleasePropagator/FakeRelea
 export default class NpmPropagationCoordinatorTest extends AbstractModuleTest {
     private static instance: PropagationCoordinator
 
+    private static readonly packageScope = this.generateId()
     private static readonly packageName = this.generateId()
+    private static readonly scopedName = `${this.packageScope}/${this.packageName}`
     private static readonly packageVersion = '7.8.9'
     private static readonly repoPath = `${this.generateId()}/${this.packageName}`
 
@@ -31,7 +33,7 @@ export default class NpmPropagationCoordinatorTest extends AbstractModuleTest {
         { dependencies: { [this.repoPath]: '^1.2.3' } },
         { devDependencies: { [this.repoPath]: '^4.5.6' } },
         {},
-        { version: this.packageVersion },
+        { name: this.scopedName, version: this.packageVersion },
     ]
 
     protected static async beforeEach() {
@@ -55,7 +57,7 @@ export default class NpmPropagationCoordinatorTest extends AbstractModuleTest {
         assert.isEqualDeep(
             FakeReleasePropagator.callsToConstructor[0],
             {
-                packageName: this.packageName,
+                packageName: this.scopedName,
                 packageVersion: this.packageVersion,
                 repoPaths: [this.repoPaths[0], this.repoPaths[1]],
             },

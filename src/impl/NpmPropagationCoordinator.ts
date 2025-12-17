@@ -25,25 +25,24 @@ export default class NpmPropagationCoordinator implements PropagationCoordinator
     }
 
     public async run() {
-        const packageName = this.repoPath.split('/').pop()!
-        const packageVersion = await this.getPackageVersion()
+        const pkg = await this.loadPackageJson()
         const repoPaths = await this.determineWhereToPropagate()
 
         const propagator = this.NpmReleaseCoordinator({
-            packageName,
-            packageVersion,
+            packageName: pkg.name,
+            packageVersion: pkg.version,
             repoPaths,
         })
 
         await propagator.run()
     }
 
-    private async getPackageVersion() {
+    private async loadPackageJson() {
         const pkgJson = await this.readFile(
             `${this.repoPath}/package.json`,
             'utf-8'
         )
-        return JSON.parse(pkgJson)?.version as string
+        return JSON.parse(pkgJson)
     }
 
     private async determineWhereToPropagate() {
