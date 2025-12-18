@@ -70,11 +70,11 @@ export default class NpmPropagationCoordinator implements PropagationCoordinator
     }
 
     private get isDependency() {
-        return this.currentPkgJson.dependencies[this.packageName]
+        return this.currentPkgJson?.dependencies?.[this.packageName]
     }
 
     private get isDevDependency() {
-        return this.currentPkgJson.devDependencies[this.packageName]
+        return this.currentPkgJson?.devDependencies?.[this.packageName]
     }
 
     private async loadCurrentPkgJson() {
