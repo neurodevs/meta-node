@@ -12,6 +12,7 @@ export default class NpmPropagationCoordinator implements PropagationCoordinator
     private repoPath: string
     private repoPaths: string[]
 
+    private pkg!: PackageJson
     private currentRepoPath!: string
     private currentPkgJson!: PackageJson
 
@@ -25,12 +26,13 @@ export default class NpmPropagationCoordinator implements PropagationCoordinator
     }
 
     public async run() {
-        const pkg = await this.loadPackageJson()
+        await this.loadPackageJson()
+
         const repoPaths = await this.determineWhereToPropagate()
 
         const propagator = this.NpmReleaseCoordinator({
-            packageName: pkg.name,
-            packageVersion: pkg.version,
+            packageName: this.packageName,
+            packageVersion: this.packageVersion,
             repoPaths,
         })
 
@@ -42,7 +44,15 @@ export default class NpmPropagationCoordinator implements PropagationCoordinator
             `${this.repoPath}/package.json`,
             'utf-8'
         )
-        return JSON.parse(pkgJson)
+        this.pkg = JSON.parse(pkgJson)
+    }
+
+    private get packageName() {
+        return this.pkg.name
+    }
+
+    private get packageVersion() {
+        return this.pkg.version
     }
 
     private async determineWhereToPropagate() {
@@ -60,11 +70,11 @@ export default class NpmPropagationCoordinator implements PropagationCoordinator
     }
 
     private get isDependency() {
-        return this.currentPkgJson?.dependencies?.[this.repoPath]
+        return this.currentPkgJson.dependencies[this.packageName]
     }
 
     private get isDevDependency() {
-        return this.currentPkgJson?.devDependencies?.[this.repoPath]
+        return this.currentPkgJson.devDependencies[this.packageName]
     }
 
     private async loadCurrentPkgJson() {
