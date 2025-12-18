@@ -32,6 +32,7 @@ export default class NpmReleasePropagator implements ReleasePropagator {
 
     public async run() {
         for (const repoPath of this.repoPaths) {
+            console.log(`Propagating to ${repoPath}...`)
             this.currentRepoPath = repoPath
 
             await this.throwIfPreviousReleaseNotFound()
