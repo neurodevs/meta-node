@@ -24,8 +24,6 @@ const exec = promisify(execSync)
 export default class NpmReleasePropagatorTest extends AbstractPackageTest {
     private static instance: ReleasePropagator
 
-    private static readonly packageName = this.generateId()
-    private static readonly packageVersion = this.generateId()
     private static readonly repoPaths = [this.generateId(), this.generateId()]
 
     protected static async beforeEach() {
@@ -116,20 +114,24 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
 
         setFakeReadFileResult(
             `${this.repoPaths[0]}/package.json`,
-            JSON.stringify({
-                dependencies: {
-                    [this.packageName]: this.generateId(),
-                },
-            })
+            JSON.stringify(
+                this.generatePackageJson({
+                    dependencies: {
+                        [this.packageName]: this.generateId(),
+                    },
+                })
+            )
         )
 
         setFakeReadFileResult(
             `${this.repoPaths[1]}/package.json`,
-            JSON.stringify({
-                devDependencies: {
-                    [this.packageName]: this.generateId(),
-                },
-            })
+            JSON.stringify(
+                this.generatePackageJson({
+                    devDependencies: {
+                        [this.packageName]: this.generateId(),
+                    },
+                })
+            )
         )
     }
 

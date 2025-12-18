@@ -7,14 +7,30 @@ import {
 import AbstractModuleTest from '@neurodevs/node-tdd'
 
 import expandHomeDir from '../functions/expandHomeDir.js'
+import { PackageJson } from '../impl/NpmReleasePropagator.js'
 
 export default class AbstractPackageTest extends AbstractModuleTest {
+    protected static readonly packageScope = this.generateId()
+    protected static readonly packageName = this.generateId()
+    protected static readonly scopedName = `${this.packageScope}/${this.packageName}`
+    protected static readonly packageVersion = '7.8.9'
+
     protected static readonly yarnGlobalDirCmd = 'yarn global dir'
     protected static readonly fakeGlobalRoot = this.generateId()
     protected static readonly metaNodeVersion = this.generateId()
 
     protected static async beforeEach() {
         await super.beforeEach()
+    }
+
+    protected static generatePackageJson(options?: Partial<PackageJson>) {
+        return {
+            name: this.scopedName,
+            version: this.packageVersion,
+            dependencies: {},
+            devDependencies: {},
+            ...options,
+        }
     }
 
     protected static normalize(input: string) {

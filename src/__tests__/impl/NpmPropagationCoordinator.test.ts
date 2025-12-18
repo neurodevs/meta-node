@@ -5,23 +5,18 @@ import {
     resetCallsToReadFile,
     setFakeReadFileResult,
 } from '@neurodevs/fake-node-core'
-import AbstractModuleTest, { test, assert } from '@neurodevs/node-tdd'
+import { test, assert } from '@neurodevs/node-tdd'
 
 import NpmPropagationCoordinator, {
     PropagationCoordinator,
 } from '../../impl/NpmPropagationCoordinator.js'
-import NpmReleasePropagator, {
-    PackageJson,
-} from '../../impl/NpmReleasePropagator.js'
+import NpmReleasePropagator from '../../impl/NpmReleasePropagator.js'
 import FakeReleasePropagator from '../../testDoubles/ReleasePropagator/FakeReleasePropagator.js'
+import AbstractPackageTest from '../AbstractPackageTest.js'
 
-export default class NpmPropagationCoordinatorTest extends AbstractModuleTest {
+export default class NpmPropagationCoordinatorTest extends AbstractPackageTest {
     private static instance: PropagationCoordinator
 
-    private static readonly packageScope = this.generateId()
-    private static readonly packageName = this.generateId()
-    private static readonly scopedName = `${this.packageScope}/${this.packageName}`
-    private static readonly packageVersion = '7.8.9'
     private static readonly repoPath = `${this.generateId()}/${this.packageName}`
 
     private static readonly repoPaths = [
@@ -73,16 +68,6 @@ export default class NpmPropagationCoordinatorTest extends AbstractModuleTest {
 
     private static async run() {
         await this.instance.run()
-    }
-
-    private static generatePackageJson(options?: Partial<PackageJson>) {
-        return {
-            name: this.scopedName,
-            version: this.packageVersion,
-            dependencies: {},
-            devDependencies: {},
-            ...options,
-        }
     }
 
     private static setFakeReadFile() {
