@@ -1,11 +1,15 @@
 import { readFile } from 'node:fs/promises'
 
+import semver from 'semver'
+
 import NpmReleasePropagator, {
     PackageJson,
     ReleasePropagatorOptions,
 } from './NpmReleasePropagator.js'
 
-export default class NpmPropagationCoordinator implements PropagationCoordinator {
+export default class NpmPropagationCoordinator
+    implements PropagationCoordinator
+{
     public static Class?: PropagationCoordinatorConstructor
     public static readFile = readFile
 
@@ -58,23 +62,27 @@ export default class NpmPropagationCoordinator implements PropagationCoordinator
     private async determineWhereToPropagate() {
         const repoPaths: string[] = []
 
+        const target = semver.parse(this.packageVersion)
+
         for (const repoPath of this.repoPaths) {
             this.currentRepoPath = repoPath
             this.currentPkgJson = await this.loadCurrentPkgJson()
 
-            if (this.isDependency ?? this.isDevDependency) {
+            const min = semver.minVersion(this.maybeDeclaredRange)
+
+            if (min?.major === target?.major) {
                 repoPaths.push(repoPath)
             }
         }
         return repoPaths
     }
 
-    private get isDependency() {
-        return this.currentPkgJson?.dependencies?.[this.packageName]
-    }
-
-    private get isDevDependency() {
-        return this.currentPkgJson?.devDependencies?.[this.packageName]
+    private get maybeDeclaredRange() {
+        return (
+            this.currentPkgJson?.dependencies?.[this.packageName] ??
+            this.currentPkgJson?.devDependencies?.[this.packageName] ??
+            ''
+        )
     }
 
     private async loadCurrentPkgJson() {

@@ -12,6 +12,7 @@ import NpmPropagationCoordinator, {
 } from '../../impl/NpmPropagationCoordinator.js'
 import NpmReleasePropagator from '../../impl/NpmReleasePropagator.js'
 import FakeReleasePropagator from '../../testDoubles/ReleasePropagator/FakeReleasePropagator.js'
+
 import AbstractPackageTest from '../AbstractPackageTest.js'
 
 export default class NpmPropagationCoordinatorTest extends AbstractPackageTest {
@@ -23,15 +24,19 @@ export default class NpmPropagationCoordinatorTest extends AbstractPackageTest {
         this.generateId(),
         this.generateId(),
         this.generateId(),
+        this.generateId(),
         this.repoPath,
     ]
 
     private static readonly pkgJsons = [
         this.generatePackageJson({
-            dependencies: { [this.scopedName]: '^1.2.3' },
+            dependencies: { [this.scopedName]: '^2.0.1' },
         }),
         this.generatePackageJson({
-            devDependencies: { [this.scopedName]: '^4.5.6' },
+            devDependencies: { [this.scopedName]: '^2.1.0' },
+        }),
+        this.generatePackageJson({
+            dependencies: { [this.scopedName]: '^1.0.0' },
         }),
         this.generatePackageJson(),
         this.generatePackageJson({ version: this.packageVersion }),

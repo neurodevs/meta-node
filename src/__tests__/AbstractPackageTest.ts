@@ -13,7 +13,7 @@ export default class AbstractPackageTest extends AbstractModuleTest {
     protected static readonly packageScope = this.generateId()
     protected static readonly packageName = this.generateId()
     protected static readonly scopedName = `${this.packageScope}/${this.packageName}`
-    protected static readonly packageVersion = '7.8.9'
+    protected static readonly packageVersion = '2.2.0' // Dummy value in tests to handle necessary cases
 
     protected static readonly yarnGlobalDirCmd = 'yarn global dir'
     protected static readonly fakeGlobalRoot = this.generateId()
