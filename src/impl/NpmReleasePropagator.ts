@@ -35,6 +35,7 @@ export default class NpmReleasePropagator implements ReleasePropagator {
             console.log(`Propagating to ${repoPath}...`)
             this.currentRepoPath = repoPath
 
+            await this.loadCurrentPackageJson()
             await this.throwIfPreviousReleaseNotFound()
             await this.installReleaseForCurrentRepo()
             await this.gitCommitChanges()
@@ -42,8 +43,6 @@ export default class NpmReleasePropagator implements ReleasePropagator {
     }
 
     private async throwIfPreviousReleaseNotFound() {
-        await this.loadCurrentPackageJson()
-
         if (!(this.isDependency || this.isDevDependency)) {
             throw new Error(
                 `Cannot propagate release for ${this.packageName} because it is not listed in either dependencies or devDependencies! Please install it in the target repository before running propagation.`
