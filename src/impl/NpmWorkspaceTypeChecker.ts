@@ -10,4 +10,6 @@ export default class NpmWorkspaceTypeChecker implements WorkspaceTypeChecker {
 
 export interface WorkspaceTypeChecker {}
 
-export type WorkspaceTypeCheckerConstructor = new () => WorkspaceTypeChecker
+export type WorkspaceTypeCheckerConstructor = new (
+    workspacePath: string
+) => WorkspaceTypeChecker
