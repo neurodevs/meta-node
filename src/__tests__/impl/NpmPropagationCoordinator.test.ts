@@ -67,6 +67,7 @@ export default class NpmPropagationCoordinatorTest extends AbstractPackageTest {
                 packageName: this.scopedName,
                 packageVersion: this.packageVersion,
                 repoPaths: [this.repoPaths[0], this.repoPaths[1]],
+                shouldGitCommit: true,
             },
             'Incorrect repo paths propagated to!'
         )
@@ -90,8 +91,23 @@ export default class NpmPropagationCoordinatorTest extends AbstractPackageTest {
                     this.repoPaths[1],
                     this.repoPaths[2],
                 ],
+                shouldGitCommit: true,
             },
             'Did not propagate majors!'
+        )
+    }
+
+    @test()
+    protected static async passesShouldGitCommitParameterToPropagator() {
+        const instance = this.NpmPropagationCoordinator({
+            shouldGitCommit: false,
+        })
+
+        await instance.run()
+
+        assert.isFalse(
+            FakeReleasePropagator.callsToConstructor[0]?.shouldGitCommit,
+            'Did not pass shouldGitCommit parameter to propagator!'
         )
     }
 

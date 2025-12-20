@@ -109,7 +109,7 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
 
     @test()
     protected static async doesNotCommitIfPassedOptionalParameter() {
-        const instance = this.NpmReleasePropagator({ shouldCommit: false })
+        const instance = this.NpmReleasePropagator({ shouldGitCommit: false })
 
         await instance.run()
 

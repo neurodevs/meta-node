@@ -15,7 +15,7 @@ export default class NpmReleasePropagator implements ReleasePropagator {
     private packageName: string
     private packageVersion: string
     private repoPaths: string[]
-    private shouldCommit: boolean
+    private shouldGitCommit: boolean
 
     private currentRepoPath!: string
     private currentPackageJson!: PackageJson
@@ -26,13 +26,13 @@ export default class NpmReleasePropagator implements ReleasePropagator {
             packageName,
             packageVersion,
             repoPaths,
-            shouldCommit = true,
+            shouldGitCommit = true,
         } = options
 
         this.packageName = packageName
         this.packageVersion = packageVersion
         this.repoPaths = repoPaths
-        this.shouldCommit = shouldCommit
+        this.shouldGitCommit = shouldGitCommit
     }
 
     public static Create(options: ReleasePropagatorOptions) {
@@ -56,7 +56,7 @@ export default class NpmReleasePropagator implements ReleasePropagator {
             console.log(`Propagating to ${repoPath}...`)
             await this.installReleaseForCurrentRepo()
 
-            if (this.shouldCommit) {
+            if (this.shouldGitCommit) {
                 await this.gitCommitChanges()
             }
         }
@@ -192,7 +192,7 @@ export interface ReleasePropagatorOptions {
     packageName: string
     packageVersion: string
     repoPaths: string[]
-    shouldCommit?: boolean
+    shouldGitCommit?: boolean
 }
 
 export interface PackageJson {

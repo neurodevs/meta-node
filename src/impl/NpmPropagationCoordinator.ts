@@ -16,6 +16,7 @@ export default class NpmPropagationCoordinator
     private repoPath: string
     private repoPaths: string[]
     private shouldPropagateMajors: boolean
+    private shouldGitCommit: boolean
 
     private pkg!: PackageJson
     private currentRepoPath!: string
@@ -26,11 +27,13 @@ export default class NpmPropagationCoordinator
         repoPaths: string[],
         options?: PropagationCoordinatorOptions
     ) {
-        const { shouldPropagateMajors = false } = options ?? {}
+        const { shouldPropagateMajors = false, shouldGitCommit = true } =
+            options ?? {}
 
         this.repoPath = repoPath
         this.repoPaths = repoPaths
         this.shouldPropagateMajors = shouldPropagateMajors
+        this.shouldGitCommit = shouldGitCommit
     }
 
     public static Create(
@@ -50,6 +53,7 @@ export default class NpmPropagationCoordinator
             packageName: this.packageName,
             packageVersion: this.packageVersion,
             repoPaths,
+            shouldGitCommit: this.shouldGitCommit,
         })
 
         await propagator.run()
@@ -130,4 +134,5 @@ export type PropagationCoordinatorConstructor = new (
 
 export interface PropagationCoordinatorOptions {
     shouldPropagateMajors?: boolean
+    shouldGitCommit?: boolean
 }
