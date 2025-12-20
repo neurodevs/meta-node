@@ -78,7 +78,7 @@ export default class NpmPropagationCoordinator
     private async determineWhereToPropagate() {
         const repoPaths: string[] = []
 
-        const target = semver.parse(this.packageVersion)
+        const target = semver.parse(this.packageVersion)!
 
         for (const repoPath of this.repoPaths) {
             this.currentRepoPath = repoPath
@@ -90,7 +90,11 @@ export default class NpmPropagationCoordinator
                 continue
             }
 
-            if (this.shouldPropagateMajors || min?.major === target?.major) {
+            if (!this.shouldPropagateMajors && min.major < target.major) {
+                console.log(`Major version difference, skipping ${repoPath}...`)
+            }
+
+            if (this.shouldPropagateMajors || min.major === target.major) {
                 repoPaths.push(repoPath)
             }
         }
