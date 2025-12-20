@@ -50,6 +50,7 @@ export default class NpmReleasePropagator implements ReleasePropagator {
             this.throwIfPreviousReleaseNotFound()
 
             if (this.isUpToDate) {
+                console.log(`Already up to date, skipping ${repoPath}...`)
                 continue
             }
 
