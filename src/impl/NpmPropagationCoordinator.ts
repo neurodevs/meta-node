@@ -68,7 +68,7 @@ export default class NpmPropagationCoordinator
             this.currentRepoPath = repoPath
             this.currentPkgJson = await this.loadCurrentPkgJson()
 
-            const min = semver.minVersion(this.maybeDeclaredRange)
+            const min = semver.minVersion(this.maybeDependencyRange)
 
             if (min?.major === target?.major) {
                 repoPaths.push(repoPath)
@@ -77,7 +77,7 @@ export default class NpmPropagationCoordinator
         return repoPaths
     }
 
-    private get maybeDeclaredRange() {
+    private get maybeDependencyRange() {
         return (
             this.currentPkgJson?.dependencies?.[this.packageName] ??
             this.currentPkgJson?.devDependencies?.[this.packageName] ??
