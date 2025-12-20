@@ -108,6 +108,19 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
     }
 
     @test()
+    protected static async doesNotCommitIfPassedOptionalParameter() {
+        const instance = this.NpmReleasePropagator({ shouldCommit: false })
+
+        await instance.run()
+
+        assert.isEqual(
+            FakeAutocommit.callsToConstructor.length,
+            0,
+            'Should not have committed changes!'
+        )
+    }
+
+    @test()
     protected static async throwsIfRepoDoesNotHavePreviousRelease() {
         const missingPackageName = this.generateId()
 
