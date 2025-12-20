@@ -50,21 +50,21 @@ export default class NpmReleasePropagator implements ReleasePropagator {
             this.throwIfPreviousReleaseNotFound()
 
             if (this.isUpToDate) {
-                console.log(`Already up to date, skipping ${repoPath}...`)
+                console.info(`Already up to date, skipping ${repoPath}...`)
                 continue
             }
 
-            console.log(`Propagating to ${repoPath}...`)
+            console.info(`Propagating to ${repoPath}...`)
             await this.installReleaseForCurrentRepo()
 
             const hasTypeErrors = await this.checkForTypeErrors()
 
             if (hasTypeErrors) {
-                await this.rollbackInstallation()
-
-                throw new Error(
-                    `TypeScript compilation errors detected! Skipping for ${repoPath}...`
+                console.warn(
+                    `TypeScript compilation errors detected! Rolling back for ${repoPath}...`
                 )
+                await this.rollbackInstallation()
+                continue
             }
 
             if (this.shouldGitCommit) {

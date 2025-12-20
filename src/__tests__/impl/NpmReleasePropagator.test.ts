@@ -135,9 +135,13 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
     protected static async doesNotCommitIfThereAreTypeErrors() {
         setExecThrowsFor(`npx tsc --noEmit`)
 
-        await assert.doesThrowAsync(async () => {
-            await this.run()
-        }, `TypeScript compilation errors detected! Skipping for ${this.repoPaths[0]}...`)
+        await this.run()
+
+        assert.isEqual(
+            FakeAutocommit.callsToConstructor.length,
+            0,
+            'Should not have committed changes!'
+        )
     }
 
     @test()
