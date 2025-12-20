@@ -60,6 +60,8 @@ export default class NpmReleasePropagator implements ReleasePropagator {
             const hasTypeErrors = await this.checkForTypeErrors()
 
             if (hasTypeErrors) {
+                await this.rollbackInstallation()
+
                 throw new Error(
                     `TypeScript compilation errors detected! Skipping for ${repoPath}...`
                 )
@@ -160,6 +162,12 @@ Please commit or stash these changes before running propagation!
         } catch {
             return true
         }
+    }
+
+    private async rollbackInstallation() {
+        await this.exec(`git reset --hard && git clean -fd`, {
+            cwd: this.currentRepoPath,
+        })
     }
 
     private async gitCommitChanges() {

@@ -110,6 +110,28 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
     }
 
     @test()
+    protected static async rollsBackInstallIfThereAreTypeErrors() {
+        setExecThrowsFor(`npx tsc --noEmit`)
+
+        try {
+            await this.run()
+        } catch (error) {
+            // Expected to throw
+        }
+
+        const rollbackCall = callsToExec.find(
+            (call) =>
+                call.command === 'git reset --hard && git clean -fd' &&
+                call.options?.cwd === this.repoPaths[0]
+        )
+
+        assert.isTruthy(
+            rollbackCall,
+            'Expected rollback command to be called with correct cwd'
+        )
+    }
+
+    @test()
     protected static async doesNotCommitIfThereAreTypeErrors() {
         setExecThrowsFor(`npx tsc --noEmit`)
 
