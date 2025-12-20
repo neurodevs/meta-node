@@ -42,6 +42,8 @@ export default class NpmReleasePropagator implements ReleasePropagator {
     public async run() {
         await this.throwIfUncommittedGitChanges()
 
+        console.info('Starting propagation...\n')
+
         for (const repoPath of this.repoPaths) {
             this.currentRepoPath = repoPath
 
@@ -71,6 +73,8 @@ export default class NpmReleasePropagator implements ReleasePropagator {
                 await this.gitCommitChanges()
             }
         }
+
+        console.info('\nPropagation complete!\n')
     }
 
     private async throwIfUncommittedGitChanges() {
