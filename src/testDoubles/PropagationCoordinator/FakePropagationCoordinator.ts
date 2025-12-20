@@ -1,4 +1,7 @@
-import { PropagationCoordinator } from '../../impl/NpmPropagationCoordinator.js'
+import {
+    PropagationCoordinator,
+    PropagationCoordinatorOptions,
+} from '../../impl/NpmPropagationCoordinator.js'
 
 export default class FakePropagationCoordinator
     implements PropagationCoordinator
@@ -6,14 +9,20 @@ export default class FakePropagationCoordinator
     public static callsToConstructor: {
         repoPath?: string
         repoPaths?: string[]
+        options?: PropagationCoordinatorOptions
     }[] = []
 
     public static numCallsToRun = 0
 
-    public constructor(repoPath?: string, repoPaths?: string[]) {
+    public constructor(
+        repoPath?: string,
+        repoPaths?: string[],
+        options?: PropagationCoordinatorOptions
+    ) {
         FakePropagationCoordinator.callsToConstructor.push({
             repoPath,
             repoPaths,
+            options,
         })
     }
 
