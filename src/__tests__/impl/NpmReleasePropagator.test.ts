@@ -8,6 +8,8 @@ import {
     fakeReadFile,
     resetCallsToExec,
     resetCallsToReadFile,
+    resetExecThrowsFor,
+    setExecThrowsFor,
     setFakeExecResult,
     setFakeReadFileResult,
 } from '@neurodevs/fake-node-core'
@@ -59,7 +61,7 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
         ]
 
         assert.isEqualDeep(
-            [callsToExec[2], callsToExec[4]],
+            [callsToExec[2], callsToExec[5]],
             expectedCalls,
             'Did not install release in each repo path!'
         )
@@ -105,6 +107,15 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
         )
 
         assert.isEqual(execCalls.length, 1, 'Should not have installed update!')
+    }
+
+    @test()
+    protected static async doesNotCommitIfThereAreTypeErrors() {
+        setExecThrowsFor(`npx tsc --noEmit`)
+
+        await assert.doesThrowAsync(async () => {
+            await this.run()
+        }, `TypeScript compilation errors detected! Skipping for ${this.repoPaths[0]}...`)
     }
 
     @test()
@@ -160,6 +171,7 @@ Please commit or stash these changes before running propagation!
     private static setFakeExec() {
         NpmReleasePropagator.exec = fakeExec as unknown as typeof exec
         resetCallsToExec()
+        resetExecThrowsFor()
 
         this.setFakeMetaNodeVersion()
     }

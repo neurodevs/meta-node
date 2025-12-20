@@ -57,6 +57,14 @@ export default class NpmReleasePropagator implements ReleasePropagator {
             console.log(`Propagating to ${repoPath}...`)
             await this.installReleaseForCurrentRepo()
 
+            const hasTypeErrors = await this.checkForTypeErrors()
+
+            if (hasTypeErrors) {
+                throw new Error(
+                    `TypeScript compilation errors detected! Skipping for ${repoPath}...`
+                )
+            }
+
             if (this.shouldGitCommit) {
                 await this.gitCommitChanges()
             }
@@ -141,6 +149,17 @@ Please commit or stash these changes before running propagation!
                 cwd: this.currentRepoPath,
             }
         )
+    }
+
+    private async checkForTypeErrors() {
+        try {
+            await this.exec(`npx tsc --noEmit`, {
+                cwd: this.currentRepoPath,
+            })
+            return false
+        } catch {
+            return true
+        }
     }
 
     private async gitCommitChanges() {

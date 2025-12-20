@@ -1,6 +1,6 @@
 {
   "name": "@neurodevs/meta-node",
-  "version": "0.18.3",
+  "version": "0.18.4",
   "description": "Meta-layer utilities for maintaining Node.js package ecosystems.",
   "type": "module",
   "keywords": [
@@ -54,7 +54,7 @@
     "semver": "^7.7.3"
   },
   "devDependencies": {
-    "@neurodevs/fake-node-core": "0.8.0",
+    "@neurodevs/fake-node-core": "^0.10.0",
     "@neurodevs/generate-id": "^1.0.9",
     "@neurodevs/node-tdd": "0.2.3",
     "@types/fs-extra": "^11.0.4",
