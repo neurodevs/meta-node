@@ -75,3 +75,11 @@ export * from './impl/TypescriptClassSnippetSuite.js'
 
 export { default as FakeSnippetSuite } from './testDoubles/SnippetSuite/FakeSnippetSuite.js'
 export * from './testDoubles/SnippetSuite/FakeSnippetSuite.js'
+
+// WorkspaceTypeChecker
+
+export { default as NpmWorkspaceTypeChecker } from './impl/NpmWorkspaceTypeChecker.js'
+export * from './impl/NpmWorkspaceTypeChecker.js'
+
+export { default as FakeWorkspaceTypeChecker } from './testDoubles/WorkspaceTypeChecker/FakeWorkspaceTypeChecker.js'
+export * from './testDoubles/WorkspaceTypeChecker/FakeWorkspaceTypeChecker.js'
