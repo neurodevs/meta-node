@@ -15,18 +15,30 @@ export default class NpmPropagationCoordinator
 
     private repoPath: string
     private repoPaths: string[]
+    private shouldPropagateMajors: boolean
 
     private pkg!: PackageJson
     private currentRepoPath!: string
     private currentPkgJson!: PackageJson
 
-    protected constructor(repoPath: string, repoPaths: string[]) {
+    protected constructor(
+        repoPath: string,
+        repoPaths: string[],
+        options?: PropagationCoordinatorOptions
+    ) {
+        const { shouldPropagateMajors = false } = options ?? {}
+
         this.repoPath = repoPath
         this.repoPaths = repoPaths
+        this.shouldPropagateMajors = shouldPropagateMajors
     }
 
-    public static Create(repoPath: string, repoPaths: string[]) {
-        return new (this.Class ?? this)(repoPath, repoPaths)
+    public static Create(
+        repoPath: string,
+        repoPaths: string[],
+        options?: PropagationCoordinatorOptions
+    ) {
+        return new (this.Class ?? this)(repoPath, repoPaths, options)
     }
 
     public async run() {
@@ -70,7 +82,11 @@ export default class NpmPropagationCoordinator
 
             const min = semver.minVersion(this.maybeDependencyRange)
 
-            if (min?.major === target?.major) {
+            if (!min || min.toString() === '0.0.0') {
+                continue
+            }
+
+            if (this.shouldPropagateMajors || min?.major === target?.major) {
                 repoPaths.push(repoPath)
             }
         }
@@ -108,5 +124,10 @@ export interface PropagationCoordinator {
 
 export type PropagationCoordinatorConstructor = new (
     repoPath: string,
-    repoPaths: string[]
+    repoPaths: string[],
+    options?: PropagationCoordinatorOptions
 ) => PropagationCoordinator
+
+export interface PropagationCoordinatorOptions {
+    shouldPropagateMajors?: boolean
+}

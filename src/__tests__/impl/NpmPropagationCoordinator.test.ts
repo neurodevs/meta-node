@@ -9,6 +9,7 @@ import { test, assert } from '@neurodevs/node-tdd'
 
 import NpmPropagationCoordinator, {
     PropagationCoordinator,
+    PropagationCoordinatorOptions,
 } from '../../impl/NpmPropagationCoordinator.js'
 import NpmReleasePropagator from '../../impl/NpmReleasePropagator.js'
 import FakeReleasePropagator from '../../testDoubles/ReleasePropagator/FakeReleasePropagator.js'
@@ -71,6 +72,29 @@ export default class NpmPropagationCoordinatorTest extends AbstractPackageTest {
         )
     }
 
+    @test()
+    protected static async propagatesMajorsIfPassedOptionalParameter() {
+        const instance = this.NpmPropagationCoordinator({
+            shouldPropagateMajors: true,
+        })
+
+        await instance.run()
+
+        assert.isEqualDeep(
+            FakeReleasePropagator.callsToConstructor[0],
+            {
+                packageName: this.scopedName,
+                packageVersion: this.packageVersion,
+                repoPaths: [
+                    this.repoPaths[0],
+                    this.repoPaths[1],
+                    this.repoPaths[2],
+                ],
+            },
+            'Did not propagate majors!'
+        )
+    }
+
     private static async run() {
         await this.instance.run()
     }
@@ -93,7 +117,13 @@ export default class NpmPropagationCoordinatorTest extends AbstractPackageTest {
         FakeReleasePropagator.resetTestDouble()
     }
 
-    private static NpmPropagationCoordinator() {
-        return NpmPropagationCoordinator.Create(this.repoPath, this.repoPaths)
+    private static NpmPropagationCoordinator(
+        options?: PropagationCoordinatorOptions
+    ) {
+        return NpmPropagationCoordinator.Create(
+            this.repoPath,
+            this.repoPaths,
+            options
+        )
     }
 }
