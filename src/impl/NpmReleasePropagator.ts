@@ -31,18 +31,50 @@ export default class NpmReleasePropagator implements ReleasePropagator {
     }
 
     public async run() {
+        await this.throwIfUncommittedGitChanges()
+
         for (const repoPath of this.repoPaths) {
             console.log(`Propagating to ${repoPath}...`)
             this.currentRepoPath = repoPath
 
-            await this.loadCurrentPackageJson()
             await this.throwIfPreviousReleaseNotFound()
+
             await this.installReleaseForCurrentRepo()
             await this.gitCommitChanges()
         }
     }
 
+    private async throwIfUncommittedGitChanges() {
+        const repoPathsWithChanges: string[] = []
+
+        for (const repoPath of this.repoPaths) {
+            const changes = await this.exec('git status --porcelain', {
+                cwd: repoPath,
+            })
+
+            if (changes.stdout.trim().length > 0) {
+                repoPathsWithChanges.push(repoPath)
+            }
+        }
+
+        if (repoPathsWithChanges.length > 0) {
+            const err = this.generateUncommittedErrorFrom(repoPathsWithChanges)
+            throw new Error(err)
+        }
+    }
+
+    private generateUncommittedErrorFrom(repoPathsWithChanges: string[]) {
+        return `Cannot propagate release because there are uncommitted git changes in the following repositor${repoPathsWithChanges.length > 1 ? 'ies' : 'y'}:
+
+\t - ${repoPathsWithChanges.join('\n\t - ')}
+
+Please commit or stash these changes before running propagation!
+        `
+    }
+
     private async throwIfPreviousReleaseNotFound() {
+        await this.loadCurrentPackageJson()
+
         if (!(this.isDependency || this.isDevDependency)) {
             throw new Error(
                 `Cannot propagate release for ${this.packageName} because it is not listed in either dependencies or devDependencies! Please install it in the target repository before running propagation.`

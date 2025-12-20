@@ -1,5 +1,6 @@
-import { exec as execSync } from 'node:child_process'
+import { ChildProcess, exec as execSync } from 'node:child_process'
 import { readFile } from 'node:fs/promises'
+import { Readable } from 'node:stream'
 import { promisify } from 'node:util'
 import {
     callsToExec,
@@ -7,6 +8,7 @@ import {
     fakeReadFile,
     resetCallsToExec,
     resetCallsToReadFile,
+    setFakeExecResult,
     setFakeReadFileResult,
 } from '@neurodevs/fake-node-core'
 import { test, assert } from '@neurodevs/node-tdd'
@@ -57,23 +59,10 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
         ]
 
         assert.isEqualDeep(
-            [callsToExec[0], callsToExec[2]],
+            [callsToExec[2], callsToExec[4]],
             expectedCalls,
             'Did not install release in each repo path!'
         )
-    }
-
-    @test()
-    protected static async runThrowsIfRepoDoesNotHavePreviousRelease() {
-        const missingPackageName = this.generateId()
-
-        this.instance = this.NpmReleasePropagator({
-            packageName: missingPackageName,
-        })
-
-        await assert.doesThrowAsync(async () => {
-            await this.run()
-        }, `Cannot propagate release for ${missingPackageName} because it is not listed in either dependencies or devDependencies! Please install it in the target repository before running propagation.`)
     }
 
     @test()
@@ -93,6 +82,39 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
                 },
             ],
             'Did not commit changes to git for each repo path!'
+        )
+    }
+
+    @test()
+    protected static async throwsIfRepoDoesNotHavePreviousRelease() {
+        const missingPackageName = this.generateId()
+
+        this.instance = this.NpmReleasePropagator({
+            packageName: missingPackageName,
+        })
+
+        await assert.doesThrowAsync(async () => {
+            await this.run()
+        }, `Cannot propagate release for ${missingPackageName} because it is not listed in either dependencies or devDependencies! Please install it in the target repository before running propagation.`)
+    }
+
+    @test()
+    protected static async throwsIfGitHasUncommittedChanges() {
+        setFakeExecResult('git status --porcelain', {
+            stdout: 'M somefile.ts' as unknown as Readable,
+        } as ChildProcess)
+
+        await assert.doesThrowAsync(
+            async () => {
+                await this.run()
+            },
+            `Cannot propagate release because there are uncommitted git changes in the following repositories:
+
+\t - ${this.repoPaths[0]}
+\t - ${this.repoPaths[1]}
+
+Please commit or stash these changes before running propagation!
+`
         )
     }
 
