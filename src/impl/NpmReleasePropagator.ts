@@ -3,6 +3,8 @@ import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { promisify } from 'node:util'
 
+import { parse, minVersion, gte } from 'semver'
+
 import GitAutocommit from './GitAutocommit.js'
 
 export default class NpmReleasePropagator implements ReleasePropagator {
@@ -34,11 +36,17 @@ export default class NpmReleasePropagator implements ReleasePropagator {
         await this.throwIfUncommittedGitChanges()
 
         for (const repoPath of this.repoPaths) {
-            console.log(`Propagating to ${repoPath}...`)
             this.currentRepoPath = repoPath
 
-            await this.throwIfPreviousReleaseNotFound()
+            await this.loadCurrentPackageJson()
 
+            this.throwIfPreviousReleaseNotFound()
+
+            if (this.isUpToDate) {
+                continue
+            }
+
+            console.log(`Propagating to ${repoPath}...`)
             await this.installReleaseForCurrentRepo()
             await this.gitCommitChanges()
         }
@@ -72,16 +80,6 @@ Please commit or stash these changes before running propagation!
         `
     }
 
-    private async throwIfPreviousReleaseNotFound() {
-        await this.loadCurrentPackageJson()
-
-        if (!(this.isDependency || this.isDevDependency)) {
-            throw new Error(
-                `Cannot propagate release for ${this.packageName} because it is not listed in either dependencies or devDependencies! Please install it in the target repository before running propagation.`
-            )
-        }
-    }
-
     private async loadCurrentPackageJson() {
         const raw = await this.readFile(this.currentPackageJsonPath, 'utf-8')
         this.currentPackageJson = JSON.parse(raw)
@@ -91,17 +89,43 @@ Please commit or stash these changes before running propagation!
         return `${this.currentRepoPath}/package.json`
     }
 
-    private get isDependency() {
-        return this.currentPackageJson?.dependencies?.[this.packageName]
+    private throwIfPreviousReleaseNotFound() {
+        if (!(this.dependencyRange || this.devDependencyRange)) {
+            throw new Error(
+                `Cannot propagate release for ${this.packageName} because it is not listed in either dependencies or devDependencies! Please install it in the target repository before running propagation.`
+            )
+        }
     }
 
-    private get isDevDependency() {
-        return this.currentPackageJson?.devDependencies?.[this.packageName]
+    private get dependencyRange() {
+        return this.currentPackageJson?.dependencies?.[this.packageName] ?? ''
+    }
+
+    private get devDependencyRange() {
+        return (
+            this.currentPackageJson?.devDependencies?.[this.packageName] ?? ''
+        )
+    }
+
+    private get isUpToDate() {
+        const target = parse(this.packageVersion)
+
+        if (!target) {
+            return false
+        }
+
+        const depMin = minVersion(this.dependencyRange ?? '')
+        const devDepMin = minVersion(this.devDependencyRange ?? '')
+
+        return (
+            (depMin && gte(depMin, target)) ||
+            (devDepMin && gte(devDepMin, target))
+        )
     }
 
     private async installReleaseForCurrentRepo() {
         await this.exec(
-            `yarn add ${this.isDevDependency ? '-D ' : ''}${this.packageName}@${this.packageVersion}`,
+            `yarn add ${this.devDependencyRange ? '-D ' : ''}${this.packageName}@${this.packageVersion}`,
             {
                 cwd: this.currentRepoPath,
             }

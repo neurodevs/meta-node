@@ -86,6 +86,28 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
     }
 
     @test()
+    protected static async doesNotInstallIfAlreadyUpToDate() {
+        setFakeReadFileResult(
+            `${this.repoPaths[0]}/package.json`,
+            JSON.stringify(
+                this.generatePackageJson({
+                    dependencies: {
+                        [this.packageName]: this.packageVersion,
+                    },
+                })
+            )
+        )
+
+        await this.run()
+
+        const execCalls = callsToExec.filter((call) =>
+            call.command.includes(`yarn add`)
+        )
+
+        assert.isEqual(execCalls.length, 1, 'Should not have installed update!')
+    }
+
+    @test()
     protected static async throwsIfRepoDoesNotHavePreviousRelease() {
         const missingPackageName = this.generateId()
 
@@ -139,7 +161,7 @@ Please commit or stash these changes before running propagation!
             JSON.stringify(
                 this.generatePackageJson({
                     dependencies: {
-                        [this.packageName]: this.generateId(),
+                        [this.packageName]: '2.0.0',
                     },
                 })
             )
@@ -150,7 +172,7 @@ Please commit or stash these changes before running propagation!
             JSON.stringify(
                 this.generatePackageJson({
                     devDependencies: {
-                        [this.packageName]: this.generateId(),
+                        [this.packageName]: '2.0.0',
                     },
                 })
             )
