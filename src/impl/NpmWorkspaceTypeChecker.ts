@@ -18,7 +18,7 @@ export default class NpmWorkspaceTypeChecker implements WorkspaceTypeChecker {
     }
 
     public async run() {
-        console.info('Starting type checking...\n')
+        console.info('Starting type checking... \n')
         const repoNames = await this.readDir(this.workspacePath, {
             withFileTypes: true,
         })
@@ -44,6 +44,8 @@ export default class NpmWorkspaceTypeChecker implements WorkspaceTypeChecker {
                 console.error(`Type errors found in ${fullRepoPath}!`)
             }
         }
+
+        console.info('\n Type checking completed! \n')
     }
 
     private get readDir() {
