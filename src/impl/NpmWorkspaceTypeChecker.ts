@@ -23,6 +23,13 @@ export default class NpmWorkspaceTypeChecker implements WorkspaceTypeChecker {
 
         for (const repoName of repoNames) {
             const fullRepoPath = `${this.workspacePath}/${repoName}`
+
+            const repoContents = await this.readDir(fullRepoPath)
+
+            if (!repoContents.includes('package.json')) {
+                continue
+            }
+
             console.info(`Checking types for ${fullRepoPath}...`)
 
             try {

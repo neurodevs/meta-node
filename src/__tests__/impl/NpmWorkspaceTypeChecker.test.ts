@@ -68,6 +68,23 @@ export default class NpmWorkspaceTypeCheckerTest extends AbstractPackageTest {
         await this.instance.run()
     }
 
+    @test()
+    protected static async onlyChecksInDirsWithPackageJson() {
+        setFakeReadDirResult(this.repoPaths[0], [])
+
+        await this.instance.run()
+
+        const calls = callsToExec.filter(
+            (call) => call.command === 'npx tsc --noEmit'
+        )
+
+        assert.isEqual(
+            calls.length,
+            1,
+            'Checked types in repo without package.json!'
+        )
+    }
+
     private static setFakeReadDir() {
         NpmWorkspaceTypeChecker.readDir =
             fakeReadDir as unknown as typeof readdir
@@ -77,6 +94,9 @@ export default class NpmWorkspaceTypeCheckerTest extends AbstractPackageTest {
             this.repoName1,
             this.repoName2,
         ])
+
+        setFakeReadDirResult(this.repoPaths[0], ['package.json'])
+        setFakeReadDirResult(this.repoPaths[1], ['package.json'])
     }
 
     private static setFakeExec() {
