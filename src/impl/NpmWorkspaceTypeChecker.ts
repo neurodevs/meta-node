@@ -19,10 +19,16 @@ export default class NpmWorkspaceTypeChecker implements WorkspaceTypeChecker {
 
     public async run() {
         console.info('Starting type checking...\n')
-        const repoNames = await this.readDir(this.workspacePath)
+        const repoNames = await this.readDir(this.workspacePath, {
+            withFileTypes: true,
+        })
 
         for (const repoName of repoNames) {
-            const fullRepoPath = `${this.workspacePath}/${repoName}`
+            if (!repoName.isDirectory()) {
+                continue
+            }
+
+            const fullRepoPath = `${this.workspacePath}/${repoName.name}`
 
             const repoContents = await this.readDir(fullRepoPath)
 

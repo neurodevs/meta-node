@@ -4,6 +4,9 @@ import { promisify } from 'node:util'
 
 import {
     callsToExec,
+    callsToReadDir,
+    createFakeDir,
+    createFakeFile,
     fakeExec,
     fakeReadDir,
     resetCallsToExec,
@@ -27,6 +30,14 @@ export default class NpmWorkspaceTypeCheckerTest extends AbstractPackageTest {
 
     private static readonly repoName1 = this.generateId()
     private static readonly repoName2 = this.generateId()
+
+    private static readonly fakeDir1 = createFakeDir({
+        name: this.repoName1,
+    })
+
+    private static readonly fakeDir2 = createFakeDir({
+        name: this.repoName2,
+    })
 
     private static readonly repoPaths = [
         `${this.workspacePath}/${this.repoName1}`,
@@ -58,7 +69,7 @@ export default class NpmWorkspaceTypeCheckerTest extends AbstractPackageTest {
                     call.options?.cwd === this.repoPaths[1])
         )
 
-        assert.isEqual(calls.length, 2, 'Failed to check types for first repo!')
+        assert.isEqual(calls.length, 2, 'Failed to check types!')
     }
 
     @test()
@@ -85,15 +96,32 @@ export default class NpmWorkspaceTypeCheckerTest extends AbstractPackageTest {
         )
     }
 
+    @test()
+    protected static async onlyChecksDirsForPackageJson() {
+        const filename = this.generateId()
+
+        const fakeFile = createFakeFile({
+            name: filename,
+            parentPath: this.workspacePath,
+        })
+
+        setFakeReadDirResult(this.workspacePath, [fakeFile])
+
+        await this.instance.run()
+
+        assert.isEqual(
+            callsToReadDir.length,
+            1,
+            'Checked types in non-directory!'
+        )
+    }
+
     private static setFakeReadDir() {
         NpmWorkspaceTypeChecker.readDir =
             fakeReadDir as unknown as typeof readdir
         resetCallsToReadDir()
 
-        setFakeReadDirResult(this.workspacePath, [
-            this.repoName1,
-            this.repoName2,
-        ])
+        setFakeReadDirResult(this.workspacePath, [this.fakeDir1, this.fakeDir2])
 
         setFakeReadDirResult(this.repoPaths[0], ['package.json'])
         setFakeReadDirResult(this.repoPaths[1], ['package.json'])
