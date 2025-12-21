@@ -92,7 +92,7 @@ export default class NpmWorkspaceTypeCheckerTest extends AbstractPackageTest {
         assert.isEqual(
             calls.length,
             1,
-            'Checked types in repo without package.json!'
+            'Checked types in repo without tsconfig.json!'
         )
     }
 
@@ -123,8 +123,8 @@ export default class NpmWorkspaceTypeCheckerTest extends AbstractPackageTest {
 
         setFakeReadDirResult(this.workspacePath, [this.fakeDir1, this.fakeDir2])
 
-        setFakeReadDirResult(this.repoPaths[0], ['package.json'])
-        setFakeReadDirResult(this.repoPaths[1], ['package.json'])
+        setFakeReadDirResult(this.repoPaths[0], ['tsconfig.json'])
+        setFakeReadDirResult(this.repoPaths[1], ['tsconfig.json'])
     }
 
     private static setFakeExec() {

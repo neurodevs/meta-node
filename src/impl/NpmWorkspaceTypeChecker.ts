@@ -32,7 +32,7 @@ export default class NpmWorkspaceTypeChecker implements WorkspaceTypeChecker {
 
             const repoContents = await this.readDir(fullRepoPath)
 
-            if (!repoContents.includes('package.json')) {
+            if (!repoContents.includes('tsconfig.json')) {
                 continue
             }
 
