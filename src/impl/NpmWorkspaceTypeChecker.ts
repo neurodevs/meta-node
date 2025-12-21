@@ -1,5 +1,6 @@
 import { exec as execSync } from 'node:child_process'
 import { readdir } from 'node:fs/promises'
+import { join } from 'node:path'
 import { promisify } from 'node:util'
 
 export default class NpmWorkspaceTypeChecker implements WorkspaceTypeChecker {
@@ -28,7 +29,7 @@ export default class NpmWorkspaceTypeChecker implements WorkspaceTypeChecker {
                 continue
             }
 
-            const fullRepoPath = `${this.workspacePath}/${repoName.name}`
+            const fullRepoPath = join(this.workspacePath, repoName.name)
 
             const repoContents = await this.readDir(fullRepoPath)
 
