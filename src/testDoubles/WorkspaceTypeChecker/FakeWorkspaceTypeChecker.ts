@@ -7,6 +7,7 @@ export default class FakeWorkspaceTypeChecker implements WorkspaceTypeChecker {
     public constructor(workspacePath?: string) {
         FakeWorkspaceTypeChecker.callsToConstructor.push(workspacePath)
     }
+
     public async run() {
         FakeWorkspaceTypeChecker.numCallsToRun += 1
     }
