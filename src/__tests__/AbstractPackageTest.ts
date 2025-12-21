@@ -74,10 +74,6 @@ export default class AbstractPackageTest extends AbstractModuleTest {
         4
     )
 
-    protected static setFakeSnippetsFile() {
-        setFakeReadFileResult(this.snippetsPath, this.originalSnippetsFile)
-    }
-
     protected static setFakeKeybindingsFile() {
         setFakeReadFileResult(
             this.keybindingsPath,
@@ -100,5 +96,9 @@ export default class AbstractPackageTest extends AbstractModuleTest {
             ),
             JSON.stringify({ version: this.metaNodeVersion })
         )
+    }
+
+    protected static setFakeSnippetsFile() {
+        setFakeReadFileResult(this.snippetsPath, this.originalSnippetsFile)
     }
 }
