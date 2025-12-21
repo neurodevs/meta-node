@@ -8,6 +8,7 @@ import {
     fakeReadDir,
     resetCallsToExec,
     resetCallsToReadDir,
+    setExecThrowsFor,
     setFakeReadDirResult,
 } from '@neurodevs/fake-node-core'
 import { test, assert } from '@neurodevs/node-tdd'
@@ -58,6 +59,13 @@ export default class NpmWorkspaceTypeCheckerTest extends AbstractPackageTest {
         )
 
         assert.isEqual(calls.length, 2, 'Failed to check types for first repo!')
+    }
+
+    @test()
+    protected static async catchesExitCodeIfThereAreTypeErrors() {
+        setExecThrowsFor('npx tsc --noEmit')
+
+        await this.instance.run()
     }
 
     private static setFakeReadDir() {

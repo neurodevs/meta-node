@@ -25,7 +25,11 @@ export default class NpmWorkspaceTypeChecker implements WorkspaceTypeChecker {
             const fullRepoPath = `${this.workspacePath}/${repoName}`
             console.info(`Checking types for ${fullRepoPath}...`)
 
-            await this.exec('npx tsc --noEmit', { cwd: fullRepoPath })
+            try {
+                await this.exec('npx tsc --noEmit', { cwd: fullRepoPath })
+            } catch {
+                console.error(`Type errors found in ${fullRepoPath}!`)
+            }
         }
     }
 
