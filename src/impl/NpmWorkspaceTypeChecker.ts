@@ -46,7 +46,7 @@ export default class NpmWorkspaceTypeChecker implements WorkspaceTypeChecker {
             }
         }
 
-        console.info('\n Type checking completed! \n')
+        console.info('\nType checking completed!\n')
     }
 
     private get readDir() {
