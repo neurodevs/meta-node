@@ -19,31 +19,40 @@ export default class NpmWorkspaceTypeChecker implements WorkspaceTypeChecker {
     }
 
     public async run() {
-        console.info('Starting type checking... \n')
         const repoNames = await this.readDir(this.workspacePath, {
             withFileTypes: true,
         })
 
+        const repoPaths = (
+            await Promise.all(
+                repoNames.map(async (repoName) => {
+                    if (!repoName.isDirectory()) {
+                        return
+                    }
+
+                    const repoPath = join(this.workspacePath, repoName.name)
+                    const repoContents = await this.readDir(repoPath)
+
+                    if (!repoContents.includes('tsconfig.json')) {
+                        return
+                    }
+                    return repoPath
+                })
+            )
+        ).filter((p): p is string => Boolean(p))
+
+        console.info(
+            `\nChecking types for the following repos:\n\n${repoPaths
+                .map((r) => `  ${r}`)
+                .join('\n')}\n`
+        )
+
         await Promise.all(
-            repoNames.map(async (repoName) => {
-                if (!repoName.isDirectory()) {
-                    return
-                }
-
-                const fullRepoPath = join(this.workspacePath, repoName.name)
-
-                const repoContents = await this.readDir(fullRepoPath)
-
-                if (!repoContents.includes('tsconfig.json')) {
-                    return
-                }
-
-                console.info(`Checking types for ${fullRepoPath}...`)
-
+            repoPaths.map(async (repoPath) => {
                 try {
-                    await this.exec('npx tsc --noEmit', { cwd: fullRepoPath })
+                    await this.exec('npx tsc --noEmit', { cwd: repoPath })
                 } catch {
-                    console.error(`Type errors found in ${fullRepoPath}!`)
+                    console.error(`Type errors found in ${repoPath}!`)
                 }
             })
         )
