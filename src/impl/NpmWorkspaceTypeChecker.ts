@@ -47,17 +47,22 @@ export default class NpmWorkspaceTypeChecker implements WorkspaceTypeChecker {
                 .join('\n')}\n`
         )
 
-        await Promise.all(
+        const results = await Promise.all(
             repoPaths.map(async (repoPath) => {
                 try {
                     await this.exec('npx tsc --noEmit', { cwd: repoPath })
+                    return { hasErrors: false }
                 } catch {
                     console.error(`Type errors found in ${repoPath}!`)
+                    return { hasErrors: true }
                 }
             })
         )
 
-        console.info('\nType checking completed!\n')
+        const numErrors = results.filter((r) => r.hasErrors).length
+        console.info(
+            `\nType checking completed with ${numErrors} error${numErrors !== 1 ? 's' : ''}!\n`
+        )
     }
 
     private get readDir() {
