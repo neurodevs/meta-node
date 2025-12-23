@@ -24,27 +24,29 @@ export default class NpmWorkspaceTypeChecker implements WorkspaceTypeChecker {
             withFileTypes: true,
         })
 
-        for (const repoName of repoNames) {
-            if (!repoName.isDirectory()) {
-                continue
-            }
+        await Promise.all(
+            repoNames.map(async (repoName) => {
+                if (!repoName.isDirectory()) {
+                    return
+                }
 
-            const fullRepoPath = join(this.workspacePath, repoName.name)
+                const fullRepoPath = join(this.workspacePath, repoName.name)
 
-            const repoContents = await this.readDir(fullRepoPath)
+                const repoContents = await this.readDir(fullRepoPath)
 
-            if (!repoContents.includes('tsconfig.json')) {
-                continue
-            }
+                if (!repoContents.includes('tsconfig.json')) {
+                    return
+                }
 
-            console.info(`Checking types for ${fullRepoPath}...`)
+                console.info(`Checking types for ${fullRepoPath}...`)
 
-            try {
-                await this.exec('npx tsc --noEmit', { cwd: fullRepoPath })
-            } catch {
-                console.error(`Type errors found in ${fullRepoPath}!`)
-            }
-        }
+                try {
+                    await this.exec('npx tsc --noEmit', { cwd: fullRepoPath })
+                } catch {
+                    console.error(`Type errors found in ${fullRepoPath}!`)
+                }
+            })
+        )
 
         console.info('\nType checking completed!\n')
     }
