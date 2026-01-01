@@ -55,7 +55,7 @@
   },
   "devDependencies": {
     "@neurodevs/fake-node-core": "^0.10.0",
-    "@neurodevs/generate-id": "^1.0.9",
+    "@neurodevs/generate-id": "1.1.1",
     "@neurodevs/node-tdd": "0.2.3",
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^24.6.2",
