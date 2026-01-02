@@ -49,7 +49,7 @@ export default class NpmPropagationCoordinator
 
         const repoPaths = await this.determineWhereToPropagate()
 
-        const propagator = this.NpmReleaseCoordinator({
+        const propagator = this.NpmReleasePropagator({
             packageName: this.packageName,
             packageVersion: this.packageVersion,
             repoPaths,
@@ -121,7 +121,7 @@ export default class NpmPropagationCoordinator
         return NpmPropagationCoordinator.readFile
     }
 
-    private NpmReleaseCoordinator(options: ReleasePropagatorOptions) {
+    private NpmReleasePropagator(options: ReleasePropagatorOptions) {
         return NpmReleasePropagator.Create(options)
     }
 }
