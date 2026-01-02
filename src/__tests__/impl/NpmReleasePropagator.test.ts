@@ -49,6 +49,10 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
     protected static async runInstallsReleaseForEachRepoPath() {
         await this.run()
 
+        const actualCalls = callsToExec.filter((call) =>
+            call.command.includes(`yarn add`)
+        )
+
         const expectedCalls = [
             {
                 command: `yarn add ${this.packageName}@${this.packageVersion}`,
@@ -61,7 +65,7 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
         ]
 
         assert.isEqualDeep(
-            [callsToExec[2], callsToExec[5]],
+            actualCalls,
             expectedCalls,
             'Did not install release in each repo path!'
         )
