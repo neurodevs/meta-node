@@ -1,7 +1,6 @@
 import { exec as execSync } from 'child_process'
 import { mkdir, readFile, writeFile } from 'fs/promises'
 import path from 'path'
-import { chdir } from 'process'
 import { promisify } from 'util'
 import { pathExists } from 'fs-extra'
 import { parse } from 'jsonc-parser'
@@ -10,7 +9,6 @@ import GitAutocommit from './GitAutocommit.js'
 
 export default class NpmAutopackage implements Autopackage {
     public static Class?: AutopackageConstructor
-    public static chdir = chdir
     public static exec = promisify(execSync)
     public static fetch = fetch
     public static mkdir = mkdir
@@ -18,8 +16,6 @@ export default class NpmAutopackage implements Autopackage {
     public static readFile = readFile
     public static writeFile = writeFile
 
-    private installDir: string
-    private packageName: string
     private description: string
     private gitNamespace: string
     private npmNamespace?: string
@@ -38,6 +34,25 @@ export default class NpmAutopackage implements Autopackage {
     }
 
     private shouldOpenVscode = false
+
+    private readonly installDir: string
+    private readonly packageName: string
+    private readonly packageDir: string
+    private readonly packageJsonPath: string
+    private readonly gitignorePath: string
+    private readonly tasksJsonPath: string
+    private readonly settingsJsonPath: string
+    private readonly testDirPath: string
+    private readonly abstractTestPath: string
+
+    private readonly abstractPackageTestFile = `import AbstractModuleTest from '@neurodevs/node-tdd'
+
+export default abstract class AbstractPackageTest extends AbstractModuleTest {
+    protected static async beforeEach() {
+        await super.beforeEach()
+    }
+}
+`
 
     protected constructor(options: AutopackageOptions) {
         const {
@@ -59,6 +74,23 @@ export default class NpmAutopackage implements Autopackage {
         this.keywords = keywords
         this.license = license
         this.author = author
+
+        this.packageDir = path.join(this.installDir, this.packageName)
+        this.packageJsonPath = path.join(this.packageDir, 'package.json')
+        this.gitignorePath = path.join(this.packageDir, '.gitignore')
+        this.tasksJsonPath = path.join(this.packageDir, '.vscode/tasks.json')
+
+        this.settingsJsonPath = path.join(
+            this.packageDir,
+            '.vscode/settings.json'
+        )
+
+        this.testDirPath = path.join(this.packageDir, 'src', '__tests__')
+
+        this.abstractTestPath = path.join(
+            this.testDirPath,
+            'AbstractPackageTest.ts'
+        )
     }
 
     public static Create(options: AutopackageOptions) {
@@ -69,11 +101,7 @@ export default class NpmAutopackage implements Autopackage {
         this.throwIfGithubTokenNotInEnv()
 
         await this.createRepoInGithubOrg()
-
-        this.chdirToInstallDir()
         await this.cloneGitRepo()
-
-        this.chdirToPackageDir()
         await this.resetMainToOrigin()
         await this.setCurrentMetaNodeVersion()
         await this.spruceCreateModule()
@@ -141,16 +169,15 @@ export default class NpmAutopackage implements Autopackage {
         )
     }
 
-    private chdirToInstallDir() {
-        this.chdir(this.installDir)
-    }
-
     private async cloneGitRepo() {
         const packageDirExists = await this.checkIfPackageDirExists()
 
         if (!packageDirExists) {
             console.log('Cloning git repository...')
-            await this.exec(`git clone ${this.gitUrl}`)
+
+            await this.exec(`git clone ${this.gitUrl}`, {
+                cwd: this.installDir,
+            })
             this.shouldOpenVscode = true
         }
     }
@@ -159,21 +186,16 @@ export default class NpmAutopackage implements Autopackage {
         return this.pathExists(this.packageDir)
     }
 
-    private get packageDir() {
-        return this.packageName
-    }
-
     private get gitUrl() {
         return `https://github.com/${this.gitNamespace}/${this.packageName}.git`
     }
 
     private async resetMainToOrigin() {
-        await this.exec('git fetch origin')
-        await this.exec('git reset --hard origin/main')
-    }
+        await this.exec('git fetch origin', { cwd: this.packageDir })
 
-    private chdirToPackageDir() {
-        this.chdir(this.packageDir)
+        await this.exec('git reset --hard origin/main', {
+            cwd: this.packageDir,
+        })
     }
 
     private async setCurrentMetaNodeVersion() {
@@ -198,6 +220,7 @@ export default class NpmAutopackage implements Autopackage {
 
         if (!packageJsonExists) {
             console.log('Running spruce create.module...')
+
             await this.execSpruceCreateModule()
             await this.commitCreatePackage()
         }
@@ -207,11 +230,10 @@ export default class NpmAutopackage implements Autopackage {
         return this.pathExists(this.packageJsonPath)
     }
 
-    private readonly packageJsonPath = 'package.json'
-
     private async execSpruceCreateModule() {
         await this.exec(
-            `spruce create.module --name "${this.packageName}" --destination "." --description "${this.description}"`
+            `spruce create.module --name "${this.packageName}" --destination "." --description "${this.description}"`,
+            { cwd: this.packageDir }
         )
     }
 
@@ -226,6 +248,7 @@ export default class NpmAutopackage implements Autopackage {
 
         if (!this.isPackageUpToDate) {
             console.log('Updating package.json...')
+
             await this.updatePackageJsonFile()
             await this.commitUpdatePackageJson()
         }
@@ -343,8 +366,6 @@ export default class NpmAutopackage implements Autopackage {
         })
     }
 
-    private readonly gitignorePath = '.gitignore'
-
     private get isGitignoreUpdated() {
         const lines = this.originalGitignoreFile
             .split(/\r?\n/)
@@ -371,17 +392,20 @@ export default class NpmAutopackage implements Autopackage {
 
         if (!vscodeSettingsExist) {
             console.log('Setting up VSCode...')
+
             await this.spruceSetupVscode()
             await this.commitSetupVscode()
         }
     }
 
     private async checkIfVscodeSettingsExist() {
-        return this.pathExists(`.vscode/settings.json`)
+        return this.pathExists(this.settingsJsonPath)
     }
 
     private async spruceSetupVscode() {
-        await this.exec('spruce setup.vscode --all true')
+        await this.exec('spruce setup.vscode --all true', {
+            cwd: this.packageDir,
+        })
     }
 
     private async commitSetupVscode() {
@@ -429,8 +453,6 @@ export default class NpmAutopackage implements Autopackage {
         })
         return parse(raw)
     }
-
-    private readonly tasksJsonPath = '.vscode/tasks.json'
 
     private get updatedTasksJsonFile() {
         return JSON.stringify(
@@ -490,7 +512,8 @@ export default class NpmAutopackage implements Autopackage {
             console.log('Installing default devDependencies...')
 
             await this.exec(
-                'yarn add -D @neurodevs/generate-id@latest @neurodevs/node-tdd@latest'
+                'yarn add -D @neurodevs/generate-id@latest @neurodevs/node-tdd@latest',
+                { cwd: this.packageDir }
             )
             await this.commitInstallDevDependencies()
         }
@@ -498,7 +521,8 @@ export default class NpmAutopackage implements Autopackage {
 
     private async getLatestVersion(scopedPackageName: string) {
         const { stdout } = await this.exec(
-            `yarn info ${scopedPackageName} version --silent`
+            `yarn info ${scopedPackageName} version --silent`,
+            { cwd: this.packageDir }
         )
         return stdout.trim()
     }
@@ -531,12 +555,14 @@ export default class NpmAutopackage implements Autopackage {
         if (!fileExists) {
             console.log(`Installing ${this.abstractTestPath}...`)
 
-            await this.mkdir('src/__tests__', { recursive: true })
+            await this.mkdir(this.testDirPath, { recursive: true })
 
             await this.writeFile(
                 this.abstractTestPath,
                 this.abstractPackageTestFile,
-                { encoding: 'utf-8' }
+                {
+                    encoding: 'utf-8',
+                }
             )
 
             await this.commitInstallAbstractPackageTest()
@@ -550,17 +576,6 @@ export default class NpmAutopackage implements Autopackage {
         return doesTsExist || doesTsxExist
     }
 
-    private readonly abstractTestPath = `src/__tests__/AbstractPackageTest.ts`
-
-    private readonly abstractPackageTestFile = `import AbstractModuleTest from '@neurodevs/node-tdd'
-
-export default abstract class AbstractPackageTest extends AbstractModuleTest {
-    protected static async beforeEach() {
-        await super.beforeEach()
-    }
-}
-`
-
     private async commitInstallAbstractPackageTest() {
         await this.GitAutocommit(
             `patch: install AbstractPackageTest (@neurodevs/meta-node: ${this.metaNodeVersion})`
@@ -569,12 +584,8 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 
     private async openVscode() {
         if (this.shouldOpenVscode) {
-            await this.exec('code .')
+            await this.exec('code .', { cwd: this.packageDir })
         }
-    }
-
-    private get chdir() {
-        return NpmAutopackage.chdir
     }
 
     private get exec() {
@@ -602,7 +613,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
     }
 
     private GitAutocommit(commitMessage: string) {
-        return GitAutocommit.Create(commitMessage)
+        return GitAutocommit.Create(commitMessage, this.packageDir)
     }
 }
 

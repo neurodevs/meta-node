@@ -1,22 +1,20 @@
 import { ChildProcess, exec as execSync } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
 import { mkdir } from 'fs/promises'
+import path from 'path'
 import { promisify } from 'util'
 import {
-    callsToChdir,
     callsToExec,
     callsToFetch,
     callsToMkdir,
     callsToReadFile,
     callsToWriteFile,
-    fakeChdir,
     fakeExec,
     fakeFetch,
     fakeMkdir,
     fakePathExists,
     fakeReadFile,
     fakeWriteFile,
-    resetCallsToChdir,
     resetCallsToExec,
     resetCallsToFetch,
     resetCallsToMkdir,
@@ -43,10 +41,85 @@ const exec = promisify(execSync)
 export default class NpmAutopackageTest extends AbstractPackageTest {
     private static instance: Autopackage
 
+    private static readonly installDir = this.generateId()
+    private static readonly description = this.generateId()
+    private static readonly gitNamespace = this.generateId()
+    private static readonly npmNamespace = this.generateId()
+    private static readonly keywords = [this.generateId(), this.generateId()]
+    private static readonly license = this.generateId()
+    private static readonly author = this.generateId()
+    private static readonly githubToken = this.generateId()
+    private static readonly randomId = this.generateId()
+
+    private static readonly packageDir = path.join(
+        this.installDir,
+        this.packageName
+    )
+
+    private static readonly packageJsonPath = path.join(
+        this.packageDir,
+        'package.json'
+    )
+
+    private static readonly gitignorePath = path.join(
+        this.packageDir,
+        '.gitignore'
+    )
+    private static readonly buildDirGitignorePattern = '\nbuild/\n'
+
+    private static readonly tasksJsonPath = path.join(
+        this.packageDir,
+        '.vscode',
+        'tasks.json'
+    )
+
+    private static readonly testDirPath = path.join(
+        this.packageDir,
+        'src',
+        '__tests__'
+    )
+
+    private static readonly abstractTestPath = path.join(
+        this.testDirPath,
+        'AbstractPackageTest.ts'
+    )
+
+    private static readonly setupVscodeCmd = 'spruce setup.vscode --all true'
+
+    private static readonly checkGenerateIdVersionCmd = `yarn info @neurodevs/generate-id version --silent`
+    private static readonly checkNodeTddVersionCmd = `yarn info @neurodevs/node-tdd version --silent`
+
+    private static readonly dependencies = {
+        [this.generateId()]: this.generateId(),
+        [this.generateId()]: this.generateId(),
+    }
+
+    private static readonly yarnInstallDevDepsCommand =
+        'yarn add -D @neurodevs/generate-id@latest @neurodevs/node-tdd@latest'
+
+    private static readonly abstractTestFile = `import AbstractModuleTest from '@neurodevs/node-tdd'
+
+export default abstract class AbstractPackageTest extends AbstractModuleTest {
+    protected static async beforeEach() {
+        await super.beforeEach()
+    }
+}
+`
+
+    private static readonly defaultOptions = {
+        installDir: this.installDir,
+        name: this.packageName,
+        description: this.description,
+        gitNamespace: this.gitNamespace,
+        npmNamespace: this.npmNamespace,
+        keywords: this.keywords,
+        license: this.license,
+        author: this.author,
+    }
+
     protected static async beforeEach() {
         await super.beforeEach()
 
-        this.fakeChdir()
         this.fakeExec()
         this.fakeFetch()
         this.fakeMkdir()
@@ -101,7 +174,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
-                        name: this.name,
+                        name: this.packageName,
                         private: false,
                         description: this.description,
                         auto_init: true,
@@ -115,35 +188,16 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     @test()
-    protected static async thenChdirToInstallDir() {
-        await this.run()
-
-        assert.isEqual(
-            callsToChdir[0],
-            this.installDir,
-            'Did not change to installDir!'
-        )
-    }
-
-    @test()
     protected static async thenGitClone() {
         await this.run()
 
-        assert.isEqual(
-            callsToExec[0]?.command,
-            `git clone https://github.com/${this.gitNamespace}/${this.name}.git`,
+        assert.isEqualDeep(
+            callsToExec[0],
+            {
+                command: `git clone https://github.com/${this.gitNamespace}/${this.packageName}.git`,
+                options: { cwd: this.installDir },
+            },
             'Did not call git clone!'
-        )
-    }
-
-    @test()
-    protected static async thenChdirToPackageDir() {
-        await this.run()
-
-        assert.isEqual(
-            callsToChdir[1],
-            this.packageDir,
-            'Did not change to packageDir!'
         )
     }
 
@@ -151,9 +205,9 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     protected static async thenGitFetchOrigin() {
         await this.run()
 
-        assert.isEqual(
-            callsToExec[1]?.command,
-            `git fetch origin`,
+        assert.isEqualDeep(
+            callsToExec[1],
+            { command: `git fetch origin`, options: { cwd: this.packageDir } },
             'Did not call git fetch origin!'
         )
     }
@@ -162,9 +216,12 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     protected static async thenGitFetchResetHard() {
         await this.run()
 
-        assert.isEqual(
-            callsToExec[2]?.command,
-            `git reset --hard origin/main`,
+        assert.isEqualDeep(
+            callsToExec[2],
+            {
+                command: `git reset --hard origin/main`,
+                options: { cwd: this.packageDir },
+            },
             'Did not call git reset hard!'
         )
     }
@@ -173,9 +230,12 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     protected static async thenSpruceCreateModule() {
         await this.run()
 
-        assert.isEqual(
-            callsToExec[4]?.command,
-            this.createModuleCmd,
+        assert.isEqualDeep(
+            callsToExec[4],
+            {
+                command: this.createModuleCmd,
+                options: { cwd: this.packageDir },
+            },
             'Did not call "spruce create.module"!'
         )
     }
@@ -185,8 +245,11 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[0]?.commitMessage,
-            `patch: create package (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+            FakeAutocommit.callsToConstructor[0],
+            {
+                commitMessage: `patch: create package (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+                cwd: this.packageDir,
+            },
             'Did not commit create package changes!'
         )
     }
@@ -254,8 +317,11 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[1]?.commitMessage,
-            `patch: update package.json (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+            FakeAutocommit.callsToConstructor[1],
+            {
+                commitMessage: `patch: update package.json (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+                cwd: this.packageDir,
+            },
             'Did not commit update package changes!'
         )
     }
@@ -280,8 +346,11 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[2]?.commitMessage,
-            `patch: add build dir to gitignore (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+            FakeAutocommit.callsToConstructor[2],
+            {
+                commitMessage: `patch: add build dir to gitignore (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+                cwd: this.packageDir,
+            },
             'Did not commit .gitignore changes!'
         )
     }
@@ -290,9 +359,12 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     protected static async thenSpruceSetupVscode() {
         await this.run()
 
-        assert.isEqual(
-            callsToExec[5]?.command,
-            this.setupVscodeCmd,
+        assert.isEqualDeep(
+            callsToExec[5],
+            {
+                command: this.setupVscodeCmd,
+                options: { cwd: this.packageDir },
+            },
             'Did not call "spruce setup.vscode"!'
         )
     }
@@ -302,8 +374,11 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[3]?.commitMessage,
-            `patch: setup vscode (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+            FakeAutocommit.callsToConstructor[3],
+            {
+                commitMessage: `patch: setup vscode (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+                cwd: this.packageDir,
+            },
             'Did not commit vscode changes!'
         )
     }
@@ -324,8 +399,11 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[4]?.commitMessage,
-            `patch: update vscode tasks.json (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+            FakeAutocommit.callsToConstructor[4],
+            {
+                commitMessage: `patch: update vscode tasks.json (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+                cwd: this.packageDir,
+            },
             'Did not commit updated vscode tasks.json changes!'
         )
     }
@@ -334,9 +412,12 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     protected static async thenInstallsDefaultDevDependencies() {
         await this.run()
 
-        assert.isEqual(
-            callsToExec[8]?.command,
-            this.yarnInstallDevDepsCommand,
+        assert.isEqualDeep(
+            callsToExec[8],
+            {
+                command: this.yarnInstallDevDepsCommand,
+                options: { cwd: this.packageDir },
+            },
             'Did not install default devDependencies!'
         )
     }
@@ -346,8 +427,11 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[5]?.commitMessage,
-            `patch: install default devDependencies (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+            FakeAutocommit.callsToConstructor[5],
+            {
+                commitMessage: `patch: install default devDependencies (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+                cwd: this.packageDir,
+            },
             'Did not commit install devDependencies changes!'
         )
     }
@@ -359,7 +443,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         assert.isEqualDeep(
             callsToMkdir[0],
             {
-                path: 'src/__tests__',
+                path: this.testDirPath,
                 options: { recursive: true },
             },
             'Did not install tests directory!'
@@ -373,8 +457,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         assert.isEqualDeep(
             callsToWriteFile[3],
             {
-                file: this.abstractPackageTestPath,
-                data: this.abstractPackageTestFile,
+                file: this.abstractTestPath,
+                data: this.abstractTestFile,
                 options: { encoding: 'utf-8' },
             },
             'Did not install AbstractPackageTest!'
@@ -386,8 +470,11 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[6]?.commitMessage,
-            `patch: install AbstractPackageTest (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+            FakeAutocommit.callsToConstructor[6],
+            {
+                commitMessage: `patch: install AbstractPackageTest (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+                cwd: this.packageDir,
+            },
             'Did not commit install AbstractPackageTest changes!'
         )
     }
@@ -396,10 +483,75 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     protected static async lastlyOpensVscodeAtEnd() {
         await this.run()
 
-        assert.isEqual(
-            callsToExec[9]?.command,
-            'code .',
+        assert.isEqualDeep(
+            callsToExec[9],
+            { command: 'code .', options: { cwd: this.packageDir } },
             'Did not open vscode at end!'
+        )
+    }
+
+    @test()
+    protected static async installsDevDependenciesIfGenerateIdNotLatest() {
+        setFakeExecResult(this.checkGenerateIdVersionCmd, {
+            stdout: '0.0.1',
+        } as unknown as ChildProcess)
+
+        await this.createAndRunAutopackage()
+
+        const calls = callsToExec.filter(
+            (call) => call?.command === this.yarnInstallDevDepsCommand
+        )
+
+        assert.isEqualDeep(
+            calls[0],
+            {
+                command: this.yarnInstallDevDepsCommand,
+                options: { cwd: this.packageDir },
+            },
+            'Should install default devDependencies if not already installed!'
+        )
+    }
+
+    @test()
+    protected static async installsDevDependenciesIfNodeTddNotLatest() {
+        setFakeExecResult(this.checkGenerateIdVersionCmd, {
+            stdout: '1.0.0',
+        } as unknown as ChildProcess)
+
+        setFakeExecResult(this.checkNodeTddVersionCmd, {
+            stdout: '0.0.1',
+        } as unknown as ChildProcess)
+
+        await this.createAndRunAutopackage()
+
+        const calls = callsToExec.filter(
+            (call) => call?.command === this.yarnInstallDevDepsCommand
+        )
+
+        assert.isEqualDeep(
+            calls[0],
+            {
+                command: this.yarnInstallDevDepsCommand,
+                options: { cwd: this.packageDir },
+            },
+            'Should install default devDependencies if not already installed!'
+        )
+    }
+
+    @test()
+    protected static async makeNpmNamespaceOptional() {
+        resetCallsToWriteFile()
+
+        const instance = this.NpmAutopackage({
+            npmNamespace: undefined,
+        })
+
+        await instance.run()
+
+        assert.doesInclude(
+            callsToWriteFile[0]?.data,
+            `"name": "${this.packageName}"`,
+            'Did not handle missing npmNamespace!'
         )
     }
 
@@ -429,7 +581,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
             callsToExec.filter(
                 (call) =>
                     call?.command ===
-                    `git clone https://github.com/${this.gitNamespace}/${this.name}.git`
+                    `git clone https://github.com/${this.gitNamespace}/${this.packageName}.git`
             ).length,
             1,
             'Did not clone repo once!'
@@ -547,55 +699,13 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     @test()
     protected static async doesNotOpenVscodeIfNotCloned() {
-        setPathShouldExist(this.name, true)
+        setPathShouldExist(this.packageDir, true)
 
         await this.createAndRunAutopackage()
 
         assert.isFalse(
             callsToExec.some((call) => call?.command === 'code .'),
             'Should not open vscode if not cloned!'
-        )
-    }
-
-    @test()
-    protected static async installsDevDependenciesIfGenerateIdNotLatest() {
-        setFakeExecResult(this.checkGenerateIdVersionCmd, {
-            stdout: '0.0.1',
-        } as unknown as ChildProcess)
-
-        await this.createAndRunAutopackage()
-
-        const calls = callsToExec.filter(
-            (call) => call?.command === this.yarnInstallDevDepsCommand
-        )
-
-        assert.isEqual(
-            calls.length,
-            1,
-            'Should not install default devDependencies if already installed!'
-        )
-    }
-
-    @test()
-    protected static async installsDevDependenciesIfNodeTddNotLatest() {
-        setFakeExecResult(this.checkGenerateIdVersionCmd, {
-            stdout: '1.0.0',
-        } as unknown as ChildProcess)
-
-        setFakeExecResult(this.checkNodeTddVersionCmd, {
-            stdout: '0.0.1',
-        } as unknown as ChildProcess)
-
-        await this.createAndRunAutopackage()
-
-        const calls = callsToExec.filter(
-            (call) => call?.command === this.yarnInstallDevDepsCommand
-        )
-
-        assert.isEqual(
-            calls.length,
-            1,
-            'Should not install default devDependencies if already installed!'
         )
     }
 
@@ -611,12 +721,12 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     @test()
     protected static async doesNotInstallAbstractPackageTestIfTsExists() {
-        setPathShouldExist(this.abstractPackageTestPath, true)
+        setPathShouldExist(this.abstractTestPath, true)
 
         await this.createAndRunAutopackage()
 
         const calls = callsToWriteFile.filter(
-            (call) => call.file === this.abstractPackageTestPath
+            (call) => call.file === this.abstractTestPath
         )
 
         assert.isEqual(
@@ -628,35 +738,18 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     @test()
     protected static async doesNotInstallAbstractPackageTestIfTsxExists() {
-        setPathShouldExist(`${this.abstractPackageTestPath}x`, true)
+        setPathShouldExist(`${this.abstractTestPath}x`, true)
 
         await this.createAndRunAutopackage()
 
         const calls = callsToWriteFile.filter(
-            (call) => call.file === this.abstractPackageTestPath
+            (call) => call.file === this.abstractTestPath
         )
 
         assert.isEqual(
             calls.length,
             0,
             'Should not install AbstractPackageTest.tsx if already exists!'
-        )
-    }
-
-    @test()
-    protected static async makeNpmNamespaceOptional() {
-        resetCallsToWriteFile()
-
-        const instance = this.NpmAutopackage({
-            npmNamespace: undefined,
-        })
-
-        await instance.run()
-
-        assert.doesInclude(
-            callsToWriteFile[0]?.data,
-            `"name": "${this.name}"`,
-            'Did not handle missing npmNamespace!'
         )
     }
 
@@ -670,25 +763,12 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     private static get scopedPackageName() {
-        return `@${this.npmNamespace}/${this.name}`
+        return `@${this.npmNamespace}/${this.packageName}`
     }
-
-    private static get packageDir() {
-        return this.name
-    }
-
-    private static readonly packageJsonPath = 'package.json'
-    private static readonly gitignorePath = '.gitignore'
-    private static readonly buildDirGitignorePattern = '\nbuild/\n'
 
     private static get createModuleCmd() {
-        return `spruce create.module --name "${this.name}" --destination "." --description "${this.description}"`
+        return `spruce create.module --name "${this.packageName}" --destination "." --description "${this.description}"`
     }
-
-    private static readonly setupVscodeCmd = 'spruce setup.vscode --all true'
-
-    private static readonly checkGenerateIdVersionCmd = `yarn info @neurodevs/generate-id version --silent`
-    private static readonly checkNodeTddVersionCmd = `yarn info @neurodevs/node-tdd version --silent`
 
     private static orderJsonKeys(
         json: Record<string, unknown>,
@@ -713,11 +793,6 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         return ordered
     }
 
-    private static fakeChdir() {
-        NpmAutopackage.chdir = fakeChdir
-        resetCallsToChdir()
-    }
-
     private static fakeExec() {
         NpmAutopackage.exec = fakeExec as unknown as typeof exec
         resetCallsToExec()
@@ -739,7 +814,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         NpmAutopackage.pathExists = fakePathExists
         resetCallsToPathExists()
 
-        setPathShouldExist(this.abstractPackageTestPath, false)
+        setPathShouldExist(this.abstractTestPath, false)
     }
 
     private static fakeReadFile() {
@@ -773,34 +848,17 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         setFakeFetchResponse(this.reposUrl, fakeResponse)
     }
 
-    private static readonly installDir = this.generateId()
-    private static readonly name = this.generateId()
-    private static readonly description = this.generateId()
-    private static readonly gitNamespace = this.generateId()
-    private static readonly npmNamespace = this.generateId()
-    private static readonly keywords = [this.generateId(), this.generateId()]
-    private static readonly license = this.generateId()
-    private static readonly author = this.generateId()
-
-    private static readonly githubToken = this.generateId()
-    private static readonly randomId = this.generateId()
-
     private static get reposUrl() {
-        return `https://api.github.com/repos/${this.gitNamespace}/${this.name}`
+        return `https://api.github.com/repos/${this.gitNamespace}/${this.packageName}`
     }
 
     private static get orgsUrl() {
         return `https://api.github.com/orgs/${this.gitNamespace}/repos`
     }
 
-    private static readonly dependencies = {
-        [this.generateId()]: this.generateId(),
-        [this.generateId()]: this.generateId(),
-    }
-
     private static get originalPackageJson() {
         return JSON.stringify({
-            name: this.name,
+            name: this.packageName,
             description: 'Old description',
             dependencies: this.dependencies,
             devDependencies: {
@@ -819,19 +877,17 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
             license: this.license,
             author: this.author,
             main: 'build/index.js',
-            homepage: `https://github.com/${this.gitNamespace}/${this.name}`,
+            homepage: `https://github.com/${this.gitNamespace}/${this.packageName}`,
             repository: {
                 type: 'git',
-                url: `git+https://github.com/${this.gitNamespace}/${this.name}.git`,
+                url: `git+https://github.com/${this.gitNamespace}/${this.packageName}.git`,
             },
             bugs: {
-                url: `https://github.com/${this.gitNamespace}/${this.name}/issues`,
+                url: `https://github.com/${this.gitNamespace}/${this.packageName}/issues`,
             },
             dependencies: this.dependencies,
         })
     }
-
-    private static readonly tasksJsonPath = '.vscode/tasks.json'
 
     private static originalTasksJson = {
         [this.randomId]: this.randomId,
@@ -879,32 +935,6 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
             null,
             4
         )
-    }
-
-    private static readonly yarnInstallDevDepsCommand =
-        'yarn add -D @neurodevs/generate-id@latest @neurodevs/node-tdd@latest'
-
-    private static readonly abstractPackageTestPath =
-        'src/__tests__/AbstractPackageTest.ts'
-
-    private static readonly abstractPackageTestFile = `import AbstractModuleTest from '@neurodevs/node-tdd'
-
-export default abstract class AbstractPackageTest extends AbstractModuleTest {
-    protected static async beforeEach() {
-        await super.beforeEach()
-    }
-}
-`
-
-    private static readonly defaultOptions = {
-        installDir: this.installDir,
-        name: this.name,
-        description: this.description,
-        gitNamespace: this.gitNamespace,
-        npmNamespace: this.npmNamespace,
-        keywords: this.keywords,
-        license: this.license,
-        author: this.author,
     }
 
     private static NpmAutopackage(options?: Partial<AutopackageOptions>) {

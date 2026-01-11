@@ -4,6 +4,7 @@ import {
     setFakeExecResult,
     setFakeReadFileResult,
 } from '@neurodevs/fake-node-core'
+import { generateShortId } from '@neurodevs/generate-id'
 import AbstractModuleTest from '@neurodevs/node-tdd'
 
 import expandHomeDir from '../functions/expandHomeDir.js'
@@ -100,5 +101,9 @@ export default class AbstractPackageTest extends AbstractModuleTest {
 
     protected static setFakeSnippetsFile() {
         setFakeReadFileResult(this.snippetsPath, this.originalSnippetsFile)
+    }
+
+    protected static generateId() {
+        return generateShortId()
     }
 }
