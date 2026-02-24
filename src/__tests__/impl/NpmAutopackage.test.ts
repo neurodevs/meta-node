@@ -381,6 +381,20 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
     }
 
     @test()
+    protected static async thenCommitsUpdateTsconfig() {
+        await this.run()
+
+        assert.isEqualDeep(
+            FakeAutocommit.callsToConstructor[3],
+            {
+                commitMessage: `patch: update tsconfig (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+                cwd: this.packageDir,
+            },
+            'Did not commit tsconfig changes!'
+        )
+    }
+
+    @test()
     protected static async thenSpruceSetupVscode() {
         await this.run()
 
@@ -399,7 +413,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[3],
+            FakeAutocommit.callsToConstructor[4],
             {
                 commitMessage: `patch: setup vscode (@neurodevs/meta-node: ${this.metaNodeVersion})`,
                 cwd: this.packageDir,
@@ -424,7 +438,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[4],
+            FakeAutocommit.callsToConstructor[5],
             {
                 commitMessage: `patch: update vscode tasks.json (@neurodevs/meta-node: ${this.metaNodeVersion})`,
                 cwd: this.packageDir,
@@ -452,7 +466,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[5],
+            FakeAutocommit.callsToConstructor[6],
             {
                 commitMessage: `patch: install default devDependencies (@neurodevs/meta-node: ${this.metaNodeVersion})`,
                 cwd: this.packageDir,
@@ -495,7 +509,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[6],
+            FakeAutocommit.callsToConstructor[7],
             {
                 commitMessage: `patch: install AbstractPackageTest (@neurodevs/meta-node: ${this.metaNodeVersion})`,
                 cwd: this.packageDir,

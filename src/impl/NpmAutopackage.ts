@@ -398,6 +398,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 
         console.log('Updating tsconfig...')
         await this.updateTsconfigFile()
+        await this.commitUpdateTsconfig()
     }
 
     private async loadTsconfigFile() {
@@ -462,6 +463,12 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
                 ])
             ),
         }
+    }
+
+    private async commitUpdateTsconfig() {
+        await this.GitAutocommit(
+            `patch: update tsconfig (@neurodevs/meta-node: ${this.metaNodeVersion})`
+        )
     }
 
     private async setupVscode() {
