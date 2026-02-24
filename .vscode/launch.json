@@ -17,6 +17,7 @@
 			"runtimeArgs": [
 				"--inspect-brk",
 				"--trace-warnings",
+				"--experimental-vm-modules",
 				"${workspaceFolder}/node_modules/.bin/jest",
 				"${fileBasenameNoExtension}",
 				"--detectOpenHandles"

@@ -32,6 +32,7 @@ import GitAutocommit from '../../impl/GitAutocommit.js'
 import NpmAutopackage, {
     Autopackage,
     AutopackageOptions,
+    TsConfig,
 } from '../../impl/NpmAutopackage.js'
 import FakeAutocommit from '../../testDoubles/Autocommit/FakeAutocommit.js'
 import AbstractPackageTest from '../AbstractPackageTest.js'
@@ -65,7 +66,11 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         this.packageDir,
         '.gitignore'
     )
-    private static readonly buildDirGitignorePattern = '\nbuild/\n'
+
+    private static readonly tsconfigPath = path.join(
+        this.packageDir,
+        'tsconfig.json'
+    )
 
     private static readonly tasksJsonPath = path.join(
         this.packageDir,
@@ -83,6 +88,11 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         this.testDirPath,
         'AbstractPackageTest.ts'
     )
+
+    private static readonly customLib = this.generateId()
+    private static readonly customType = this.generateId()
+    private static readonly customInclude = this.generateId()
+    private static readonly customOption = this.generateId()
 
     private static readonly setupVscodeCmd = 'spruce setup.vscode --all true'
 
@@ -334,7 +344,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
             callsToWriteFile[1],
             {
                 file: this.gitignorePath,
-                data: this.buildDirGitignorePattern,
+                data: '\nbuild/\n',
                 options: { encoding: 'utf-8', flag: 'a' },
             },
             'Did not update .gitignore as expected!'
@@ -352,6 +362,21 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
                 cwd: this.packageDir,
             },
             'Did not commit .gitignore changes!'
+        )
+    }
+
+    @test()
+    protected static async thenUpdatesTsconfig() {
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToWriteFile[2],
+            {
+                file: this.tsconfigPath,
+                data: JSON.stringify(this.updatedTsconfig, null, 4) + '\n',
+                options: { encoding: 'utf-8', flag: 'a' },
+            },
+            'Did not update tsconfig as expected!'
         )
     }
 
@@ -387,7 +412,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
     protected static async thenUpdatesVscodeTasksJson() {
         await this.run()
 
-        assert.isEqualDeep(callsToWriteFile[2], {
+        assert.isEqualDeep(callsToWriteFile[3], {
             file: this.tasksJsonPath,
             data: this.updatedTasksJson,
             options: { encoding: 'utf-8' },
@@ -455,7 +480,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToWriteFile[3],
+            callsToWriteFile[4],
             {
                 file: this.abstractTestPath,
                 data: this.abstractTestFile,
@@ -827,6 +852,11 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
             this.tasksJsonPath,
             JSON.stringify(this.originalTasksJson)
         )
+
+        setFakeReadFileResult(
+            this.tsconfigPath,
+            JSON.stringify(this.originalTsconfig)
+        )
     }
 
     private static fakeWriteFile() {
@@ -888,6 +918,46 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
             },
             dependencies: this.dependencies,
         })
+    }
+
+    private static get originalTsconfig(): TsConfig {
+        return {
+            compilerOptions: {
+                lib: [this.customLib],
+                types: [this.customType],
+            },
+            include: [this.customInclude],
+            customOption: this.customOption,
+        }
+    }
+
+    private static get updatedTsconfig() {
+        return {
+            ...this.originalTsconfig,
+            compilerOptions: {
+                module: 'nodenext',
+                moduleResolution: 'nodenext',
+                target: 'ES2022',
+                lib: [this.customLib, 'ES2022'],
+                types: [this.customType, 'node'],
+                baseUrl: 'src',
+                outDir: 'build',
+                sourceMap: false,
+                strict: true,
+                noImplicitAny: true,
+                noImplicitReturns: true,
+                noUnusedLocals: true,
+                forceConsistentCasingInFileNames: true,
+                declaration: true,
+                skipLibCheck: true,
+                esModuleInterop: true,
+                moduleDetection: 'force',
+                allowJs: true,
+                resolveJsonModule: true,
+                experimentalDecorators: true,
+            },
+            include: [this.customInclude, './src/*.ts', './src/**/*.ts'],
+        }
     }
 
     private static originalTasksJson = {

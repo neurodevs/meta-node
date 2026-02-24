@@ -25,6 +25,8 @@ export default class NpmAutopackage implements Autopackage {
 
     private originalPackageJson!: Record<string, unknown>
     private originalGitignoreFile!: string
+
+    private originalTsconfig!: TsConfig
     private metaNodeVersion!: string
 
     private originalTasksJson!: {
@@ -40,6 +42,7 @@ export default class NpmAutopackage implements Autopackage {
     private readonly packageDir: string
     private readonly packageJsonPath: string
     private readonly gitignorePath: string
+    private readonly tsconfigPath: string
     private readonly tasksJsonPath: string
     private readonly settingsJsonPath: string
     private readonly testDirPath: string
@@ -78,6 +81,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
         this.packageDir = path.join(this.installDir, this.packageName)
         this.packageJsonPath = path.join(this.packageDir, 'package.json')
         this.gitignorePath = path.join(this.packageDir, '.gitignore')
+        this.tsconfigPath = path.join(this.packageDir, 'tsconfig.json')
         this.tasksJsonPath = path.join(this.packageDir, '.vscode/tasks.json')
 
         this.settingsJsonPath = path.join(
@@ -107,6 +111,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
         await this.spruceCreateModule()
         await this.updatePackageJson()
         await this.updateGitignore()
+        await this.updateTsconfig()
         await this.setupVscode()
         await this.updateVscodeTasks()
         await this.installDefaultDevDependencies()
@@ -388,6 +393,77 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
         )
     }
 
+    private async updateTsconfig() {
+        this.originalTsconfig = await this.loadTsconfigFile()
+
+        console.log('Updating tsconfig...')
+        await this.updateTsconfigFile()
+    }
+
+    private async loadTsconfigFile() {
+        const raw = await this.readFile(this.tsconfigPath, {
+            encoding: 'utf-8',
+        })
+        return JSON.parse(raw)
+    }
+
+    private async updateTsconfigFile() {
+        await this.writeFile(
+            this.tsconfigPath,
+            JSON.stringify(this.updatedTsconfig, null, 4) + '\n',
+            {
+                encoding: 'utf-8',
+                flag: 'a',
+            }
+        )
+    }
+
+    private get updatedTsconfig() {
+        return {
+            ...this.originalTsconfig,
+            compilerOptions: {
+                module: 'nodenext',
+                moduleResolution: 'nodenext',
+                target: 'ES2022',
+                lib: Array.from(
+                    new Set([
+                        ...(this.originalTsconfig?.compilerOptions?.lib ?? []),
+                        'ES2022',
+                    ])
+                ),
+                types: Array.from(
+                    new Set([
+                        ...(this.originalTsconfig?.compilerOptions?.types ??
+                            []),
+                        'node',
+                    ])
+                ),
+                baseUrl: 'src',
+                outDir: 'build',
+                sourceMap: false,
+                strict: true,
+                noImplicitAny: true,
+                noImplicitReturns: true,
+                noUnusedLocals: true,
+                forceConsistentCasingInFileNames: true,
+                declaration: true,
+                skipLibCheck: true,
+                esModuleInterop: true,
+                moduleDetection: 'force',
+                allowJs: true,
+                resolveJsonModule: true,
+                experimentalDecorators: true,
+            },
+            include: Array.from(
+                new Set([
+                    ...(this.originalTsconfig?.include ?? []),
+                    './src/*.ts',
+                    './src/**/*.ts',
+                ])
+            ),
+        }
+    }
+
     private async setupVscode() {
         const vscodeSettingsExist = await this.checkIfVscodeSettingsExist()
 
@@ -636,3 +712,13 @@ export interface AutopackageOptions {
 export type AutopackageConstructor = new (
     options: AutopackageOptions
 ) => Autopackage
+
+export interface TsConfig {
+    compilerOptions?: {
+        lib?: string[]
+        types?: string[]
+        [key: string]: unknown
+    }
+    include?: string[]
+    [key: string]: unknown
+}
