@@ -54,7 +54,7 @@
     "semver": "^7.7.3"
   },
   "devDependencies": {
-    "@neurodevs/fake-node-core": "^0.10.0",
+    "@neurodevs/fake-node-core": "0.11.1",
     "@neurodevs/generate-id": "1.1.2",
     "@neurodevs/node-tdd": "0.2.5",
     "@types/fs-extra": "^11.0.4",
