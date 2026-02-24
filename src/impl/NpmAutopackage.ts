@@ -24,7 +24,7 @@ export default class NpmAutopackage implements Autopackage {
     private author?: string
 
     private originalPackageJson!: Record<string, unknown>
-    private originalGitignoreFile!: string
+    private originalGitignore!: string
 
     private originalTsconfig!: TsConfig
     private metaNodeVersion!: string
@@ -44,7 +44,6 @@ export default class NpmAutopackage implements Autopackage {
     private readonly gitignorePath: string
     private readonly tsconfigPath: string
     private readonly tasksJsonPath: string
-    private readonly settingsJsonPath: string
     private readonly testDirPath: string
     private readonly abstractTestPath: string
 
@@ -83,12 +82,6 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
         this.gitignorePath = path.join(this.packageDir, '.gitignore')
         this.tsconfigPath = path.join(this.packageDir, 'tsconfig.json')
         this.tasksJsonPath = path.join(this.packageDir, '.vscode/tasks.json')
-
-        this.settingsJsonPath = path.join(
-            this.packageDir,
-            '.vscode/settings.json'
-        )
-
         this.testDirPath = path.join(this.packageDir, 'src', '__tests__')
 
         this.abstractTestPath = path.join(
@@ -249,7 +242,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
     }
 
     private async updatePackageJson() {
-        this.originalPackageJson = await this.loadPackageJsonFile()
+        this.originalPackageJson = await this.loadPackageJson()
 
         if (!this.isPackageUpToDate) {
             console.log('Updating package.json...')
@@ -259,7 +252,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
         }
     }
 
-    private async loadPackageJsonFile() {
+    private async loadPackageJson() {
         const raw = await this.readFile(this.packageJsonPath, {
             encoding: 'utf-8',
         })
@@ -356,7 +349,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
     }
 
     private async updateGitignore() {
-        this.originalGitignoreFile = await this.loadGitignoreFile()
+        this.originalGitignore = await this.loadGitignore()
 
         if (!this.isGitignoreUpdated) {
             console.log('Updating .gitignore...')
@@ -366,14 +359,14 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
         }
     }
 
-    private async loadGitignoreFile() {
+    private async loadGitignore() {
         return await this.readFile(this.gitignorePath, {
             encoding: 'utf-8',
         })
     }
 
     private get isGitignoreUpdated() {
-        const lines = this.originalGitignoreFile
+        const lines = this.originalGitignore
             .split(/\r?\n/)
             .map((line) => line.trim())
 
@@ -394,18 +387,27 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
     }
 
     private async updateTsconfig() {
-        this.originalTsconfig = await this.loadTsconfigFile()
+        this.originalTsconfig = await this.loadTsconfig()
 
-        console.log('Updating tsconfig...')
-        await this.updateTsconfigFile()
-        await this.commitUpdateTsconfig()
+        if (!this.isTsconfigUpdated) {
+            console.log('Updating tsconfig...')
+            await this.updateTsconfigFile()
+            await this.commitUpdateTsconfig()
+        }
     }
 
-    private async loadTsconfigFile() {
+    private async loadTsconfig() {
         const raw = await this.readFile(this.tsconfigPath, {
             encoding: 'utf-8',
         })
         return JSON.parse(raw)
+    }
+
+    private get isTsconfigUpdated() {
+        return (
+            JSON.stringify(this.originalTsconfig) ==
+            JSON.stringify(this.updatedTsconfig)
+        )
     }
 
     private async updateTsconfigFile() {
@@ -472,9 +474,9 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
     }
 
     private async setupVscode() {
-        const vscodeSettingsExist = await this.checkIfVscodeSettingsExist()
+        const vscodeTasksExist = await this.checkIfVscodeTasksExist()
 
-        if (!vscodeSettingsExist) {
+        if (!vscodeTasksExist) {
             console.log('Setting up VSCode...')
 
             await this.spruceSetupVscode()
@@ -482,8 +484,8 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
         }
     }
 
-    private async checkIfVscodeSettingsExist() {
-        return this.pathExists(this.settingsJsonPath)
+    private async checkIfVscodeTasksExist() {
+        return this.pathExists(this.tasksJsonPath)
     }
 
     private async spruceSetupVscode() {

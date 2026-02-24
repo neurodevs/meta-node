@@ -67,6 +67,10 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         '.gitignore'
     )
 
+    private static readonly originalGitignore = this.generateId()
+
+    private static readonly updatedGitignore = `${this.originalGitignore}\nbuild/`
+
     private static readonly tsconfigPath = path.join(
         this.packageDir,
         'tsconfig.json'
@@ -535,7 +539,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
             stdout: '0.0.1',
         } as unknown as ChildProcess)
 
-        await this.createAndRunAutopackage()
+        await this.runTwice()
 
         const calls = callsToExec.filter(
             (call) => call?.command === this.yarnInstallDevDepsCommand
@@ -561,7 +565,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
             stdout: '0.0.1',
         } as unknown as ChildProcess)
 
-        await this.createAndRunAutopackage()
+        await this.runTwice()
 
         const calls = callsToExec.filter(
             (call) => call?.command === this.yarnInstallDevDepsCommand
@@ -596,25 +600,18 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 
     @test()
     protected static async doesNotCreateRepoInGithubOrgIfDone() {
-        const fakeResponse = new Response(null, {
-            status: 200,
-            statusText: 'OK',
-        })
-
-        setFakeFetchResponse(this.reposUrl, fakeResponse)
-
-        await this.createAndRunAutopackage()
+        await this.runTwice()
 
         const numCalls = callsToFetch.filter(
             (call) => call.input === this.orgsUrl
         ).length
 
-        assert.isEqual(numCalls, 0, 'Should not have created repo!')
+        assert.isEqual(numCalls, 1, 'Should have created repo once!')
     }
 
     @test()
     protected static async doesNotCloneRepoIfDone() {
-        await this.createAndRunAutopackage()
+        await this.runTwice()
 
         assert.isEqual(
             callsToExec.filter(
@@ -629,7 +626,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 
     @test()
     protected static async doesNotSpruceCreateModuleIfDone() {
-        await this.createAndRunAutopackage()
+        await this.runTwice()
 
         assert.isEqual(
             callsToExec.filter((call) => call?.command === this.createModuleCmd)
@@ -641,7 +638,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 
     @test()
     protected static async doesNotRunSetupVscodeIfDone() {
-        await this.createAndRunAutopackage()
+        await this.runTwice()
 
         assert.isEqual(
             callsToExec.filter((call) => call?.command === this.setupVscodeCmd)
@@ -653,7 +650,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 
     @test()
     protected static async doesNotCommitCreatePackageIfDone() {
-        await this.createAndRunAutopackage()
+        await this.runTwice()
 
         assert.isEqual(
             FakeAutocommit.callsToConstructor.filter(
@@ -668,7 +665,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 
     @test()
     protected static async doesNotCommitUpdatePackageIfDone() {
-        await this.createAndRunAutopackage()
+        await this.runTwice()
 
         assert.isEqual(
             FakeAutocommit.callsToConstructor.filter(
@@ -683,7 +680,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 
     @test()
     protected static async doesNotCommitUpdateGitignoreIfDone() {
-        await this.createAndRunAutopackage()
+        await this.runTwice()
 
         assert.isEqual(
             FakeAutocommit.callsToConstructor.filter(
@@ -697,8 +694,23 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
     }
 
     @test()
+    protected static async doesNotCommitUpdateTsconfigIfDone() {
+        await this.runTwice()
+
+        assert.isEqual(
+            FakeAutocommit.callsToConstructor.filter(
+                (call) =>
+                    call?.commitMessage ===
+                    `patch: update tsconfig (@neurodevs/meta-node: ${this.metaNodeVersion})`
+            ).length,
+            1,
+            'Did not commit tsconfig changes once!'
+        )
+    }
+
+    @test()
     protected static async doesNotCommitSetupVscodeIfDone() {
-        await this.createAndRunAutopackage()
+        await this.runTwice()
 
         assert.isEqual(
             FakeAutocommit.callsToConstructor.filter(
@@ -713,7 +725,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 
     @test()
     protected static async doesNotOverrideOriginalDependencies() {
-        await this.createAndRunAutopackage()
+        await this.runTwice()
 
         assert.isEqualDeep(
             JSON.parse(callsToWriteFile[0]?.data).dependencies,
@@ -724,14 +736,12 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 
     @test()
     protected static async doesNotUpdateTasksJsonIfAlreadyDone() {
-        setFakeReadFileResult(this.tasksJsonPath, this.updatedTasksJson)
-
-        await this.createAndRunAutopackage()
+        await this.runTwice()
 
         assert.isEqualDeep(
             callsToWriteFile.filter((call) => call.file === this.tasksJsonPath)
                 .length,
-            0,
+            1,
             'Did not update tasks.json once!'
         )
     }
@@ -740,7 +750,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
     protected static async doesNotOpenVscodeIfNotCloned() {
         setPathShouldExist(this.packageDir, true)
 
-        await this.createAndRunAutopackage()
+        await this.run()
 
         assert.isFalse(
             callsToExec.some((call) => call?.command === 'code .'),
@@ -755,14 +765,14 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
             this.originalPackageJson.replace('@neurodevs/generate-id', '')
         )
 
-        await this.createAndRunAutopackage()
+        await this.runTwice()
     }
 
     @test()
     protected static async doesNotInstallAbstractPackageTestIfTsExists() {
         setPathShouldExist(this.abstractTestPath, true)
 
-        await this.createAndRunAutopackage()
+        await this.run()
 
         const calls = callsToWriteFile.filter(
             (call) => call.file === this.abstractTestPath
@@ -779,7 +789,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
     protected static async doesNotInstallAbstractPackageTestIfTsxExists() {
         setPathShouldExist(`${this.abstractTestPath}x`, true)
 
-        await this.createAndRunAutopackage()
+        await this.run()
 
         const calls = callsToWriteFile.filter(
             (call) => call.file === this.abstractTestPath
@@ -796,9 +806,31 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
         await this.instance.run()
     }
 
-    private static async createAndRunAutopackage() {
-        const instance = this.NpmAutopackage()
-        await instance.run()
+    private static async runTwice() {
+        await this.run()
+
+        setPathShouldExist(this.packageDir, true)
+        setPathShouldExist(this.packageJsonPath, true)
+        setPathShouldExist(this.abstractTestPath, true)
+        setPathShouldExist(this.tasksJsonPath, true)
+
+        setFakeReadFileResult(this.packageJsonPath, this.updatedPackageJson)
+        setFakeReadFileResult(this.gitignorePath, this.updatedGitignore)
+        setFakeReadFileResult(this.tasksJsonPath, this.updatedTasksJson)
+
+        setFakeReadFileResult(
+            this.tsconfigPath,
+            JSON.stringify(this.updatedTsconfig)
+        )
+
+        const fakeResponse = new Response(null, {
+            status: 200,
+            statusText: 'OK',
+        })
+
+        setFakeFetchResponse(this.reposUrl, fakeResponse)
+
+        await this.run()
     }
 
     private static get scopedPackageName() {
@@ -853,6 +885,9 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
         NpmAutopackage.pathExists = fakePathExists
         resetCallsToPathExists()
 
+        setPathShouldExist(this.packageDir, false)
+        setPathShouldExist(this.packageJsonPath, false)
+        setPathShouldExist(this.tasksJsonPath, false)
         setPathShouldExist(this.abstractTestPath, false)
     }
 
@@ -871,6 +906,8 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
             this.tsconfigPath,
             JSON.stringify(this.originalTsconfig)
         )
+
+        setFakeReadFileResult(this.gitignorePath, this.originalGitignore)
     }
 
     private static fakeWriteFile() {
