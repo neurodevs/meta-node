@@ -301,6 +301,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
             ...this.originalPackageJson,
             name: this.scopedPackageName,
             description: this.description,
+            type: 'module',
             keywords: this.keywords ?? [],
             license: this.license,
             author: this.author,
