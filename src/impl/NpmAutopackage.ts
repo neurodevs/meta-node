@@ -591,14 +591,24 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
             '@neurodevs/node-tdd'
         )
 
+        const eslintConfigNdxVersion = await this.getLatestVersion(
+            '@neurodevs/eslint-config-ndx'
+        )
+
+        const prettierConfigNdxVersion = await this.getLatestVersion(
+            '@neurodevs/prettier-config-ndx'
+        )
+
         if (
             this.currentGenerateIdVersion != generateIdVersion ||
-            this.currentNodeTddVersion != nodeTddVersion
+            this.currentNodeTddVersion != nodeTddVersion ||
+            this.currentEslintConfigNdxVersion != eslintConfigNdxVersion ||
+            this.currentPrettierConfigNdxVersion != prettierConfigNdxVersion
         ) {
             console.log('Installing default devDependencies...')
 
             await this.exec(
-                'yarn add -D @neurodevs/generate-id@latest @neurodevs/node-tdd@latest',
+                'yarn add -D @neurodevs/generate-id @neurodevs/node-tdd @neurodevs/eslint-config-ndx @neurodevs/prettier-config-ndx',
                 { cwd: this.packageDir }
             )
             await this.commitInstallDevDependencies()
@@ -625,6 +635,22 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
         return (
             (this.originalPackageJson.devDependencies as any)[
                 '@neurodevs/node-tdd'
+            ] || ''
+        ).replace('^', '')
+    }
+
+    private get currentEslintConfigNdxVersion() {
+        return (
+            (this.originalPackageJson.devDependencies as any)[
+                '@neurodevs/eslint-config-ndx'
+            ] || ''
+        ).replace('^', '')
+    }
+
+    private get currentPrettierConfigNdxVersion() {
+        return (
+            (this.originalPackageJson.devDependencies as any)[
+                '@neurodevs/prettier-config-ndx'
             ] || ''
         ).replace('^', '')
     }

@@ -102,6 +102,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
 
     private static readonly checkGenerateIdVersionCmd = `yarn info @neurodevs/generate-id version --silent`
     private static readonly checkNodeTddVersionCmd = `yarn info @neurodevs/node-tdd version --silent`
+    private static readonly checkEslintConfigNdxVersionCmd = `yarn info @neurodevs/eslint-config-ndx version --silent`
+    private static readonly checkPrettierConfigNdxVersionCmd = `yarn info @neurodevs/prettier-config-ndx version --silent`
 
     private static readonly dependencies = {
         [this.generateId()]: this.generateId(),
@@ -109,7 +111,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     private static readonly yarnInstallDevDepsCommand =
-        'yarn add -D @neurodevs/generate-id@latest @neurodevs/node-tdd@latest'
+        'yarn add -D @neurodevs/generate-id @neurodevs/node-tdd @neurodevs/eslint-config-ndx @neurodevs/prettier-config-ndx'
 
     private static readonly abstractTestFile = `import AbstractModuleTest from '@neurodevs/node-tdd'
 
@@ -453,10 +455,11 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 
     @test()
     protected static async thenInstallsDefaultDevDependencies() {
+        this.setShouldInstallDevDeps()
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[8],
+            callsToExec[10],
             {
                 command: this.yarnInstallDevDepsCommand,
                 options: { cwd: this.packageDir },
@@ -467,6 +470,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 
     @test()
     protected static async thenCommitsInstallDefaultDevDependencies() {
+        this.setShouldInstallDevDeps()
         await this.run()
 
         assert.isEqualDeep(
@@ -495,6 +499,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 
     @test()
     protected static async thenInstallsAbstractPackageTest() {
+        this.setShouldInstallDevDeps()
         await this.run()
 
         assert.isEqualDeep(
@@ -510,6 +515,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 
     @test()
     protected static async thenCommitsInstallAbstractPackageTest() {
+        this.setShouldInstallDevDeps()
         await this.run()
 
         assert.isEqualDeep(
@@ -527,7 +533,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[9],
+            callsToExec[10],
             { command: 'code .', options: { cwd: this.packageDir } },
             'Did not open vscode at end!'
         )
@@ -557,14 +563,45 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 
     @test()
     protected static async installsDevDependenciesIfNodeTddNotLatest() {
-        setFakeExecResult(this.checkGenerateIdVersionCmd, {
-            stdout: '1.0.0',
-        } as unknown as ChildProcess)
+        this.setShouldInstallDevDeps()
+        await this.runTwice()
 
-        setFakeExecResult(this.checkNodeTddVersionCmd, {
-            stdout: '0.0.1',
-        } as unknown as ChildProcess)
+        const calls = callsToExec.filter(
+            (call) => call?.command === this.yarnInstallDevDepsCommand
+        )
 
+        assert.isEqualDeep(
+            calls[0],
+            {
+                command: this.yarnInstallDevDepsCommand,
+                options: { cwd: this.packageDir },
+            },
+            'Should install default devDependencies if not already installed!'
+        )
+    }
+
+    @test()
+    protected static async installsDevDependenciesIfEslintConfigNdxNotLatest() {
+        this.setShouldInstallDevDeps()
+        await this.runTwice()
+
+        const calls = callsToExec.filter(
+            (call) => call?.command === this.yarnInstallDevDepsCommand
+        )
+
+        assert.isEqualDeep(
+            calls[0],
+            {
+                command: this.yarnInstallDevDepsCommand,
+                options: { cwd: this.packageDir },
+            },
+            'Should install default devDependencies if not already installed!'
+        )
+    }
+
+    @test()
+    protected static async installsDevDependenciesIfPrettierConfigNdxNotLatest() {
+        this.setShouldInstallDevDeps()
         await this.runTwice()
 
         const calls = callsToExec.filter(
@@ -833,6 +870,12 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
         await this.run()
     }
 
+    private static setShouldInstallDevDeps() {
+        setFakeExecResult(this.checkGenerateIdVersionCmd, {
+            stdout: '0.0.1',
+        } as unknown as ChildProcess)
+    }
+
     private static get scopedPackageName() {
         return `@${this.npmNamespace}/${this.packageName}`
     }
@@ -869,6 +912,22 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
         resetCallsToExec()
 
         this.setFakeMetaNodeVersion()
+
+        setFakeExecResult(this.checkGenerateIdVersionCmd, {
+            stdout: '1.0.0',
+        } as unknown as ChildProcess)
+
+        setFakeExecResult(this.checkNodeTddVersionCmd, {
+            stdout: '1.0.0',
+        } as unknown as ChildProcess)
+
+        setFakeExecResult(this.checkEslintConfigNdxVersionCmd, {
+            stdout: '1.0.0',
+        } as unknown as ChildProcess)
+
+        setFakeExecResult(this.checkPrettierConfigNdxVersionCmd, {
+            stdout: '1.0.0',
+        } as unknown as ChildProcess)
     }
 
     private static fakeFetch() {
@@ -945,6 +1004,8 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
             devDependencies: {
                 '@neurodevs/generate-id': '^1.0.0',
                 '@neurodevs/node-tdd': '^1.0.0',
+                '@neurodevs/eslint-config-ndx': '^1.0.0',
+                '@neurodevs/prettier-config-ndx': '^1.0.0',
             },
         })
     }
