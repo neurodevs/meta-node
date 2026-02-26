@@ -61,6 +61,11 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 export default esConfigNdx
 `
 
+    private readonly prettierConfigFile = `import prettierConfigNdx from '@neurodevs/prettier-config-ndx'
+
+export default prettierConfigNdx
+`
+
     protected constructor(options: AutopackageOptions) {
         const {
             installDir,
@@ -114,7 +119,8 @@ export default esConfigNdx
         await this.updateVscodeTasks()
         await this.installDefaultDevDependencies()
         await this.installAbstractPackageTest()
-        await this.installEslintConfig()
+        await this.installEslintConfigFile()
+        await this.installPrettierConfigFile()
         await this.openVscode()
     }
 
@@ -700,7 +706,7 @@ export default esConfigNdx
         )
     }
 
-    private async installEslintConfig() {
+    private async installEslintConfigFile() {
         const eslintConfigPath = path.join(this.packageDir, 'eslint.config.js')
         const fileExists = await this.pathExists(eslintConfigPath)
 
@@ -719,6 +725,19 @@ export default esConfigNdx
         await this.GitAutocommit(
             `patch: install eslint.config.js (@neurodevs/meta-node: ${this.metaNodeVersion})`
         )
+    }
+
+    private async installPrettierConfigFile() {
+        const prettierConfigPath = path.join(
+            this.packageDir,
+            'prettier.config.js'
+        )
+
+        console.log('Installing prettier.config.js...')
+
+        await this.writeFile(prettierConfigPath, this.prettierConfigFile, {
+            encoding: 'utf-8',
+        })
     }
 
     private async openVscode() {

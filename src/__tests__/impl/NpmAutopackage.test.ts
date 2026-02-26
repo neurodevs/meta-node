@@ -98,6 +98,11 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         'eslint.config.js'
     )
 
+    private static readonly prettierConfigPath = path.join(
+        this.packageDir,
+        'prettier.config.js'
+    )
+
     private static readonly customLib = this.generateId()
     private static readonly customType = this.generateId()
     private static readonly customInclude = this.generateId()
@@ -130,6 +135,11 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
     private static readonly eslintConfigFile = `import esConfigNdx from './src/eslint.config.js'
 
 export default esConfigNdx
+`
+
+    private static readonly prettierConfigFile = `import prettierConfigNdx from '@neurodevs/prettier-config-ndx'
+
+export default prettierConfigNdx
 `
 
     private static readonly defaultOptions = {
@@ -566,6 +576,22 @@ export default esConfigNdx
                 cwd: this.packageDir,
             },
             'Did not commit install eslint.config.js changes!'
+        )
+    }
+
+    @test()
+    protected static async thenInstallsPrettierConfigFile() {
+        this.setShouldInstallDevDeps()
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToWriteFile[6],
+            {
+                file: this.prettierConfigPath,
+                data: this.prettierConfigFile,
+                options: { encoding: 'utf-8' },
+            },
+            'Did not install prettier.config.js!'
         )
     }
 
