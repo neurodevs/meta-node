@@ -938,6 +938,23 @@ export default prettierConfigNdx
         )
     }
 
+    @test()
+    protected static async doesNotInstallPrettierConfigFileIfExists() {
+        setPathShouldExist(this.prettierConfigPath, true)
+
+        await this.run()
+
+        const calls = callsToWriteFile.filter(
+            (call) => call.file === this.prettierConfigPath
+        )
+
+        assert.isEqual(
+            calls.length,
+            0,
+            'Should not install prettier.config.js if already exists!'
+        )
+    }
+
     private static async run() {
         await this.instance.run()
     }

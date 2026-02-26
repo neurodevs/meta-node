@@ -733,13 +733,17 @@ export default prettierConfigNdx
             'prettier.config.js'
         )
 
-        console.log('Installing prettier.config.js...')
+        const fileExists = await this.pathExists(prettierConfigPath)
 
-        await this.writeFile(prettierConfigPath, this.prettierConfigFile, {
-            encoding: 'utf-8',
-        })
+        if (!fileExists) {
+            console.log('Installing prettier.config.js...')
 
-        await this.commitInstallPrettierConfigFile()
+            await this.writeFile(prettierConfigPath, this.prettierConfigFile, {
+                encoding: 'utf-8',
+            })
+
+            await this.commitInstallPrettierConfigFile()
+        }
     }
 
     private async commitInstallPrettierConfigFile() {
