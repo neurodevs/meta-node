@@ -738,6 +738,14 @@ export default prettierConfigNdx
         await this.writeFile(prettierConfigPath, this.prettierConfigFile, {
             encoding: 'utf-8',
         })
+
+        await this.commitInstallPrettierConfigFile()
+    }
+
+    private async commitInstallPrettierConfigFile() {
+        await this.GitAutocommit(
+            `patch: install prettier.config.js (@neurodevs/meta-node: ${this.metaNodeVersion})`
+        )
     }
 
     private async openVscode() {

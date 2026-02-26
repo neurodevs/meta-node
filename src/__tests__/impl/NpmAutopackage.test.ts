@@ -596,6 +596,21 @@ export default prettierConfigNdx
     }
 
     @test()
+    protected static async thenCommitsInstallPrettierConfigFile() {
+        this.setShouldInstallDevDeps()
+        await this.run()
+
+        assert.isEqualDeep(
+            FakeAutocommit.callsToConstructor[9],
+            {
+                commitMessage: `patch: install prettier.config.js (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+                cwd: this.packageDir,
+            },
+            'Did not commit install prettier.config.js changes!'
+        )
+    }
+
+    @test()
     protected static async lastlyOpensVscodeAtEnd() {
         await this.run()
 
