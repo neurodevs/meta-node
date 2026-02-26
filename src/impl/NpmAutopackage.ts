@@ -702,14 +702,17 @@ export default esConfigNdx
 
     private async installEslintConfig() {
         const eslintConfigPath = path.join(this.packageDir, 'eslint.config.js')
+        const fileExists = await this.pathExists(eslintConfigPath)
 
-        console.log('Installing eslint.config.js...')
+        if (!fileExists) {
+            console.log('Installing eslint.config.js...')
 
-        await this.writeFile(eslintConfigPath, this.eslintConfigFile, {
-            encoding: 'utf-8',
-        })
+            await this.writeFile(eslintConfigPath, this.eslintConfigFile, {
+                encoding: 'utf-8',
+            })
 
-        await this.commitInstallEslintConfigFile()
+            await this.commitInstallEslintConfigFile()
+        }
     }
 
     private async commitInstallEslintConfigFile() {

@@ -880,6 +880,23 @@ export default esConfigNdx
         )
     }
 
+    @test()
+    protected static async doesNotInstallEslintConfigFileIfExists() {
+        setPathShouldExist(this.eslintConfigPath, true)
+
+        await this.run()
+
+        const calls = callsToWriteFile.filter(
+            (call) => call.file === this.eslintConfigPath
+        )
+
+        assert.isEqual(
+            calls.length,
+            0,
+            'Should not install eslint.config.js if already exists!'
+        )
+    }
+
     private static async run() {
         await this.instance.run()
     }
