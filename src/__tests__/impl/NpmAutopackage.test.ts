@@ -93,6 +93,11 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         'AbstractPackageTest.ts'
     )
 
+    private static readonly eslintConfigPath = path.join(
+        this.packageDir,
+        'eslint.config.js'
+    )
+
     private static readonly customLib = this.generateId()
     private static readonly customType = this.generateId()
     private static readonly customInclude = this.generateId()
@@ -120,6 +125,11 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
         await super.beforeEach()
     }
 }
+`
+
+    private static readonly eslintConfigFile = `import esConfigNdx from './src/eslint.config.js'
+
+export default esConfigNdx
 `
 
     private static readonly defaultOptions = {
@@ -525,6 +535,22 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
                 cwd: this.packageDir,
             },
             'Did not commit install AbstractPackageTest changes!'
+        )
+    }
+
+    @test()
+    protected static async thenInstallsEslintConfigFile() {
+        this.setShouldInstallDevDeps()
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToWriteFile[5],
+            {
+                file: this.eslintConfigPath,
+                data: this.eslintConfigFile,
+                options: { encoding: 'utf-8' },
+            },
+            'Did not install eslint.config.js!'
         )
     }
 

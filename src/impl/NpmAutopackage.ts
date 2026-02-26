@@ -56,6 +56,11 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 }
 `
 
+    private readonly eslintConfigFile = `import esConfigNdx from './src/eslint.config.js'
+
+export default esConfigNdx
+`
+
     protected constructor(options: AutopackageOptions) {
         const {
             installDir,
@@ -109,6 +114,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
         await this.updateVscodeTasks()
         await this.installDefaultDevDependencies()
         await this.installAbstractPackageTest()
+        await this.installEslintConfig()
         await this.openVscode()
     }
 
@@ -692,6 +698,16 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
         await this.GitAutocommit(
             `patch: install AbstractPackageTest (@neurodevs/meta-node: ${this.metaNodeVersion})`
         )
+    }
+
+    private async installEslintConfig() {
+        const eslintConfigPath = path.join(this.packageDir, 'eslint.config.js')
+
+        console.log('Installing eslint.config.js...')
+
+        await this.writeFile(eslintConfigPath, this.eslintConfigFile, {
+            encoding: 'utf-8',
+        })
     }
 
     private async openVscode() {
