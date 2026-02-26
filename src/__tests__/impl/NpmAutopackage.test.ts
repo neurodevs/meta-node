@@ -555,6 +555,21 @@ export default esConfigNdx
     }
 
     @test()
+    protected static async thenCommitsInstallEslintConfigFile() {
+        this.setShouldInstallDevDeps()
+        await this.run()
+
+        assert.isEqualDeep(
+            FakeAutocommit.callsToConstructor[8],
+            {
+                commitMessage: `patch: install eslint.config.js (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+                cwd: this.packageDir,
+            },
+            'Did not commit install eslint.config.js changes!'
+        )
+    }
+
+    @test()
     protected static async lastlyOpensVscodeAtEnd() {
         await this.run()
 

@@ -708,6 +708,14 @@ export default esConfigNdx
         await this.writeFile(eslintConfigPath, this.eslintConfigFile, {
             encoding: 'utf-8',
         })
+
+        await this.commitInstallEslintConfigFile()
+    }
+
+    private async commitInstallEslintConfigFile() {
+        await this.GitAutocommit(
+            `patch: install eslint.config.js (@neurodevs/meta-node: ${this.metaNodeVersion})`
+        )
     }
 
     private async openVscode() {
