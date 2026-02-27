@@ -29,6 +29,8 @@ export default class NpmAutopackage implements Autopackage {
     private originalTsconfig!: TsConfig
     private metaNodeVersion!: string
 
+    private originalSettingsJson!: string
+
     private originalTasksJson!: {
         tasks: unknown[]
         inputs: unknown[]
@@ -845,21 +847,31 @@ export default prettierConfigNdx
     }
 
     private async installSettingsJsonFile() {
-        const settingsJsonDir = path.dirname(this.settingsJsonPath)
+        this.originalSettingsJson = await this.loadSettingsJsonFile()
 
-        await this.mkdir(settingsJsonDir, { recursive: true })
+        if (!this.settingsJsonIsUpToDate) {
+            console.log('Installing .vscode/settings.json...')
 
-        console.log('Installing .vscode/settings.json...')
+            await this.writeFile(
+                this.settingsJsonPath,
+                this.settingsJsonFile,
+                {
+                    encoding: 'utf-8',
+                }
+            )
+            
+            await this.commitInstallSettingsJsonFile()
+        }
+    }
 
-        await this.writeFile(
-            this.settingsJsonPath,
-            this.settingsJsonFile,
-            {
-                encoding: 'utf-8',
-            }
-        )
-        
-        await this.commitInstallSettingsJsonFile()
+    private async loadSettingsJsonFile() {
+        return await this.readFile(this.settingsJsonPath, {
+            encoding: 'utf-8',
+        })
+    }
+
+    private get settingsJsonIsUpToDate() {
+        return this.originalSettingsJson.trim() === this.settingsJsonFile.trim()
     }
 
     private async commitInstallSettingsJsonFile() {

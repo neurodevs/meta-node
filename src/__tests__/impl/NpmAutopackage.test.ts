@@ -1095,6 +1095,23 @@ private static readonly settingsJsonFile = `{
         )
     }
 
+    @test()
+    protected static async doesNotInstallSettingsJsonFileIfContentsEqual() {
+        setFakeReadFileResult(this.settingsJsonPath, this.settingsJsonFile)
+
+        await this.run()
+
+        const calls = callsToWriteFile.filter(
+            (call) => call.file === this.settingsJsonPath
+        )
+
+        assert.isEqual(
+            calls.length,
+            0,
+            'Should not install settings.json if contents are equal!'
+        )
+    }
+
     private static async run() {
         await this.instance.run()
     }
