@@ -857,7 +857,15 @@ export default prettierConfigNdx
             {
                 encoding: 'utf-8',
             }
-        )        
+        )
+        
+        await this.commitInstallSettingsJsonFile()
+    }
+
+    private async commitInstallSettingsJsonFile() {
+        await this.GitAutocommit(
+            `patch: install settings.json (@neurodevs/meta-node: ${this.metaNodeVersion})`
+        )
     }
 
     private async openVscode() {

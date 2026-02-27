@@ -720,6 +720,21 @@ private static readonly settingsJsonFile = `{
     }
 
     @test()
+    protected static async thenCommitsInstallSettingsJsonFile() {
+        this.setShouldInstallDevDeps()
+        await this.run()
+
+        assert.isEqualDeep(
+            FakeAutocommit.callsToConstructor[10],
+            {
+                commitMessage: `patch: install settings.json (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+                cwd: this.packageDir,
+            },
+            'Did not commit install settings.json changes!'
+        )
+    }
+
+    @test()
     protected static async lastlyOpensVscodeAtEnd() {
         await this.run()
 
