@@ -1062,8 +1062,8 @@ private static readonly settingsJsonFile = `{
     }
 
     @test()
-    protected static async doesNotInstallEslintConfigFileIfExists() {
-        setPathShouldExist(this.eslintConfigJsPath, true)
+    protected static async doesNotInstallEslintConfigFileIfContentsEqual() {
+        setFakeReadFileResult(this.eslintConfigJsPath, this.eslintConfigFile)
 
         await this.run()
 
@@ -1074,13 +1074,13 @@ private static readonly settingsJsonFile = `{
         assert.isEqual(
             calls.length,
             0,
-            'Should not install eslint.config.js if already exists!'
+            'Should not install eslint.config.js if contents are equal!'
         )
     }
 
     @test()
-    protected static async doesNotInstallPrettierConfigFileIfExists() {
-        setPathShouldExist(this.prettierConfigPath, true)
+    protected static async doesNotInstallPrettierConfigFileIfContentsEqual() {
+        setFakeReadFileResult(this.prettierConfigPath, this.prettierConfigFile)
 
         await this.run()
 
@@ -1091,7 +1091,7 @@ private static readonly settingsJsonFile = `{
         assert.isEqual(
             calls.length,
             0,
-            'Should not install prettier.config.js if already exists!'
+            'Should not install prettier.config.js if contents are equal!'
         )
     }
 

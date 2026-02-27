@@ -29,6 +29,8 @@ export default class NpmAutopackage implements Autopackage {
     private originalTsconfig!: TsConfig
     private metaNodeVersion!: string
 
+    private originalEslintConfig!: string
+    private originalPrettierConfig!: string
     private originalSettingsJson!: string
 
     private originalTasksJson!: {
@@ -807,9 +809,9 @@ export default prettierConfigNdx
     private async installEslintConfigFile() {
         await this.removeOldEslintConfigMjs()
 
-        const fileExists = await this.pathExists(this.eslintConfigPath)
+        this.originalEslintConfig = await this.loadEslintConfigFile()
 
-        if (!fileExists) {
+        if (!this.eslintConfigIsUpToDate) {
             console.log('Installing eslint.config.js...')
 
             await this.writeFile(this.eslintConfigPath, this.eslintConfigFile, {
@@ -820,6 +822,16 @@ export default prettierConfigNdx
         }
     }
 
+    private async loadEslintConfigFile() {
+        return await this.readFile(this.eslintConfigPath, {
+            encoding: 'utf-8',
+        })
+    }
+    
+    private get eslintConfigIsUpToDate() {
+        return this.originalEslintConfig.trim() === this.eslintConfigFile.trim()
+    }
+
     private async commitInstallEslintConfigFile() {
         await this.GitAutocommit(
             `patch: install eslint.config.js (@neurodevs/meta-node: ${this.metaNodeVersion})`
@@ -827,9 +839,9 @@ export default prettierConfigNdx
     }
 
     private async installPrettierConfigFile() {
-        const fileExists = await this.pathExists(this.prettierConfigPath)
+        this.originalPrettierConfig = await this.loadPrettierConfigFile()
 
-        if (!fileExists) {
+        if (!this.prettierConfigIsUpToDate) {
             console.log('Installing prettier.config.js...')
 
             await this.writeFile(this.prettierConfigPath, this.prettierConfigFile, {
@@ -838,6 +850,16 @@ export default prettierConfigNdx
 
             await this.commitInstallPrettierConfigFile()
         }
+    }
+
+    private async loadPrettierConfigFile() {
+        return await this.readFile(this.prettierConfigPath, {
+            encoding: 'utf-8',
+        })
+    }
+
+    private get prettierConfigIsUpToDate() {
+        return this.originalPrettierConfig.trim() === this.prettierConfigFile.trim()
     }
 
     private async commitInstallPrettierConfigFile() {
