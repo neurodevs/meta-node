@@ -137,7 +137,7 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 }
 `
 
-    private static readonly eslintConfigFile = `import esConfigNdx from './src/eslint.config.js'
+    private static readonly eslintConfigFile = `import esConfigNdx from '@neurodevs/eslint-config-ndx'
 
 export default esConfigNdx
 `
