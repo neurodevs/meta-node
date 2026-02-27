@@ -79,7 +79,8 @@ export default class AbstractAutomoduleTest extends AbstractPackageTest {
     `
 
     protected static setFakeExec() {
-        AbstractAutomodule.exec = fakeExec as unknown as typeof AbstractAutomodule.exec
+        AbstractAutomodule.exec =
+            fakeExec as unknown as typeof AbstractAutomodule.exec
         resetCallsToExec()
     }
 
