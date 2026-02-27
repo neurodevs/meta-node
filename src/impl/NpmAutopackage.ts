@@ -857,9 +857,13 @@ export default prettierConfigNdx
     }
 
     private async loadPrettierConfigFile() {
-        return await this.readFile(this.prettierConfigPath, {
-            encoding: 'utf-8',
-        })
+        try {
+            return await this.readFile(this.prettierConfigPath, {
+                encoding: 'utf-8',
+            })
+        } catch {
+            return ''
+        }
     }
 
     private get prettierConfigIsUpToDate() {

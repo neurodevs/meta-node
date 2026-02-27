@@ -765,6 +765,23 @@ private static readonly settingsJsonFile = `{
     }
 
     @test()
+    protected static async installsPrettierConfigIfNotExists() {
+        setFakeReadFileThrowsFor(this.prettierConfigPath)
+
+        await this.run()
+
+        const calls = callsToWriteFile.filter(
+            (call) => call.file === this.prettierConfigPath
+        )
+
+        assert.isEqual(
+            calls.length,
+            1, 
+            'Should install prettier.config.js if it does not exist!'
+        )
+    }
+
+    @test()
     protected static async installsDevDependenciesIfGenerateIdNotLatest() {
         setFakeExecResult(this.checkGenerateIdVersionCmd, {
             stdout: '0.0.1',
