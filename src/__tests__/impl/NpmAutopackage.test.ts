@@ -152,7 +152,7 @@ export default esConfigNdx
 export default prettierConfigNdx
 `
 
-private static readonly settingsJsonFile = `{
+    private static readonly settingsJsonFile = `{
   "debug.node.autoAttach": "on",
   "git.ignoreLimitWarning": true,
   "javascript.validate.enable": false,
@@ -759,7 +759,7 @@ private static readonly settingsJsonFile = `{
 
         assert.isEqual(
             calls.length,
-            1, 
+            1,
             'Should install eslint.config.js if it does not exist!'
         )
     }
@@ -776,7 +776,7 @@ private static readonly settingsJsonFile = `{
 
         assert.isEqual(
             calls.length,
-            1, 
+            1,
             'Should install prettier.config.js if it does not exist!'
         )
     }

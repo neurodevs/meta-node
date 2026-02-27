@@ -831,7 +831,7 @@ export default prettierConfigNdx
             return ''
         }
     }
-    
+
     private get eslintConfigIsUpToDate() {
         return this.originalEslintConfig.trim() === this.eslintConfigFile.trim()
     }
@@ -848,9 +848,13 @@ export default prettierConfigNdx
         if (!this.prettierConfigIsUpToDate) {
             console.log('Installing prettier.config.js...')
 
-            await this.writeFile(this.prettierConfigPath, this.prettierConfigFile, {
-                encoding: 'utf-8',
-            })
+            await this.writeFile(
+                this.prettierConfigPath,
+                this.prettierConfigFile,
+                {
+                    encoding: 'utf-8',
+                }
+            )
 
             await this.commitInstallPrettierConfigFile()
         }
@@ -867,7 +871,10 @@ export default prettierConfigNdx
     }
 
     private get prettierConfigIsUpToDate() {
-        return this.originalPrettierConfig.trim() === this.prettierConfigFile.trim()
+        return (
+            this.originalPrettierConfig.trim() ===
+            this.prettierConfigFile.trim()
+        )
     }
 
     private async commitInstallPrettierConfigFile() {
@@ -882,14 +889,10 @@ export default prettierConfigNdx
         if (!this.settingsJsonIsUpToDate) {
             console.log('Installing .vscode/settings.json...')
 
-            await this.writeFile(
-                this.settingsJsonPath,
-                this.settingsJsonFile,
-                {
-                    encoding: 'utf-8',
-                }
-            )
-            
+            await this.writeFile(this.settingsJsonPath, this.settingsJsonFile, {
+                encoding: 'utf-8',
+            })
+
             await this.commitInstallSettingsJsonFile()
         }
     }
