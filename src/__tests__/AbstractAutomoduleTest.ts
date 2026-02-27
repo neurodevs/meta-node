@@ -1,6 +1,4 @@
-import { exec as execSync } from 'child_process'
 import { readFile, writeFile } from 'fs/promises'
-import { promisify } from 'util'
 import {
     fakeExec,
     fakePathExists,
@@ -17,8 +15,6 @@ import { assert } from '@neurodevs/node-tdd'
 import AbstractAutomodule from '../impl/AbstractAutomodule.js'
 import { Automodule } from '../types.js'
 import AbstractPackageTest from './AbstractPackageTest.js'
-
-const exec = promisify(execSync)
 
 export default class AbstractAutomoduleTest extends AbstractPackageTest {
     protected static instance: Automodule
@@ -83,7 +79,7 @@ export default class AbstractAutomoduleTest extends AbstractPackageTest {
     `
 
     protected static setFakeExec() {
-        AbstractAutomodule.exec = fakeExec as unknown as typeof exec
+        AbstractAutomodule.exec = fakeExec as unknown as typeof AbstractAutomodule.exec
         resetCallsToExec()
     }
 

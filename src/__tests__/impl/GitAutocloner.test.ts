@@ -1,5 +1,4 @@
-import { ChildProcess, exec as execSync } from 'child_process'
-import { promisify } from 'util'
+import { ChildProcess } from 'child_process'
 import {
     callsToChdir,
     callsToExec,
@@ -19,8 +18,6 @@ import GitAutocloner, {
     AutoclonerOptions,
 } from '../../impl/GitAutocloner.js'
 import AbstractPackageTest from '../AbstractPackageTest.js'
-
-const exec = promisify(execSync)
 
 export default class AutoclonerTest extends AbstractPackageTest {
     private static instance: Autocloner
@@ -256,7 +253,7 @@ export default class AutoclonerTest extends AbstractPackageTest {
     }
 
     private static setFakeExec() {
-        GitAutocloner.exec = fakeExec as unknown as typeof exec
+        GitAutocloner.exec = fakeExec as unknown as typeof this.exec
         resetCallsToExec()
     }
 

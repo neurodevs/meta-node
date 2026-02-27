@@ -1,18 +1,14 @@
-import { exec as execSync } from 'node:child_process'
-import { promisify } from 'node:util'
-
 import {
     callsToExec,
     fakeExec,
     resetCallsToExec,
 } from '@neurodevs/fake-node-core'
-import AbstractModuleTest, { test, assert } from '@neurodevs/node-tdd'
+import { test, assert } from '@neurodevs/node-tdd'
 
 import GitAutocommit, { Autocommit } from '../../impl/GitAutocommit.js'
+import AbstractPackageTest from '../AbstractPackageTest.js'
 
-const exec = promisify(execSync)
-
-export default class GitAutocommitTest extends AbstractModuleTest {
+export default class GitAutocommitTest extends AbstractPackageTest {
     private static instance: Autocommit
 
     private static readonly commitMessage = this.generateId()
@@ -44,7 +40,7 @@ export default class GitAutocommitTest extends AbstractModuleTest {
     }
 
     private static setFakeExec() {
-        GitAutocommit.exec = fakeExec as unknown as typeof exec
+        GitAutocommit.exec = fakeExec as unknown as typeof this.exec
         resetCallsToExec()
     }
 

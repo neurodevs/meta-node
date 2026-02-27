@@ -1,7 +1,6 @@
-import { ChildProcess, exec as execSync } from 'node:child_process'
+import { ChildProcess } from 'node:child_process'
 import { readFile } from 'node:fs/promises'
 import { Readable } from 'node:stream'
-import { promisify } from 'node:util'
 import {
     callsToExec,
     fakeExec,
@@ -22,8 +21,6 @@ import NpmReleasePropagator, {
 } from '../../impl/NpmReleasePropagator.js'
 import { FakeAutocommit } from '../../index.js'
 import AbstractPackageTest from '../AbstractPackageTest.js'
-
-const exec = promisify(execSync)
 
 export default class NpmReleasePropagatorTest extends AbstractPackageTest {
     private static instance: ReleasePropagator
@@ -119,7 +116,7 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
 
         try {
             await this.run()
-        } catch (error) {
+        } catch (_error) {
             // Expected to throw
         }
 
@@ -199,7 +196,7 @@ Please commit or stash these changes before running propagation!
     }
 
     private static setFakeExec() {
-        NpmReleasePropagator.exec = fakeExec as unknown as typeof exec
+        NpmReleasePropagator.exec = fakeExec as unknown as typeof this.exec
         resetCallsToExec()
         resetExecThrowsFor()
 

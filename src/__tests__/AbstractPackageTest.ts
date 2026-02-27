@@ -1,5 +1,7 @@
-import { ChildProcess } from 'child_process'
-import path from 'path'
+import { promisify } from 'node:util'
+import { ChildProcess, exec as execSync } from 'node:child_process'
+import path from 'node:path'
+
 import {
     setFakeExecResult,
     setFakeReadFileResult,
@@ -11,6 +13,8 @@ import expandHomeDir from '../functions/expandHomeDir.js'
 import { PackageJson } from '../impl/NpmReleasePropagator.js'
 
 export default class AbstractPackageTest extends AbstractModuleTest {
+    protected static exec = promisify(execSync)
+
     protected static readonly packageScope = this.generateId()
     protected static readonly packageName = this.generateId()
     protected static readonly scopedName = `${this.packageScope}/${this.packageName}`

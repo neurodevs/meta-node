@@ -1,6 +1,4 @@
-import { exec as execSync } from 'node:child_process'
 import { readdir } from 'node:fs/promises'
-import { promisify } from 'node:util'
 
 import {
     callsToExec,
@@ -15,8 +13,6 @@ import {
     setFakeReadDirResult,
 } from '@neurodevs/fake-node-core'
 import { test, assert } from '@neurodevs/node-tdd'
-
-const exec = promisify(execSync)
 
 import NpmWorkspaceTypeChecker, {
     WorkspaceTypeChecker,
@@ -128,7 +124,7 @@ export default class NpmWorkspaceTypeCheckerTest extends AbstractPackageTest {
     }
 
     private static setFakeExec() {
-        NpmWorkspaceTypeChecker.exec = fakeExec as unknown as typeof exec
+        NpmWorkspaceTypeChecker.exec = fakeExec as unknown as typeof this.exec
         resetCallsToExec()
     }
 
