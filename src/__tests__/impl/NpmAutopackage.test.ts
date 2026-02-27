@@ -549,7 +549,27 @@ export default prettierConfigNdx
     }
 
     @test()
-    protected static async thenInstallsEslintConfigFile() {
+    protected static async thenDeletesOldEslintConfigMjs() {
+        setPathShouldExist(
+            path.join(this.packageDir, 'eslint.config.mjs'),
+            true
+        )
+
+        this.setShouldInstallDevDeps()
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToExec[11],
+            {
+                command: `git rm eslint.config.mjs`,
+                options: { cwd: this.packageDir },
+            },
+            'Did not delete old eslint.config.mjs!'
+        )
+    }
+
+    @test()
+    protected static async thenInstallsNewEslintConfigJs() {
         this.setShouldInstallDevDeps()
         await this.run()
 
@@ -615,7 +635,7 @@ export default prettierConfigNdx
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[10],
+            callsToExec[11],
             { command: 'code .', options: { cwd: this.packageDir } },
             'Did not open vscode at end!'
         )
