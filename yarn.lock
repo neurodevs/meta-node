@@ -754,10 +754,10 @@
     eslint-plugin-import "^2.32.0"
     eslint-plugin-react "^7.37.5"
 
-"@neurodevs/fake-node-core@0.11.1":
-  version "0.11.1"
-  resolved "https://registry.yarnpkg.com/@neurodevs/fake-node-core/-/fake-node-core-0.11.1.tgz#455a1821fee0b9f28545d721a5433206f25d4318"
-  integrity sha512-PgtEaTeKpFi+oFZrigha4XcSVFOJvM2bEszy37x9iLrsjchRBQauawDjfv6HoRmaPGgDzhI6/DVY8ItJh/ZiUw==
+"@neurodevs/fake-node-core@^0.12.1":
+  version "0.12.1"
+  resolved "https://registry.yarnpkg.com/@neurodevs/fake-node-core/-/fake-node-core-0.12.1.tgz#95384ece25aaf84c5d4487b3ac69f173b0537780"
+  integrity sha512-Gal/Xd0gv2542Uw/wW71mDQ6bJxqptpmfntKOWai5rCsWwXsTSd/CgjxzGeUUrAU197gUs0yurZ11KCAwym/ug==
   dependencies:
     "@neurodevs/generate-id" "1.1.2"
 

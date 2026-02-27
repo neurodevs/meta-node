@@ -792,20 +792,6 @@ export default prettierConfigNdx
         )
     }
 
-    private async removeOldEslintConfigMjs() {
-        const fileExists = await this.pathExists(
-            path.join(this.packageDir, 'eslint.config.mjs')
-        )
-
-        if (fileExists) {
-            console.log('Removing old eslint.config.mjs...')
-
-            await this.exec(`git rm eslint.config.mjs`, {
-                cwd: this.packageDir,
-            })
-        }
-    }
-
     private async installEslintConfigFile() {
         await this.removeOldEslintConfigMjs()
 
@@ -822,10 +808,28 @@ export default prettierConfigNdx
         }
     }
 
+    private async removeOldEslintConfigMjs() {
+        const fileExists = await this.pathExists(
+            path.join(this.packageDir, 'eslint.config.mjs')
+        )
+
+        if (fileExists) {
+            console.log('Removing old eslint.config.mjs...')
+
+            await this.exec(`git rm eslint.config.mjs`, {
+                cwd: this.packageDir,
+            })
+        }
+    }
+
     private async loadEslintConfigFile() {
-        return await this.readFile(this.eslintConfigPath, {
-            encoding: 'utf-8',
-        })
+        try {
+            return await this.readFile(this.eslintConfigPath, {
+                encoding: 'utf-8',
+            })
+        } catch {
+            return ''
+        }
     }
     
     private get eslintConfigIsUpToDate() {

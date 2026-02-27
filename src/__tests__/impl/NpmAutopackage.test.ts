@@ -20,9 +20,11 @@ import {
     resetCallsToPathExists,
     resetCallsToReadFile,
     resetCallsToWriteFile,
+    resetFakeReadFileThrowsFor,
     setFakeExecResult,
     setFakeFetchResponse,
     setFakeReadFileResult,
+    setFakeReadFileThrowsFor,
     setPathShouldExist,
 } from '@neurodevs/fake-node-core'
 import { test, assert } from '@neurodevs/node-tdd'
@@ -746,6 +748,23 @@ private static readonly settingsJsonFile = `{
     }
 
     @test()
+    protected static async installsEslintConfigIfNotExists() {
+        setFakeReadFileThrowsFor(this.eslintConfigJsPath)
+
+        await this.run()
+
+        const calls = callsToWriteFile.filter(
+            (call) => call.file === this.eslintConfigJsPath
+        )
+
+        assert.isEqual(
+            calls.length,
+            1, 
+            'Should install eslint.config.js if it does not exist!'
+        )
+    }
+
+    @test()
     protected static async installsDevDependenciesIfGenerateIdNotLatest() {
         setFakeExecResult(this.checkGenerateIdVersionCmd, {
             stdout: '0.0.1',
@@ -1240,6 +1259,8 @@ private static readonly settingsJsonFile = `{
         )
 
         setFakeReadFileResult(this.gitignorePath, this.originalGitignore)
+
+        resetFakeReadFileThrowsFor()
     }
 
     private static fakeWriteFile() {
