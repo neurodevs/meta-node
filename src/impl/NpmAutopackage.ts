@@ -119,7 +119,7 @@ export default prettierConfigNdx
         await this.updateVscodeTasks()
         await this.installDefaultDevDependencies()
         await this.installAbstractPackageTest()
-        await this.deleteOldEslintConfigMjs()
+        await this.removeOldEslintConfigMjs()
         await this.installNewEslintConfigJs()
         await this.installPrettierConfigFile()
         await this.openVscode()
@@ -707,12 +707,18 @@ export default prettierConfigNdx
         )
     }
 
-    private async deleteOldEslintConfigMjs() {
-        console.log('Deleting old eslint.config.mjs...')
+    private async removeOldEslintConfigMjs() {
+        const fileExists = await this.pathExists(
+            path.join(this.packageDir, 'eslint.config.mjs')
+        )
 
-        await this.exec(`git rm eslint.config.mjs`, {
-            cwd: this.packageDir,
-        })
+        if (fileExists) {
+            console.log('Removing old eslint.config.mjs...')
+
+            await this.exec(`git rm eslint.config.mjs`, {
+                cwd: this.packageDir,
+            })
+        }
     }
 
     private async installNewEslintConfigJs() {

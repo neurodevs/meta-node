@@ -93,7 +93,12 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         'AbstractPackageTest.ts'
     )
 
-    private static readonly eslintConfigPath = path.join(
+    private static readonly eslintConfigMjsPath = path.join(
+        this.packageDir,
+        'eslint.config.mjs'
+    )
+
+    private static readonly eslintConfigJsPath = path.join(
         this.packageDir,
         'eslint.config.js'
     )
@@ -576,7 +581,7 @@ export default prettierConfigNdx
         assert.isEqualDeep(
             callsToWriteFile[5],
             {
-                file: this.eslintConfigPath,
+                file: this.eslintConfigJsPath,
                 data: this.eslintConfigFile,
                 options: { encoding: 'utf-8' },
             },
@@ -942,13 +947,29 @@ export default prettierConfigNdx
     }
 
     @test()
+    protected static async doesNotRemoveEslintConfigMjsIfNotExists() {
+        setPathShouldExist(this.eslintConfigMjsPath, false)
+        await this.run()
+
+        const calls = callsToExec.filter(
+            (call) => call?.command === `git rm eslint.config.mjs`
+        )
+
+        assert.isEqual(
+            calls.length,
+            0,
+            'Should not remove eslint.config.mjs if it does not exist!'
+        )
+    }
+
+    @test()
     protected static async doesNotInstallEslintConfigFileIfExists() {
-        setPathShouldExist(this.eslintConfigPath, true)
+        setPathShouldExist(this.eslintConfigJsPath, true)
 
         await this.run()
 
         const calls = callsToWriteFile.filter(
-            (call) => call.file === this.eslintConfigPath
+            (call) => call.file === this.eslintConfigJsPath
         )
 
         assert.isEqual(
