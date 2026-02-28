@@ -48,7 +48,7 @@ export default class NpmAutopackage implements Autopackage {
     private readonly gitignorePath: string
     private readonly tsconfigPath: string
     private readonly tasksJsonPath: string
-    private readonly testDirPath: string
+    private readonly testsDir: string
     private readonly abstractTestPath: string
     private readonly eslintConfigPath: string
     private readonly prettierConfigPath: string
@@ -164,10 +164,10 @@ export default prettierConfigNdx
         this.gitignorePath = path.join(this.packageDir, '.gitignore')
         this.tsconfigPath = path.join(this.packageDir, 'tsconfig.json')
         this.tasksJsonPath = path.join(this.packageDir, '.vscode/tasks.json')
-        this.testDirPath = path.join(this.packageDir, 'src', '__tests__')
+        this.testsDir = path.join(this.packageDir, 'src', '__tests__')
 
         this.abstractTestPath = path.join(
-            this.testDirPath,
+            this.testsDir,
             'AbstractPackageTest.ts'
         )
 
@@ -752,6 +752,12 @@ export default prettierConfigNdx
     private async installDefaultDevDependencies() {
         await this.removeOldDevDependencies()
 
+        const testsDirExists = await this.pathExists(this.testsDir)
+
+        if (!testsDirExists) {
+            return
+        }
+
         const generateIdVersion = await this.getLatestVersion(
             '@neurodevs/generate-id'
         )
@@ -876,7 +882,7 @@ export default prettierConfigNdx
         if (shouldInstall) {
             console.log(`Installing ${this.abstractTestPath}...`)
 
-            await this.mkdir(this.testDirPath, { recursive: true })
+            await this.mkdir(this.testsDir, { recursive: true })
 
             await this.writeFile(
                 this.abstractTestPath,
@@ -891,11 +897,11 @@ export default prettierConfigNdx
     }
 
     private async checkShouldInstallAbstractTest() {
-        const doesTestDirExist = await this.pathExists(this.testDirPath)
+        const doesTestsDirExist = await this.pathExists(this.testsDir)
         const doesTsExist = await this.pathExists(this.abstractTestPath)
         const doesTsxExist = await this.pathExists(`${this.abstractTestPath}x`)
 
-        return !(doesTsExist || doesTsxExist) && doesTestDirExist
+        return !(doesTsExist || doesTsxExist) && doesTestsDirExist
     }
 
     private async commitInstallAbstractPackageTest() {

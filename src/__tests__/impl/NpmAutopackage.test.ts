@@ -81,14 +81,14 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         'tasks.json'
     )
 
-    private static readonly testDir = path.join(
+    private static readonly testsDir = path.join(
         this.packageDir,
         'src',
         '__tests__'
     )
 
     private static readonly abstractTestPath = path.join(
-        this.testDir,
+        this.testsDir,
         'AbstractPackageTest.ts'
     )
 
@@ -641,7 +641,7 @@ export default prettierConfigNdx
         assert.isEqualDeep(
             callsToMkdir[0],
             {
-                path: this.testDir,
+                path: this.testsDir,
                 options: { recursive: true },
             },
             'Did not install tests directory!'
@@ -1217,7 +1217,7 @@ export default prettierConfigNdx
 
     @test()
     protected static async doesNotInstallAbstractPackageTestIfNoTestDir() {
-        setPathShouldExist(this.testDir, false)
+        setPathShouldExist(this.testsDir, false)
 
         await this.run()
 
@@ -1228,7 +1228,25 @@ export default prettierConfigNdx
         assert.isEqual(
             calls.length,
             0,
-            'Should not install AbstractPackageTest.ts if no test directory exists!'
+            'Should not install AbstractPackageTest.ts if no __tests__ directory exists!'
+        )
+    }
+
+    @test()
+    protected static async doesNotInstallDevDependenciesIfNoTestsDir() {
+        setPathShouldExist(this.testsDir, false)
+        this.setShouldInstallDevDeps()
+
+        await this.run()
+
+        const calls = callsToExec.filter(
+            (call) => call?.command === this.yarnInstallDevDepsCommand
+        )
+
+        assert.isEqual(
+            calls.length,
+            0,
+            'Should not install devDependencies if no __tests__ directory exists!'
         )
     }
 
@@ -1475,7 +1493,7 @@ export default prettierConfigNdx
         setPathShouldExist(this.tasksJsonPath, false)
         setPathShouldExist(this.abstractTestPath, false)
         setPathShouldExist(`${this.abstractTestPath}x`, false)
-        setPathShouldExist(this.testDir, true)
+        setPathShouldExist(this.testsDir, true)
     }
 
     private static fakeReadFile() {
