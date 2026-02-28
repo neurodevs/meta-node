@@ -447,6 +447,29 @@ export default prettierConfigNdx
             bugs: {
                 url: `https://github.com/${this.gitNamespace}/${this.packageName}/issues`,
             },
+            scripts: {
+                ...(this.originalPackageJson.scripts ?? {}),
+                'build.ci': 'yarn run build.tsc && yarn run lint',
+                'build.dev':
+                    'yarn run build.tsc --sourceMap ; yarn run lint ; prettier --write .',
+                'build.copy-files':
+                    "mkdir -p build && rsync -avzq --exclude='*.ts' ./src/ ./build/",
+                'build.tsc': 'yarn run build.copy-files && tsc',
+                clean: 'yarn run clean.build',
+                'clean.all':
+                    'yarn run clean.dependencies && yarn run clean.build',
+                'clean.build': 'rm -rf build/',
+                'clean.dependencies':
+                    'rm -rf node_modules/ package-lock.json yarn.lock',
+                'fix.lint': "eslint --fix --cache '**/*.ts'",
+                lint: "eslint --cache '**/*.ts'",
+                rebuild:
+                    'yarn run clean.all && yarn install && yarn run build.dev',
+                'update.dependencies': 'yarn run clean.dependencies && yarn',
+                test: 'NODE_OPTIONS=--experimental-vm-modules jest',
+                'watch.build.dev':
+                    "tsc-watch --sourceMap --onCompilationComplete 'yarn run build.copy-files'",
+            },
             dependencies: this.originalPackageJson.dependencies ?? {},
             jest: {
                 ...(this.originalPackageJson.jest ?? {}),
