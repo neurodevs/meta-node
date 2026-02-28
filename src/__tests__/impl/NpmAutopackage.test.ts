@@ -392,6 +392,7 @@ export default prettierConfigNdx
                 'name',
                 'version',
                 'description',
+                'type',
                 'keywords',
                 'license',
                 'author',
