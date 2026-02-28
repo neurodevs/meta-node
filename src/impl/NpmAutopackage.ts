@@ -750,7 +750,7 @@ export default prettierConfigNdx
     }
 
     private async installDefaultDevDependencies() {
-        await this.removeDefaultDevDependencies()
+        await this.removeOldDevDependencies()
 
         const generateIdVersion = await this.getLatestVersion(
             '@neurodevs/generate-id'
@@ -784,19 +784,19 @@ export default prettierConfigNdx
         }
     }
 
-    private async removeDefaultDevDependencies() {
-        if (this.hasOldDevDependency) {
-            console.log('Removing default devDependencies...')
+    private async removeOldDevDependencies() {
+        if (this.oldDevDependencies.length > 0) {
+            console.log('Removing old devDependencies...')
 
             await this.exec(
-                'yarn remove eslint eslint-config-spruce prettier chokidar-cli ts-node @types/node',
+                `yarn remove ${this.oldDevDependencies.join(' ')}`,
                 { cwd: this.packageDir }
             )
         }
     }
 
-    private get hasOldDevDependency() {
-        return Object.keys(this.originalPackageJson.devDependencies!).some(
+    private get oldDevDependencies() {
+        return Object.keys(this.originalPackageJson.devDependencies!).filter(
             (dep) =>
                 [
                     'eslint',

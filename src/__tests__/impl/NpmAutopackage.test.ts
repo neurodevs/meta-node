@@ -552,6 +552,21 @@ export default prettierConfigNdx
 
     @test()
     protected static async thenRemovesOldDevDependencies() {
+        setFakeReadFileResult(
+            this.packageJsonPath,
+            JSON.stringify({
+                ...this.originalPackageJson,
+                devDependencies: {
+                    eslint: '^1.0.0',
+                    'eslint-config-spruce': '^1.0.0',
+                    prettier: '^1.0.0',
+                    'chokidar-cli': '^1.0.0',
+                    'ts-node': '^1.0.0',
+                    '@types/node': '^1.0.0',
+                },
+            })
+        )
+
         this.setShouldInstallDevDeps()
         await this.run()
 
@@ -559,6 +574,31 @@ export default prettierConfigNdx
             callsToExec[6],
             {
                 command: this.yarnRemoveDevDepsCommand,
+                options: { cwd: this.packageDir },
+            },
+            'Did not remove old devDependencies!'
+        )
+    }
+
+    @test()
+    protected static async onlyRemovesOldDevDependenciesActuallyMissing() {
+        setFakeReadFileResult(
+            this.packageJsonPath,
+            JSON.stringify({
+                ...this.originalPackageJson,
+                devDependencies: {
+                    eslint: '^1.0.0',
+                },
+            })
+        )
+
+        this.setShouldInstallDevDeps()
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToExec[6],
+            {
+                command: 'yarn remove eslint',
                 options: { cwd: this.packageDir },
             },
             'Did not remove old devDependencies!'
