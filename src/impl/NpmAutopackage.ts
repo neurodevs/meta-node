@@ -785,11 +785,27 @@ export default prettierConfigNdx
     }
 
     private async removeDefaultDevDependencies() {
-        console.log('Removing default devDependencies...')
+        if (this.hasOldDevDependency) {
+            console.log('Removing default devDependencies...')
 
-        await this.exec(
-            'yarn remove eslint eslint-config-spruce prettier chokidar-cli ts-node @types/node',
-            { cwd: this.packageDir }
+            await this.exec(
+                'yarn remove eslint eslint-config-spruce prettier chokidar-cli ts-node @types/node',
+                { cwd: this.packageDir }
+            )
+        }
+    }
+
+    private get hasOldDevDependency() {
+        return Object.keys(this.originalPackageJson.devDependencies!).some(
+            (dep) =>
+                [
+                    'eslint',
+                    'eslint-config-spruce',
+                    'prettier',
+                    'chokidar-cli',
+                    'ts-node',
+                    '@types/node',
+                ].includes(dep)
         )
     }
 

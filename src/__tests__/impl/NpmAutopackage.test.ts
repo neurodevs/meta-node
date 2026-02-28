@@ -386,28 +386,25 @@ export default prettierConfigNdx
 
         const actual = callsToWriteFile[0]
 
-        const ordered = this.orderJsonKeys(
-            JSON.parse(this.updatedPackageJson),
-            [
-                'name',
-                'version',
-                'description',
-                'type',
-                'keywords',
-                'license',
-                'author',
-                'homepage',
-                'repository',
-                'bugs',
-                'main',
-                'bin',
-                'files',
-                'scripts',
-                'dependencies',
-                'devDependencies',
-                'jest',
-            ]
-        )
+        const ordered = this.orderJsonKeys(this.updatedPackageJson, [
+            'name',
+            'version',
+            'description',
+            'type',
+            'keywords',
+            'license',
+            'author',
+            'homepage',
+            'repository',
+            'bugs',
+            'main',
+            'bin',
+            'files',
+            'scripts',
+            'dependencies',
+            'devDependencies',
+            'jest',
+        ])
 
         const expected = {
             file: this.packageJsonPath,
@@ -781,11 +778,9 @@ export default prettierConfigNdx
             'scripts.watch.tsc',
         ]
 
-        const pkg = JSON.parse(this.updatedPackageJson)
-
         for (const key of keysToRemove) {
             assert.isUndefined(
-                this.getByPath(pkg, key),
+                this.getByPath(this.updatedPackageJson, key),
                 `Did not remove ${key} from package.json!`
             )
         }
@@ -1047,6 +1042,27 @@ export default prettierConfigNdx
     }
 
     @test()
+    protected static async doesNotRemoveOldDevDependenciesIfNotPresent() {
+        setFakeReadFileResult(
+            this.packageJsonPath,
+            JSON.stringify(this.originalPackageJson)
+        )
+
+        this.setShouldInstallDevDeps()
+        await this.run()
+
+        const calls = callsToExec.filter(
+            (call) => call?.command === this.yarnRemoveDevDepsCommand
+        )
+
+        assert.isEqual(
+            calls.length,
+            0,
+            'Should not remove old devDependencies if not present!'
+        )
+    }
+
+    @test()
     protected static async doesNotOverrideOriginalDependencies() {
         await this.runTwice()
 
@@ -1207,7 +1223,11 @@ export default prettierConfigNdx
         setPathShouldExist(this.abstractTestPath, true)
         setPathShouldExist(this.tasksJsonPath, true)
 
-        setFakeReadFileResult(this.packageJsonPath, this.updatedPackageJson)
+        setFakeReadFileResult(
+            this.packageJsonPath,
+            JSON.stringify(this.updatedPackageJson)
+        )
+
         setFakeReadFileResult(this.gitignorePath, this.updatedGitignore)
         setFakeReadFileResult(this.tasksJsonPath, this.updatedTasksJson)
 
@@ -1395,6 +1415,10 @@ export default prettierConfigNdx
                 'watch.rebuild': 'dummy',
                 'watch.tsc': 'dummy',
             },
+            devDependencies: {
+                ...this.originalPackageJson.devDependencies,
+                eslint: '^1.0.0',
+            },
             jest: {
                 ...this.originalPackageJson.jest,
                 testPathIgnorePatterns: 'dummy',
@@ -1405,7 +1429,7 @@ export default prettierConfigNdx
     }
 
     private static get updatedPackageJson() {
-        return JSON.stringify({
+        return {
             ...this.originalPackageJson,
             name: this.scopedPackageName,
             description: this.description,
@@ -1446,6 +1470,10 @@ export default prettierConfigNdx
                     "tsc-watch --sourceMap --onCompilationComplete 'yarn run build.copy-files'",
             },
             dependencies: this.dependencies,
+            devDependencies: {
+                ...this.originalPackageJson.devDependencies,
+                eslint: '^1.0.0',
+            },
             jest: {
                 ...this.originalPackageJson.jest,
                 testEnvironment: 'node',
@@ -1454,7 +1482,7 @@ export default prettierConfigNdx
                 testTimeout: 5000,
                 maxWorkers: 4,
             },
-        })
+        }
     }
 
     private static get originalTsconfig(): TsConfig {
