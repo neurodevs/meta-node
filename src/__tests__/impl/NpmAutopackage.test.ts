@@ -136,7 +136,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         'yarn remove eslint eslint-config-spruce prettier chokidar-cli ts-node @types/node'
 
     private static readonly yarnInstallDevDepsCommand =
-        'yarn add -D @neurodevs/generate-id @neurodevs/node-tdd @neurodevs/eslint-config-ndx @neurodevs/prettier-config-ndx'
+        'yarn add -D @neurodevs/generate-id @neurodevs/node-tdd @neurodevs/eslint-config-ndx @neurodevs/prettier-config-ndx prettier'
 
     private static readonly abstractTestFile = `import AbstractModuleTest from '@neurodevs/node-tdd'
 

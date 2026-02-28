@@ -777,7 +777,7 @@ export default prettierConfigNdx
             console.log('Installing default devDependencies...')
 
             await this.exec(
-                'yarn add -D @neurodevs/generate-id @neurodevs/node-tdd @neurodevs/eslint-config-ndx @neurodevs/prettier-config-ndx',
+                'yarn add -D @neurodevs/generate-id @neurodevs/node-tdd @neurodevs/eslint-config-ndx @neurodevs/prettier-config-ndx prettier',
                 { cwd: this.packageDir }
             )
             await this.commitInstallDevDependencies()
