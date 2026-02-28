@@ -909,7 +909,7 @@ export default prettierConfigNdx
 
         this.originalEslintConfig = await this.loadEslintConfigFile()
 
-        if (!this.eslintConfigIsUpToDate) {
+        if (this.shouldUpdateEslintConfig) {
             console.log('Installing eslint.config.js...')
 
             await this.writeFile(this.eslintConfigPath, this.eslintConfigFile, {
@@ -944,8 +944,11 @@ export default prettierConfigNdx
         }
     }
 
-    private get eslintConfigIsUpToDate() {
-        return this.originalEslintConfig.trim() === this.eslintConfigFile.trim()
+    private get shouldUpdateEslintConfig() {
+        return (
+            this.originalEslintConfig.trim() !== this.eslintConfigFile.trim() &&
+            this.packageName !== 'eslint-config-ndx'
+        )
     }
 
     private async commitInstallEslintConfigFile() {

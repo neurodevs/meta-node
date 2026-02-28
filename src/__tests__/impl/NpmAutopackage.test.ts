@@ -1283,6 +1283,34 @@ export default prettierConfigNdx
     }
 
     @test()
+    protected static async doesNotInstallEslintConfigFileForEslintConfigNdxPackage() {
+        const eslintConfigPath = path.join(
+            this.installDir,
+            'eslint-config-ndx',
+            'eslint.config.js'
+        )
+
+        setFakeReadFileResult(eslintConfigPath, this.generateId())
+
+        const instance = this.NpmAutopackage({
+            name: 'eslint-config-ndx',
+        })
+
+        //@ts-ignore
+        await instance.installEslintConfigFile()
+
+        const calls = callsToWriteFile.filter(
+            (call) => call.file === eslintConfigPath
+        )
+
+        assert.isEqual(
+            calls.length,
+            0,
+            'Should not install eslint.config.js for eslint-config-ndx package!'
+        )
+    }
+
+    @test()
     protected static async doesNotInstallPrettierConfigFileForPrettierConfigNdxPackage() {
         const prettierConfigPath = path.join(
             this.installDir,
