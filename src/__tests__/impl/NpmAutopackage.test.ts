@@ -1105,6 +1105,35 @@ export default prettierConfigNdx
     }
 
     @test()
+    protected static async doesNotInstallDevDependenciesIfInDependencies() {
+        setFakeReadFileResult(
+            this.packageJsonPath,
+            JSON.stringify({
+                ...this.originalPackageJson,
+                dependencies: {
+                    '@neurodevs/generate-id': '^1.0.0',
+                    '@neurodevs/node-tdd': '^1.0.0',
+                    '@neurodevs/eslint-config-ndx': '^1.0.0',
+                    '@neurodevs/prettier-config-ndx': '^1.0.0',
+                },
+                devDependencies: {},
+            })
+        )
+
+        await this.run()
+
+        const calls = callsToExec.filter(
+            (call) => call?.command === this.yarnInstallDevDepsCommand
+        )
+
+        assert.isEqual(
+            calls.length,
+            0,
+            'Should not install devDependencies if already in dependencies!'
+        )
+    }
+
+    @test()
     protected static async doesNotOverrideOriginalDependencies() {
         await this.runTwice()
 

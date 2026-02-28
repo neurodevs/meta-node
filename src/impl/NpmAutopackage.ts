@@ -820,7 +820,11 @@ export default prettierConfigNdx
         return (
             (this.originalPackageJson.devDependencies as any)[
                 '@neurodevs/generate-id'
-            ] || ''
+            ] ||
+            (this.originalPackageJson.dependencies as any)[
+                '@neurodevs/generate-id'
+            ] ||
+            ''
         ).replace('^', '')
     }
 
@@ -828,7 +832,11 @@ export default prettierConfigNdx
         return (
             (this.originalPackageJson.devDependencies as any)[
                 '@neurodevs/node-tdd'
-            ] || ''
+            ] ||
+            (this.originalPackageJson.dependencies as any)[
+                '@neurodevs/node-tdd'
+            ] ||
+            ''
         ).replace('^', '')
     }
 
@@ -836,7 +844,11 @@ export default prettierConfigNdx
         return (
             (this.originalPackageJson.devDependencies as any)[
                 '@neurodevs/eslint-config-ndx'
-            ] || ''
+            ] ||
+            (this.originalPackageJson.dependencies as any)[
+                '@neurodevs/eslint-config-ndx'
+            ] ||
+            ''
         ).replace('^', '')
     }
 
@@ -844,7 +856,11 @@ export default prettierConfigNdx
         return (
             (this.originalPackageJson.devDependencies as any)[
                 '@neurodevs/prettier-config-ndx'
-            ] || ''
+            ] ||
+            (this.originalPackageJson.dependencies as any)[
+                '@neurodevs/prettier-config-ndx'
+            ] ||
+            ''
         ).replace('^', '')
     }
 
