@@ -801,7 +801,6 @@ export default prettierConfigNdx
                 [
                     'eslint',
                     'eslint-config-spruce',
-                    'prettier',
                     'chokidar-cli',
                     'ts-node',
                     '@types/node',

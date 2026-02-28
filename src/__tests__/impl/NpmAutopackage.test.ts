@@ -133,7 +133,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     private static readonly yarnRemoveDevDepsCommand =
-        'yarn remove eslint eslint-config-spruce prettier chokidar-cli ts-node @types/node'
+        'yarn remove eslint eslint-config-spruce chokidar-cli ts-node @types/node'
 
     private static readonly yarnInstallDevDepsCommand =
         'yarn add -D @neurodevs/generate-id @neurodevs/node-tdd @neurodevs/eslint-config-ndx @neurodevs/prettier-config-ndx prettier'
@@ -559,7 +559,6 @@ export default prettierConfigNdx
                 devDependencies: {
                     eslint: '^1.0.0',
                     'eslint-config-spruce': '^1.0.0',
-                    prettier: '^1.0.0',
                     'chokidar-cli': '^1.0.0',
                     'ts-node': '^1.0.0',
                     '@types/node': '^1.0.0',
