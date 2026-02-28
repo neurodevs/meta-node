@@ -130,6 +130,9 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         [this.generateId()]: this.generateId(),
     }
 
+    private static readonly yarnRemoveDevDepsCommand =
+        'yarn remove eslint eslint-config-spruce prettier chokidar-cli ts-node @types/node'
+
     private static readonly yarnInstallDevDepsCommand =
         'yarn add -D @neurodevs/generate-id @neurodevs/node-tdd @neurodevs/eslint-config-ndx @neurodevs/prettier-config-ndx'
 
@@ -549,12 +552,27 @@ export default prettierConfigNdx
     }
 
     @test()
+    protected static async thenRemovesOldDevDependencies() {
+        this.setShouldInstallDevDeps()
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToExec[6],
+            {
+                command: this.yarnRemoveDevDepsCommand,
+                options: { cwd: this.packageDir },
+            },
+            'Did not remove old devDependencies!'
+        )
+    }
+
+    @test()
     protected static async thenInstallsDefaultDevDependencies() {
         this.setShouldInstallDevDeps()
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[10],
+            callsToExec[11],
             {
                 command: this.yarnInstallDevDepsCommand,
                 options: { cwd: this.packageDir },
@@ -624,7 +642,7 @@ export default prettierConfigNdx
     }
 
     @test()
-    protected static async thenDeletesOldEslintConfigMjs() {
+    protected static async thenRemovesOldEslintConfigMjs() {
         setPathShouldExist(
             path.join(this.packageDir, 'eslint.config.mjs'),
             true
@@ -633,13 +651,15 @@ export default prettierConfigNdx
         this.setShouldInstallDevDeps()
         await this.run()
 
+        debugger
+
         assert.isEqualDeep(
-            callsToExec[11],
+            callsToExec[12],
             {
                 command: `git rm eslint.config.mjs`,
                 options: { cwd: this.packageDir },
             },
-            'Did not delete old eslint.config.mjs!'
+            'Did not remove old eslint.config.mjs!'
         )
     }
 
@@ -741,7 +761,7 @@ export default prettierConfigNdx
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[11],
+            callsToExec[12],
             { command: 'code .', options: { cwd: this.packageDir } },
             'Did not open vscode at end!'
         )

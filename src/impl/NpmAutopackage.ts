@@ -681,6 +681,8 @@ export default prettierConfigNdx
     }
 
     private async installDefaultDevDependencies() {
+        await this.removeDefaultDevDependencies()
+
         const generateIdVersion = await this.getLatestVersion(
             '@neurodevs/generate-id'
         )
@@ -711,6 +713,15 @@ export default prettierConfigNdx
             )
             await this.commitInstallDevDependencies()
         }
+    }
+
+    private async removeDefaultDevDependencies() {
+        console.log('Removing default devDependencies...')
+
+        await this.exec(
+            'yarn remove eslint eslint-config-spruce prettier chokidar-cli ts-node @types/node',
+            { cwd: this.packageDir }
+        )
     }
 
     private async getLatestVersion(scopedPackageName: string) {
