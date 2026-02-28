@@ -147,9 +147,9 @@ export default abstract class AbstractPackageTest extends AbstractModuleTest {
 }
 `
 
-    private static readonly eslintConfigFile = `import esConfigNdx from '@neurodevs/eslint-config-ndx'
+    private static readonly eslintConfigFile = `import eslintConfigNdx from '@neurodevs/eslint-config-ndx'
 
-export default esConfigNdx
+export default eslintConfigNdx
 `
 
     private static readonly prettierConfigFile = `import prettierConfigNdx from '@neurodevs/prettier-config-ndx'
