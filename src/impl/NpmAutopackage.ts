@@ -411,6 +411,14 @@ export default prettierConfigNdx
                 url: `https://github.com/${this.gitNamespace}/${this.packageName}/issues`,
             },
             dependencies: this.originalPackageJson.dependencies ?? {},
+            jest: {
+                ...(this.originalPackageJson.jest ?? {}),
+                testEnvironment: 'node',
+                testRunner: 'jest-circus/runner',
+                testMatch: ['<rootDir>/build/__tests__/**/*.test.js?(x)'],
+                testTimeout: 5000,
+                maxWorkers: 4,
+            },
         }
     }
 

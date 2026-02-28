@@ -116,7 +116,8 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     private static readonly customLib = this.generateId()
     private static readonly customType = this.generateId()
     private static readonly customInclude = this.generateId()
-    private static readonly customOption = this.generateId()
+    private static readonly customTsconfigOption = this.generateId()
+    private static readonly customJestOption = this.generateId()
 
     private static readonly setupVscodeCmd = 'spruce setup.vscode --all true'
 
@@ -651,8 +652,6 @@ export default prettierConfigNdx
         this.setShouldInstallDevDeps()
         await this.run()
 
-        debugger
-
         assert.isEqualDeep(
             callsToExec[12],
             {
@@ -1061,7 +1060,10 @@ export default prettierConfigNdx
     protected static async doesNotThrowIfGenerateIdNotInPackageJson() {
         setFakeReadFileResult(
             this.packageJsonPath,
-            this.originalPackageJson.replace('@neurodevs/generate-id', '')
+            JSON.stringify(this.originalPackageJson).replace(
+                '@neurodevs/generate-id',
+                ''
+            )
         )
 
         await this.runTwice()
@@ -1283,7 +1285,10 @@ export default prettierConfigNdx
         NpmAutopackage.readFile = fakeReadFile as unknown as typeof readFile
         resetCallsToReadFile()
 
-        setFakeReadFileResult(this.packageJsonPath, this.originalPackageJson)
+        setFakeReadFileResult(
+            this.packageJsonPath,
+            JSON.stringify(this.originalPackageJson)
+        )
 
         setFakeReadFileResult(
             this.tasksJsonPath,
@@ -1328,7 +1333,7 @@ export default prettierConfigNdx
     }
 
     private static get originalPackageJson() {
-        return JSON.stringify({
+        return {
             name: this.packageName,
             description: 'Old description',
             dependencies: this.dependencies,
@@ -1338,12 +1343,15 @@ export default prettierConfigNdx
                 '@neurodevs/eslint-config-ndx': '^1.0.0',
                 '@neurodevs/prettier-config-ndx': '^1.0.0',
             },
-        })
+            jest: {
+                ['customOption']: this.customJestOption,
+            },
+        }
     }
 
     private static get updatedPackageJson() {
         return JSON.stringify({
-            ...JSON.parse(this.originalPackageJson),
+            ...this.originalPackageJson,
             name: this.scopedPackageName,
             description: this.description,
             type: 'module',
@@ -1360,6 +1368,14 @@ export default prettierConfigNdx
                 url: `https://github.com/${this.gitNamespace}/${this.packageName}/issues`,
             },
             dependencies: this.dependencies,
+            jest: {
+                ...this.originalPackageJson.jest,
+                testEnvironment: 'node',
+                testRunner: 'jest-circus/runner',
+                testMatch: ['<rootDir>/build/__tests__/**/*.test.js?(x)'],
+                testTimeout: 5000,
+                maxWorkers: 4,
+            },
         })
     }
 
@@ -1370,7 +1386,7 @@ export default prettierConfigNdx
                 types: [this.customType],
             },
             include: [this.customInclude],
-            customOption: this.customOption,
+            customOption: this.customTsconfigOption,
         }
     }
 
