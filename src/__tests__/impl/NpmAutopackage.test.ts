@@ -81,14 +81,14 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
         'tasks.json'
     )
 
-    private static readonly testDirPath = path.join(
+    private static readonly testDir = path.join(
         this.packageDir,
         'src',
         '__tests__'
     )
 
     private static readonly abstractTestPath = path.join(
-        this.testDirPath,
+        this.testDir,
         'AbstractPackageTest.ts'
     )
 
@@ -641,7 +641,7 @@ export default prettierConfigNdx
         assert.isEqualDeep(
             callsToMkdir[0],
             {
-                path: this.testDirPath,
+                path: this.testDir,
                 options: { recursive: true },
             },
             'Did not install tests directory!'
@@ -1216,6 +1216,23 @@ export default prettierConfigNdx
     }
 
     @test()
+    protected static async doesNotInstallAbstractPackageTestIfNoTestDir() {
+        setPathShouldExist(this.testDir, false)
+
+        await this.run()
+
+        const calls = callsToWriteFile.filter(
+            (call) => call.file === this.abstractTestPath
+        )
+
+        assert.isEqual(
+            calls.length,
+            0,
+            'Should not install AbstractPackageTest.ts if no test directory exists!'
+        )
+    }
+
+    @test()
     protected static async doesNotRemoveEslintConfigMjsIfNotExists() {
         setPathShouldExist(this.eslintConfigMjsPath, false)
         await this.run()
@@ -1401,6 +1418,8 @@ export default prettierConfigNdx
         setPathShouldExist(this.packageJsonPath, false)
         setPathShouldExist(this.tasksJsonPath, false)
         setPathShouldExist(this.abstractTestPath, false)
+        setPathShouldExist(`${this.abstractTestPath}x`, false)
+        setPathShouldExist(this.testDir, true)
     }
 
     private static fakeReadFile() {

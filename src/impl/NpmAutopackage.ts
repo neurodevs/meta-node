@@ -871,9 +871,9 @@ export default prettierConfigNdx
     }
 
     private async installAbstractPackageTest() {
-        const fileExists = await this.checkIfAbstractPackageTestExists()
+        const shouldInstall = await this.checkShouldInstallAbstractTest()
 
-        if (!fileExists) {
+        if (shouldInstall) {
             console.log(`Installing ${this.abstractTestPath}...`)
 
             await this.mkdir(this.testDirPath, { recursive: true })
@@ -890,11 +890,12 @@ export default prettierConfigNdx
         }
     }
 
-    private async checkIfAbstractPackageTestExists() {
+    private async checkShouldInstallAbstractTest() {
+        const doesTestDirExist = await this.pathExists(this.testDirPath)
         const doesTsExist = await this.pathExists(this.abstractTestPath)
         const doesTsxExist = await this.pathExists(`${this.abstractTestPath}x`)
 
-        return doesTsExist || doesTsxExist
+        return !(doesTsExist || doesTsxExist) && doesTestDirExist
     }
 
     private async commitInstallAbstractPackageTest() {
