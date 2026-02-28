@@ -1283,6 +1283,34 @@ export default prettierConfigNdx
     }
 
     @test()
+    protected static async doesNotInstallPrettierConfigFileForPrettierConfigNdxPackage() {
+        const prettierConfigPath = path.join(
+            this.installDir,
+            'prettier-config-ndx',
+            'prettier.config.js'
+        )
+
+        setFakeReadFileResult(prettierConfigPath, this.generateId())
+
+        const instance = this.NpmAutopackage({
+            name: 'prettier-config-ndx',
+        })
+
+        //@ts-ignore
+        await instance.installPrettierConfigFile()
+
+        const calls = callsToWriteFile.filter(
+            (call) => call.file === prettierConfigPath
+        )
+
+        assert.isEqual(
+            calls.length,
+            0,
+            'Should not install prettier.config.js for prettier-config-ndx package!'
+        )
+    }
+
+    @test()
     protected static async doesNotInstallSettingsJsonFileIfContentsEqual() {
         setFakeReadFileResult(this.settingsJsonPath, this.settingsJsonFile)
 
@@ -1463,10 +1491,15 @@ export default prettierConfigNdx
         })
 
         setFakeFetchResponse(this.reposUrl, fakeResponse)
+        setFakeFetchResponse(this.prettierConfigNdxUrl, fakeResponse)
     }
 
     private static get reposUrl() {
         return `https://api.github.com/repos/${this.gitNamespace}/${this.packageName}`
+    }
+
+    private static get prettierConfigNdxUrl() {
+        return `https://api.github.com/repos/${this.gitNamespace}/prettier-config-ndx`
     }
 
     private static get orgsUrl() {

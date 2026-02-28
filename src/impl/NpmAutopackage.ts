@@ -957,7 +957,7 @@ export default prettierConfigNdx
     private async installPrettierConfigFile() {
         this.originalPrettierConfig = await this.loadPrettierConfigFile()
 
-        if (!this.prettierConfigIsUpToDate) {
+        if (this.shouldUpdatePrettierConfig) {
             console.log('Installing prettier.config.js...')
 
             await this.writeFile(
@@ -982,10 +982,11 @@ export default prettierConfigNdx
         }
     }
 
-    private get prettierConfigIsUpToDate() {
+    private get shouldUpdatePrettierConfig() {
         return (
-            this.originalPrettierConfig.trim() ===
-            this.prettierConfigFile.trim()
+            this.originalPrettierConfig.trim() !==
+                this.prettierConfigFile.trim() &&
+            this.packageName !== 'prettier-config-ndx'
         )
     }
 
