@@ -759,7 +759,10 @@ export default prettierConfigNdx
 
         assert.isEqualDeep(
             callsToExec[12],
-            { command: 'code .', options: { cwd: this.packageDir } },
+            {
+                command: 'code . --reuse-window --reload-window',
+                options: { cwd: this.packageDir },
+            },
             'Did not open vscode at end!'
         )
     }

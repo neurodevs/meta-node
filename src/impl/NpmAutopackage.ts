@@ -1011,7 +1011,9 @@ export default prettierConfigNdx
 
     private async openVscode() {
         if (this.shouldOpenVscode) {
-            await this.exec('code .', { cwd: this.packageDir })
+            await this.exec('code . --reuse-window --reload-window', {
+                cwd: this.packageDir,
+            })
         }
     }
 
