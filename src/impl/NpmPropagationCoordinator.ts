@@ -7,9 +7,7 @@ import NpmReleasePropagator, {
     ReleasePropagatorOptions,
 } from './NpmReleasePropagator.js'
 
-export default class NpmPropagationCoordinator
-    implements PropagationCoordinator
-{
+export default class NpmPropagationCoordinator implements PropagationCoordinator {
     public static Class?: PropagationCoordinatorConstructor
     public static readFile = readFile
 
