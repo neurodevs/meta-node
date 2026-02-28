@@ -805,6 +805,7 @@ export default prettierConfigNdx
         return Object.keys(this.originalPackageJson.devDependencies!).filter(
             (dep) =>
                 [
+                    'concurrently',
                     'eslint',
                     'eslint-config-spruce',
                     'chokidar-cli',
