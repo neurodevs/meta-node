@@ -404,7 +404,6 @@ export default prettierConfigNdx
                 'dependencies',
                 'devDependencies',
                 'jest',
-                'skill',
             ]
         )
 
@@ -764,6 +763,30 @@ export default prettierConfigNdx
             { command: 'code .', options: { cwd: this.packageDir } },
             'Did not open vscode at end!'
         )
+    }
+
+    @test()
+    protected static async removesCertainKeysFromPackageJson() {
+        const keysToRemove = [
+            'skill',
+            'jest.testPathIgnorePatterns',
+            'jest.moduleNameMapper',
+            'scripts.build.resolve-paths',
+            'scripts.lint.tsc',
+            'scripts.post.watch.build',
+            'scripts.resolve-paths.lint',
+            'scripts.watch.rebuild',
+            'scripts.watch.tsc',
+        ]
+
+        const pkg = JSON.parse(this.updatedPackageJson)
+
+        for (const key of keysToRemove) {
+            assert.isUndefined(
+                this.getByPath(pkg, key),
+                `Did not remove ${key} from package.json!`
+            )
+        }
     }
 
     @test()
@@ -1201,6 +1224,12 @@ export default prettierConfigNdx
         await this.run()
     }
 
+    private static getByPath(obj: any, path: string) {
+        return path
+            .split('.')
+            .reduce((acc, key) => (acc == null ? undefined : acc[key]), obj)
+    }
+
     private static setShouldInstallDevDeps() {
         setFakeExecResult(this.checkGenerateIdVersionCmd, {
             stdout: '0.0.1',
@@ -1287,7 +1316,7 @@ export default prettierConfigNdx
 
         setFakeReadFileResult(
             this.packageJsonPath,
-            JSON.stringify(this.originalPackageJson)
+            JSON.stringify(this.originalPackageJsonWithDummies)
         )
 
         setFakeReadFileResult(
@@ -1349,6 +1378,26 @@ export default prettierConfigNdx
         }
     }
 
+    private static get originalPackageJsonWithDummies() {
+        return {
+            ...this.originalPackageJson,
+            scripts: {
+                'build.resolve-paths': 'dummy',
+                'lint.tsc': 'dummy',
+                'post.watch.build': 'dummy',
+                'resolve-paths.lint': 'dummy',
+                'watch.rebuild': 'dummy',
+                'watch.tsc': 'dummy',
+            },
+            jest: {
+                ...this.originalPackageJson.jest,
+                testPathIgnorePatterns: 'dummy',
+                moduleNameMapper: 'dummy',
+            },
+            skill: 'dummy',
+        }
+    }
+
     private static get updatedPackageJson() {
         return JSON.stringify({
             ...this.originalPackageJson,
@@ -1367,6 +1416,7 @@ export default prettierConfigNdx
             bugs: {
                 url: `https://github.com/${this.gitNamespace}/${this.packageName}/issues`,
             },
+            scripts: {},
             dependencies: this.dependencies,
             jest: {
                 ...this.originalPackageJson.jest,

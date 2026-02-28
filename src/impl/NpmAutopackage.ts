@@ -365,6 +365,8 @@ export default prettierConfigNdx
     }
 
     private async updatePackageJsonFile() {
+        this.removeOldKeysFromPackageJson()
+
         const ordered = this.orderJsonKeys(this.updatedPackageJson, [
             'name',
             'version',
@@ -382,7 +384,6 @@ export default prettierConfigNdx
             'dependencies',
             'devDependencies',
             'jest',
-            'skill',
         ])
 
         await this.writeFile(
@@ -390,6 +391,42 @@ export default prettierConfigNdx
             JSON.stringify(ordered, null, 2) + '\n',
             { encoding: 'utf-8' }
         )
+    }
+
+    private removeOldKeysFromPackageJson() {
+        const keysToRemove = [
+            'skill',
+            'jest.testPathIgnorePatterns',
+            'jest.moduleNameMapper',
+            'scripts.build.resolve-paths',
+            'scripts.lint.tsc',
+            'scripts.post.watch.build',
+            'scripts.resolve-paths.lint',
+            'scripts.watch.rebuild',
+            'scripts.watch.tsc',
+        ]
+
+        for (const key of keysToRemove) {
+            this.deleteByPath(this.originalPackageJson, key)
+        }
+    }
+
+    private deleteByPath(obj: any, path: string): void {
+        const dot = path.indexOf('.')
+
+        if (dot === -1) {
+            delete obj[path]
+            return
+        }
+
+        const parentKey = path.slice(0, dot)
+        const childKey = path.slice(dot + 1)
+
+        const parent = obj[parentKey]
+
+        if (parent) {
+            delete parent[childKey]
+        }
     }
 
     private get updatedPackageJson() {
