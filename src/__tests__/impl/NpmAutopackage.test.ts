@@ -893,7 +893,6 @@ export default prettierConfigNdx
         const keysToRemove = [
             'skill',
             'jest.testPathIgnorePatterns',
-            'jest.moduleNameMapper',
             'scripts.build.resolve-paths',
             'scripts.lint.tsc',
             'scripts.post.watch.build',
@@ -1676,6 +1675,9 @@ export default prettierConfigNdx
             },
             jest: {
                 ['customOption']: this.customJestOption,
+                moduleNameMapper: {
+                    '^#spruce/(.*)$': '',
+                },
             },
         }
     }
@@ -1699,7 +1701,6 @@ export default prettierConfigNdx
             jest: {
                 ...this.originalPackageJson.jest,
                 testPathIgnorePatterns: 'dummy',
-                moduleNameMapper: 'dummy',
             },
             skill: 'dummy',
         }
@@ -1752,7 +1753,7 @@ export default prettierConfigNdx
                 eslint: '^1.0.0',
             },
             jest: {
-                ...this.originalPackageJson.jest,
+                ['customOption']: this.customJestOption,
                 testEnvironment: 'node',
                 testRunner: 'jest-circus/runner',
                 testMatch: ['<rootDir>/build/__tests__/**/*.test.js?(x)'],

@@ -402,7 +402,6 @@ export default prettierConfigNdx
         const keysToRemove = [
             'skill',
             'jest.testPathIgnorePatterns',
-            'jest.moduleNameMapper',
             'scripts.build.resolve-paths',
             'scripts.lint.tsc',
             'scripts.post.watch.build',
@@ -414,6 +413,15 @@ export default prettierConfigNdx
         for (const key of keysToRemove) {
             this.deleteByPath(this.originalPackageJson, key)
         }
+
+        const jest = this.originalPackageJson?.jest as any
+        const moduleNameMapper = jest?.moduleNameMapper ?? {}
+
+        if (Object.keys(moduleNameMapper).some((k) => k === '^#spruce/(.*)$')) {
+            delete moduleNameMapper['^#spruce/(.*)$']
+        }
+
+        delete jest?.moduleNameMapper
     }
 
     private deleteByPath(obj: any, path: string): void {
