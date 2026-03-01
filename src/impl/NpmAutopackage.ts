@@ -556,7 +556,7 @@ export default prettierConfigNdx
     private async updateTsconfig() {
         this.originalTsconfig = await this.loadTsconfig()
 
-        if (!this.isTsconfigUpdated) {
+        if (this.shouldUpdateTsconfig) {
             console.log('Updating tsconfig...')
             await this.updateTsconfigFile()
             await this.commitUpdateTsconfig()
@@ -570,11 +570,8 @@ export default prettierConfigNdx
         return JSON.parse(raw)
     }
 
-    private get isTsconfigUpdated() {
-        return (
-            JSON.stringify(this.originalTsconfig) ==
-            JSON.stringify(this.updatedTsconfig)
-        )
+    private get shouldUpdateTsconfig() {
+        return this.originalTsconfig.compilerOptions?.module !== 'nodenext'
     }
 
     private async updateTsconfigFile() {
