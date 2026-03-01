@@ -190,7 +190,7 @@ export default prettierConfigNdx
     }
 
     public async run() {
-        console.info('\n\nStarting autopackage process...\n\n')
+        console.info('Starting autopackage process...\n')
         this.throwIfGithubTokenNotInEnv()
 
         await this.createRepoInGithubOrg()
@@ -211,7 +211,7 @@ export default prettierConfigNdx
         await this.fixEslintAndPrettier()
         await this.openVscode()
 
-        console.info('\n\nAutopackage process completed!\n\n')
+        console.info('\nAutopackage process completed!\n')
     }
 
     private throwIfGithubTokenNotInEnv() {
