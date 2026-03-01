@@ -815,7 +815,8 @@ export default prettierConfigNdx
     @test()
     protected static async thenCommitsFixEslintAndPrettier() {
         setFakeExecResult('git status --porcelain', {
-            stdout: this.generateId(),
+            stdout: 'Some changes',
+            stderr: '',
         } as unknown as ChildProcess)
 
         this.setShouldInstallDevDeps()
@@ -832,9 +833,31 @@ export default prettierConfigNdx
     }
 
     @test()
+    protected static async doesNotCommitFixEslintAndPrettierIfStderr() {
+        setFakeExecResult('git status --porcelain', {
+            stdout: 'Some changes',
+            stderr: 'Some error',
+        } as unknown as ChildProcess)
+
+        this.setShouldInstallDevDeps()
+        await this.run()
+
+        assert.isEqual(
+            FakeAutocommit.callsToConstructor.filter(
+                (call) =>
+                    call?.commitMessage ===
+                    `patch: fix eslint and prettier (@neurodevs/meta-node: ${this.metaNodeVersion})`
+            ).length,
+            0,
+            'Should not commit fix eslint and prettier if stderr!'
+        )
+    }
+
+    @test()
     protected static async doesNotCommitFixEslintAndPrettierIfNoChanges() {
         setFakeExecResult('git status --porcelain', {
             stdout: '',
+            stderr: '',
         } as unknown as ChildProcess)
 
         this.setShouldInstallDevDeps()

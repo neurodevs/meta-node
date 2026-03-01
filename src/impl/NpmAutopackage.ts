@@ -1059,10 +1059,10 @@ export default prettierConfigNdx
     }
 
     private async checkIfThereAreChangesToCommit() {
-        const { stdout } = await this.exec('git status --porcelain', {
+        const { stdout, stderr } = await this.exec('git status --porcelain', {
             cwd: this.packageDir,
         })
-        return stdout.trim() !== ''
+        return stdout.trim() !== '' && stderr.trim() === ''
     }
 
     private async commitFixEslintAndPrettier() {
