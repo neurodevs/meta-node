@@ -364,14 +364,12 @@ export default prettierConfigNdx
     private get isPackageUpToDate() {
         return (
             JSON.stringify(this.originalPackageJson) ==
-            JSON.stringify(this.updatedPackageJson)
+            JSON.stringify(this.orderedPackageJson)
         )
     }
 
-    private async updatePackageJsonFile() {
-        this.removeOldKeysFromPackageJson()
-
-        const ordered = this.orderJsonKeys(this.updatedPackageJson, [
+    private get orderedPackageJson() {
+        return this.orderJsonKeys(this.updatedPackageJson, [
             'name',
             'version',
             'description',
@@ -391,10 +389,14 @@ export default prettierConfigNdx
             'peerDependencies',
             'jest',
         ])
+    }
+
+    private async updatePackageJsonFile() {
+        this.removeOldKeysFromPackageJson()
 
         await this.writeFile(
             this.packageJsonPath,
-            JSON.stringify(ordered, null, 2) + '\n',
+            JSON.stringify(this.orderedPackageJson, null, 2) + '\n',
             { encoding: 'utf-8' }
         )
     }

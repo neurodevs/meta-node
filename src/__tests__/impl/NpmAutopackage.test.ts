@@ -1524,7 +1524,7 @@ export default prettierConfigNdx
 
         setFakeReadFileResult(
             this.packageJsonPath,
-            JSON.stringify(this.updatedPackageJson)
+            JSON.stringify(this.orderedPackageJson)
         )
 
         setFakeReadFileResult(this.gitignorePath, this.updatedGitignore)
@@ -1737,6 +1737,29 @@ export default prettierConfigNdx
             },
             skill: 'dummy',
         }
+    }
+
+    private static get orderedPackageJson() {
+        return this.orderJsonKeys(this.updatedPackageJson, [
+            'name',
+            'version',
+            'description',
+            'type',
+            'keywords',
+            'license',
+            'author',
+            'homepage',
+            'repository',
+            'bugs',
+            'main',
+            'bin',
+            'files',
+            'scripts',
+            'dependencies',
+            'devDependencies',
+            'peerDependencies',
+            'jest',
+        ])
     }
 
     private static get updatedPackageJson() {
