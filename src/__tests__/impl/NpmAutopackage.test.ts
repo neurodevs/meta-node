@@ -133,7 +133,7 @@ export default class NpmAutopackageTest extends AbstractPackageTest {
     }
 
     private static readonly yarnRemoveDevDepsCommand =
-        'yarn remove @sprucelabs/jest-json-reporter @sprucelabs/resolve-path-aliases @sprucelabs/test @sprucelabs/test-utils @types/node concurrently eslint eslint-config-spruce chokidar-cli ts-node'
+        'yarn remove @sprucelabs/jest-json-reporter @sprucelabs/resolve-path-aliases @sprucelabs/spruce-test-fixtures @sprucelabs/test @sprucelabs/test-utils @types/node concurrently eslint eslint-config-spruce chokidar-cli ts-node'
 
     private static readonly yarnInstallDevDepsCommand =
         'yarn add -D @neurodevs/generate-id @neurodevs/node-tdd @neurodevs/eslint-config-ndx @neurodevs/prettier-config-ndx prettier'
@@ -559,6 +559,7 @@ export default prettierConfigNdx
                 devDependencies: {
                     '@sprucelabs/jest-json-reporter': '^1.0.0',
                     '@sprucelabs/resolve-path-aliases': '^1.0.0',
+                    '@sprucelabs/spruce-test-fixtures': '^1.0.0',
                     '@sprucelabs/test': '^1.0.0',
                     '@sprucelabs/test-utils': '^1.0.0',
                     '@types/node': '^1.0.0',

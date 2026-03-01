@@ -818,6 +818,7 @@ export default prettierConfigNdx
                 [
                     '@sprucelabs/jest-json-reporter',
                     '@sprucelabs/resolve-path-aliases',
+                    '@sprucelabs/spruce-test-fixtures',
                     '@sprucelabs/test',
                     '@sprucelabs/test-utils',
                     '@types/node',
