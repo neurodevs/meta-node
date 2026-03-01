@@ -798,11 +798,25 @@ export default prettierConfigNdx
     }
 
     @test()
-    protected static async lastlyOpensVscodeAtEnd() {
+    protected static async thenRunsYarnBuildDotDev() {
         await this.run()
 
         assert.isEqualDeep(
             callsToExec[12],
+            {
+                command: 'yarn build.dev',
+                options: { cwd: this.packageDir },
+            },
+            'Did not run yarn build.dev!'
+        )
+    }
+
+    @test()
+    protected static async lastlyOpensVscodeAtEnd() {
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToExec[13],
             {
                 command: 'code . --reuse-window --reload-window',
                 options: { cwd: this.packageDir },

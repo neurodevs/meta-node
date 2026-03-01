@@ -207,6 +207,7 @@ export default prettierConfigNdx
         await this.installEslintConfigFile()
         await this.installPrettierConfigFile()
         await this.installSettingsJsonFile()
+        await this.runYarnBuildDotDev()
         await this.openVscode()
     }
 
@@ -1035,6 +1036,14 @@ export default prettierConfigNdx
         await this.GitAutocommit(
             `patch: install settings.json (@neurodevs/meta-node: ${this.metaNodeVersion})`
         )
+    }
+
+    private async runYarnBuildDotDev() {
+        console.log('Running yarn build.dev...')
+
+        await this.exec('yarn build.dev', {
+            cwd: this.packageDir,
+        })
     }
 
     private async openVscode() {
