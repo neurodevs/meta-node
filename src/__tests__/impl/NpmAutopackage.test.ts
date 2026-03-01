@@ -1480,6 +1480,34 @@ export default prettierConfigNdx
         )
     }
 
+    @test()
+    protected static async doesNotDeleteModuleNameMapperIfOtherKeysPresent() {
+        const moduleNameMapperKey = this.generateId()
+
+        setFakeReadFileResult(
+            this.packageJsonPath,
+            JSON.stringify({
+                ...this.originalPackageJson,
+                jest: {
+                    moduleNameMapper: {
+                        [moduleNameMapperKey]: '',
+                    },
+                },
+            })
+        )
+
+        await this.run()
+
+        assert.isTruthy(
+            callsToWriteFile.some(
+                (call) =>
+                    call.file === this.packageJsonPath &&
+                    call.data.includes(moduleNameMapperKey)
+            ),
+            'Should not delete jest.moduleNameMapper if other keys are present!'
+        )
+    }
+
     private static async run() {
         await this.instance.run()
     }

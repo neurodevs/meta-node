@@ -421,7 +421,9 @@ export default prettierConfigNdx
             delete moduleNameMapper['^#spruce/(.*)$']
         }
 
-        delete jest?.moduleNameMapper
+        if (Object.keys(moduleNameMapper).length === 0) {
+            delete jest?.moduleNameMapper
+        }
     }
 
     private deleteByPath(obj: any, path: string): void {
