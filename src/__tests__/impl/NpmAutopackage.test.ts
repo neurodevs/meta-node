@@ -814,6 +814,10 @@ export default prettierConfigNdx
 
     @test()
     protected static async thenCommitsFixEslintAndPrettier() {
+        setFakeExecResult('git status --porcelain', {
+            stdout: this.generateId(),
+        } as unknown as ChildProcess)
+
         this.setShouldInstallDevDeps()
         await this.run()
 
@@ -828,11 +832,31 @@ export default prettierConfigNdx
     }
 
     @test()
+    protected static async doesNotCommitFixEslintAndPrettierIfNoChanges() {
+        setFakeExecResult('git status --porcelain', {
+            stdout: '',
+        } as unknown as ChildProcess)
+
+        this.setShouldInstallDevDeps()
+        await this.run()
+
+        assert.isEqual(
+            FakeAutocommit.callsToConstructor.filter(
+                (call) =>
+                    call?.commitMessage ===
+                    `patch: fix eslint and prettier (@neurodevs/meta-node: ${this.metaNodeVersion})`
+            ).length,
+            0,
+            'Should not commit fix eslint and prettier if no changes!'
+        )
+    }
+
+    @test()
     protected static async lastlyOpensVscodeAtEnd() {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[13],
+            callsToExec[14],
             {
                 command: 'code . --reuse-window --reload-window',
                 options: { cwd: this.packageDir },

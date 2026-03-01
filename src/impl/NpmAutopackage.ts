@@ -225,7 +225,7 @@ export default prettierConfigNdx
         const repoExists = await this.checkIfRepoExists()
 
         if (!repoExists) {
-            console.log('Creating repository in GitHub organization...')
+            console.info('Creating repository in GitHub organization...')
             await this.submitCreateRepoRequest()
         }
     }
@@ -270,7 +270,7 @@ export default prettierConfigNdx
         const packageDirExists = await this.checkIfPackageDirExists()
 
         if (!packageDirExists) {
-            console.log('Cloning git repository...')
+            console.info('Cloning git repository...')
 
             await this.exec(`git clone ${this.gitUrl}`, {
                 cwd: this.installDir,
@@ -316,7 +316,7 @@ export default prettierConfigNdx
         const packageJsonExists = await this.checkIfPackageJsonExists()
 
         if (!packageJsonExists) {
-            console.log('Running spruce create.module...')
+            console.info('Running spruce create.module...')
 
             await this.execSpruceCreateModule()
             await this.commitCreatePackage()
@@ -344,7 +344,7 @@ export default prettierConfigNdx
         this.originalPackageJson = await this.loadPackageJson()
 
         if (!this.isPackageUpToDate) {
-            console.log('Updating package.json...')
+            console.info('Updating package.json...')
 
             await this.updatePackageJsonFile()
             await this.commitUpdatePackageJson()
@@ -520,7 +520,7 @@ export default prettierConfigNdx
         this.originalGitignore = await this.loadGitignore()
 
         if (!this.isGitignoreUpdated) {
-            console.log('Updating .gitignore...')
+            console.info('Updating .gitignore...')
 
             await this.updateGitignoreFile()
             await this.commitUpdateGitignore()
@@ -558,7 +558,7 @@ export default prettierConfigNdx
         this.originalTsconfig = await this.loadTsconfig()
 
         if (this.shouldUpdateTsconfig) {
-            console.log('Updating tsconfig...')
+            console.info('Updating tsconfig...')
             await this.updateTsconfigFile()
             await this.commitUpdateTsconfig()
         }
@@ -642,7 +642,7 @@ export default prettierConfigNdx
         const vscodeTasksExist = await this.checkIfVscodeTasksExist()
 
         if (!vscodeTasksExist) {
-            console.log('Setting up VSCode...')
+            console.info('Setting up VSCode...')
 
             await this.spruceSetupVscode()
             await this.commitSetupVscode()
@@ -669,7 +669,7 @@ export default prettierConfigNdx
         this.originalTasksJson = await this.loadTasksJsonFile()
 
         if (!this.isTasksJsonUpdated) {
-            console.log('Updating vscode tasks...')
+            console.info('Updating vscode tasks...')
             await this.updateTasksJsonFile()
             await this.commitUpdateVscodeTasks()
         }
@@ -778,7 +778,7 @@ export default prettierConfigNdx
             this.currentEslintConfigNdxVersion != eslintConfigNdxVersion ||
             this.currentPrettierConfigNdxVersion != prettierConfigNdxVersion
         ) {
-            console.log('Installing default devDependencies...')
+            console.info('Installing default devDependencies...')
 
             await this.exec(
                 'yarn add -D @neurodevs/generate-id @neurodevs/node-tdd @neurodevs/eslint-config-ndx @neurodevs/prettier-config-ndx prettier',
@@ -790,7 +790,7 @@ export default prettierConfigNdx
 
     private async removeOldDevDependencies() {
         if (this.oldDevDependencies.length > 0) {
-            console.log('Removing old devDependencies...')
+            console.info('Removing old devDependencies...')
 
             await this.exec(
                 `yarn remove ${this.oldDevDependencies.join(' ')}`,
@@ -883,7 +883,7 @@ export default prettierConfigNdx
         const shouldInstall = await this.checkShouldInstallAbstractTest()
 
         if (shouldInstall) {
-            console.log(`Installing ${this.abstractTestPath}...`)
+            console.info(`Installing ${this.abstractTestPath}...`)
 
             await this.mkdir(this.testsDir, { recursive: true })
 
@@ -919,7 +919,7 @@ export default prettierConfigNdx
         this.originalEslintConfig = await this.loadEslintConfigFile()
 
         if (this.shouldUpdateEslintConfig) {
-            console.log('Installing eslint.config.js...')
+            console.info('Installing eslint.config.js...')
 
             await this.writeFile(this.eslintConfigPath, this.eslintConfigFile, {
                 encoding: 'utf-8',
@@ -935,7 +935,7 @@ export default prettierConfigNdx
         )
 
         if (fileExists) {
-            console.log('Removing old eslint.config.mjs...')
+            console.info('Removing old eslint.config.mjs...')
 
             await this.exec(`git rm eslint.config.mjs`, {
                 cwd: this.packageDir,
@@ -970,7 +970,7 @@ export default prettierConfigNdx
         this.originalPrettierConfig = await this.loadPrettierConfigFile()
 
         if (this.shouldUpdatePrettierConfig) {
-            console.log('Installing prettier.config.js...')
+            console.info('Installing prettier.config.js...')
 
             await this.writeFile(
                 this.prettierConfigPath,
@@ -1012,7 +1012,7 @@ export default prettierConfigNdx
         this.originalSettingsJson = await this.loadSettingsJsonFile()
 
         if (!this.settingsJsonIsUpToDate) {
-            console.log('Installing .vscode/settings.json...')
+            console.info('Installing .vscode/settings.json...')
 
             await this.writeFile(this.settingsJsonPath, this.settingsJsonFile, {
                 encoding: 'utf-8',
@@ -1039,13 +1039,27 @@ export default prettierConfigNdx
     }
 
     private async fixEslintAndPrettier() {
-        console.log('Fixing eslint and prettier...')
+        console.info('Fixing eslint and prettier...')
 
         await this.exec('yarn build.dev', {
             cwd: this.packageDir,
         })
 
-        await this.commitFixEslintAndPrettier()
+        const hasChanges = await this.checkIfThereAreChangesToCommit()
+
+        if (hasChanges) {
+            console.info('Committing eslint and prettier fixes...')
+            await this.commitFixEslintAndPrettier()
+        } else {
+            console.info('No eslint or prettier fixes needed. Continuing...')
+        }
+    }
+
+    private async checkIfThereAreChangesToCommit() {
+        const { stdout } = await this.exec('git status --porcelain', {
+            cwd: this.packageDir,
+        })
+        return stdout.trim() !== ''
     }
 
     private async commitFixEslintAndPrettier() {
@@ -1056,6 +1070,8 @@ export default prettierConfigNdx
 
     private async openVscode() {
         if (this.shouldOpenVscode) {
+            console.info('Opening VSCode...\n\n')
+
             await this.exec('code . --reuse-window --reload-window', {
                 cwd: this.packageDir,
             })
