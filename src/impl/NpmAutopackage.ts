@@ -190,6 +190,7 @@ export default prettierConfigNdx
     }
 
     public async run() {
+        console.info('\n\nStarting autopackage process...\n\n')
         this.throwIfGithubTokenNotInEnv()
 
         await this.createRepoInGithubOrg()
@@ -209,6 +210,8 @@ export default prettierConfigNdx
         await this.installSettingsJsonFile()
         await this.fixEslintAndPrettier()
         await this.openVscode()
+
+        console.info('\n\nAutopackage process completed!\n\n')
     }
 
     private throwIfGithubTokenNotInEnv() {
@@ -1070,7 +1073,7 @@ export default prettierConfigNdx
 
     private async openVscode() {
         if (this.shouldOpenVscode) {
-            console.info('Opening VSCode...\n\n')
+            console.info('Opening VSCode...')
 
             await this.exec('code . --reuse-window --reload-window', {
                 cwd: this.packageDir,
