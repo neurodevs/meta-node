@@ -798,16 +798,32 @@ export default prettierConfigNdx
     }
 
     @test()
-    protected static async thenRunsYarnBuildDotDev() {
+    protected static async thenFixesEslintAndPrettier() {
+        this.setShouldInstallDevDeps()
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[12],
+            callsToExec[13],
             {
                 command: 'yarn build.dev',
                 options: { cwd: this.packageDir },
             },
-            'Did not run yarn build.dev!'
+            'Did not fix eslint and prettier!'
+        )
+    }
+
+    @test()
+    protected static async thenCommitsFixEslintAndPrettier() {
+        this.setShouldInstallDevDeps()
+        await this.run()
+
+        assert.isEqualDeep(
+            FakeAutocommit.callsToConstructor[11],
+            {
+                commitMessage: `patch: fix eslint and prettier (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+                cwd: this.packageDir,
+            },
+            'Did not commit fix eslint and prettier changes!'
         )
     }
 
@@ -1664,7 +1680,7 @@ export default prettierConfigNdx
                 ...this.originalPackageJson.scripts,
                 'build.ci': 'yarn run build.tsc && yarn run lint',
                 'build.dev':
-                    'yarn run build.tsc --sourceMap ; yarn run lint ; prettier --write .',
+                    'yarn run build.tsc --sourceMap ; yarn run fix.lint ; prettier --write .',
                 'build.copy-files':
                     "mkdir -p build && rsync -avzq --exclude='*.ts' ./src/ ./build/",
                 'build.tsc': 'yarn run build.copy-files && tsc',

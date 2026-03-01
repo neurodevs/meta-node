@@ -207,7 +207,7 @@ export default prettierConfigNdx
         await this.installEslintConfigFile()
         await this.installPrettierConfigFile()
         await this.installSettingsJsonFile()
-        await this.runYarnBuildDotDev()
+        await this.fixEslintAndPrettier()
         await this.openVscode()
     }
 
@@ -453,7 +453,7 @@ export default prettierConfigNdx
                 ...(this.originalPackageJson.scripts ?? {}),
                 'build.ci': 'yarn run build.tsc && yarn run lint',
                 'build.dev':
-                    'yarn run build.tsc --sourceMap ; yarn run lint ; prettier --write .',
+                    'yarn run build.tsc --sourceMap ; yarn run fix.lint ; prettier --write .',
                 'build.copy-files':
                     "mkdir -p build && rsync -avzq --exclude='*.ts' ./src/ ./build/",
                 'build.tsc': 'yarn run build.copy-files && tsc',
@@ -1038,12 +1038,20 @@ export default prettierConfigNdx
         )
     }
 
-    private async runYarnBuildDotDev() {
-        console.log('Running yarn build.dev...')
+    private async fixEslintAndPrettier() {
+        console.log('Fixing eslint and prettier...')
 
         await this.exec('yarn build.dev', {
             cwd: this.packageDir,
         })
+
+        await this.commitFixEslintAndPrettier()
+    }
+
+    private async commitFixEslintAndPrettier() {
+        await this.GitAutocommit(
+            `patch: fix eslint and prettier (@neurodevs/meta-node: ${this.metaNodeVersion})`
+        )
     }
 
     private async openVscode() {
