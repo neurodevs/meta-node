@@ -403,6 +403,7 @@ export default prettierConfigNdx
             'scripts',
             'dependencies',
             'devDependencies',
+            'peerDependencies',
             'jest',
         ])
 
@@ -1702,6 +1703,9 @@ export default prettierConfigNdx
                 '@neurodevs/eslint-config-ndx': '^1.0.0',
                 '@neurodevs/prettier-config-ndx': '^1.0.0',
             },
+            peerDependencies: {
+                customPeerDependency: '^1.0.0',
+            },
             jest: {
                 ['customOption']: this.customJestOption,
                 moduleNameMapper: {
@@ -1780,6 +1784,9 @@ export default prettierConfigNdx
             devDependencies: {
                 ...this.originalPackageJson.devDependencies,
                 eslint: '^1.0.0',
+            },
+            peerDependencies: {
+                customPeerDependency: '^1.0.0',
             },
             jest: {
                 ['customOption']: this.customJestOption,

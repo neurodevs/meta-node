@@ -388,6 +388,7 @@ export default prettierConfigNdx
             'scripts',
             'dependencies',
             'devDependencies',
+            'peerDependencies',
             'jest',
         ])
 
