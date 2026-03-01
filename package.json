@@ -52,7 +52,7 @@
     "@neurodevs/fake-node-core": "^0.12.1",
     "@neurodevs/generate-id": "^1.1.2",
     "@neurodevs/node-tdd": "^0.2.5",
-    "@neurodevs/prettier-config-ndx": "^1.0.1",
+    "@neurodevs/prettier-config-ndx": "^1.0.2",
     "@types/fs-extra": "^11.0.4",
     "@types/node-fetch": "^2.6.13",
     "@types/semver": "^7.7.1",
