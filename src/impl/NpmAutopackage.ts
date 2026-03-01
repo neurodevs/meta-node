@@ -802,12 +802,16 @@ export default prettierConfigNdx
         return Object.keys(this.originalPackageJson.devDependencies!).filter(
             (dep) =>
                 [
+                    '@sprucelabs/jest-json-reporter',
+                    '@sprucelabs/resolve-path-aliases',
+                    '@sprucelabs/test',
+                    '@sprucelabs/test-utils',
+                    '@types/node',
                     'concurrently',
                     'eslint',
                     'eslint-config-spruce',
                     'chokidar-cli',
                     'ts-node',
-                    '@types/node',
                 ].includes(dep)
         )
     }
