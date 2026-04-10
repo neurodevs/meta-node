@@ -1042,6 +1042,34 @@ export default prettierConfigNdx
     }
 
     @test()
+    protected static async removesEsVersionsOtherThanEsnextFromLib() {
+        setFakeReadFileResult(
+            this.tsconfigPath,
+            JSON.stringify({
+                ...this.originalTsconfig,
+                compilerOptions: {
+                    ...this.originalTsconfig.compilerOptions,
+                    lib: ['es6', 'es2017', 'esnext'],
+                },
+            })
+        )
+
+        await this.run()
+
+        const tsconfigWrites = callsToWriteFile.filter(
+            (call) => call.file === this.tsconfigPath
+        )
+
+        const json = JSON.parse(tsconfigWrites[0].data)
+
+        assert.isEqualDeep(
+            json.compilerOptions.lib,
+            ['esnext'],
+            'Should update tsconfig to only include esnext in lib!'
+        )
+    }
+
+    @test()
     protected static async doesNotCreateRepoInGithubOrgIfDone() {
         await this.runTwice()
 

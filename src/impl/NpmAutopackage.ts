@@ -610,12 +610,12 @@ export default prettierConfigNdx
             compilerOptions: {
                 module: 'nodenext',
                 target: 'esnext',
-                lib: Array.from(
-                    new Set([
-                        ...(this.originalTsconfig?.compilerOptions?.lib ?? []),
-                        'esnext',
-                    ])
-                ),
+                lib: [
+                    ...(
+                        this.originalTsconfig?.compilerOptions?.lib ?? []
+                    ).filter((v) => !v.startsWith('es')),
+                    'esnext',
+                ],
                 types: Array.from(
                     new Set([
                         ...(this.originalTsconfig?.compilerOptions?.types ??
