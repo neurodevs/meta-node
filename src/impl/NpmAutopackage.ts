@@ -607,12 +607,11 @@ export default prettierConfigNdx
             ...this.originalTsconfig,
             compilerOptions: {
                 module: 'nodenext',
-                moduleResolution: 'nodenext',
-                target: 'ES2022',
+                target: 'esnext',
                 lib: Array.from(
                     new Set([
                         ...(this.originalTsconfig?.compilerOptions?.lib ?? []),
-                        'ES2022',
+                        'esnext',
                     ])
                 ),
                 types: Array.from(
@@ -622,7 +621,7 @@ export default prettierConfigNdx
                         'node',
                     ])
                 ),
-                baseUrl: 'src',
+                rootDir: 'src',
                 outDir: 'build',
                 sourceMap: false,
                 strict: true,
