@@ -478,7 +478,7 @@ export default prettierConfigNdx
             {
                 file: this.tsconfigPath,
                 data: JSON.stringify(this.updatedTsconfig, null, 4) + '\n',
-                options: { encoding: 'utf-8', flag: 'a' },
+                options: { encoding: 'utf-8' },
             },
             'Did not update tsconfig as expected!'
         )

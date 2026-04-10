@@ -600,7 +600,6 @@ export default prettierConfigNdx
             JSON.stringify(this.updatedTsconfig, null, 4) + '\n',
             {
                 encoding: 'utf-8',
-                flag: 'a',
             }
         )
     }
