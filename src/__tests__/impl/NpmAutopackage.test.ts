@@ -485,6 +485,20 @@ export default prettierConfigNdx
     }
 
     @test()
+    protected static async thenBuildsDevAfterUpdatingTsconfig() {
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToExec[5],
+            {
+                command: 'yarn build.dev',
+                options: { cwd: this.packageDir },
+            },
+            'Did not fix eslint and prettier after updating tsconfig!'
+        )
+    }
+
+    @test()
     protected static async thenCommitsUpdateTsconfig() {
         await this.run()
 
@@ -503,7 +517,7 @@ export default prettierConfigNdx
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[5],
+            callsToExec[6],
             {
                 command: this.setupVscodeCmd,
                 options: { cwd: this.packageDir },
@@ -577,7 +591,7 @@ export default prettierConfigNdx
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[6],
+            callsToExec[7],
             {
                 command: this.yarnRemoveDevDepsCommand,
                 options: { cwd: this.packageDir },
@@ -602,7 +616,7 @@ export default prettierConfigNdx
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[6],
+            callsToExec[7],
             {
                 command: 'yarn remove eslint',
                 options: { cwd: this.packageDir },
@@ -617,7 +631,7 @@ export default prettierConfigNdx
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[11],
+            callsToExec[12],
             {
                 command: this.yarnInstallDevDepsCommand,
                 options: { cwd: this.packageDir },
@@ -697,7 +711,7 @@ export default prettierConfigNdx
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[12],
+            callsToExec[13],
             {
                 command: `git rm eslint.config.mjs`,
                 options: { cwd: this.packageDir },
@@ -805,7 +819,7 @@ export default prettierConfigNdx
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[13],
+            callsToExec[14],
             {
                 command: 'yarn build.dev',
                 options: { cwd: this.packageDir },
@@ -881,7 +895,7 @@ export default prettierConfigNdx
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[14],
+            callsToExec[15],
             {
                 command: 'code . --reuse-window --reload-window',
                 options: { cwd: this.packageDir },

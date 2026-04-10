@@ -576,6 +576,7 @@ export default prettierConfigNdx
         if (this.shouldUpdateTsconfig) {
             console.info('Updating tsconfig...')
             await this.updateTsconfigFile()
+            await this.executeYarnBuildDev()
             await this.commitUpdateTsconfig()
         }
     }
@@ -1059,9 +1060,7 @@ export default prettierConfigNdx
     private async fixEslintAndPrettier() {
         console.info('Fixing eslint and prettier...')
 
-        await this.exec('yarn build.dev', {
-            cwd: this.packageDir,
-        })
+        await this.executeYarnBuildDev()
 
         const hasChanges = await this.checkIfThereAreChangesToCommit()
 
@@ -1071,6 +1070,12 @@ export default prettierConfigNdx
         } else {
             console.info('No eslint or prettier fixes needed. Continuing...')
         }
+    }
+
+    private async executeYarnBuildDev() {
+        await this.exec('yarn build.dev', {
+            cwd: this.packageDir,
+        })
     }
 
     private async checkIfThereAreChangesToCommit() {
