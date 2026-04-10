@@ -477,7 +477,7 @@ export default prettierConfigNdx
             callsToWriteFile[2],
             {
                 file: this.tsconfigPath,
-                data: JSON.stringify(this.updatedTsconfig, null, 4) + '\n',
+                data: JSON.stringify(this.updatedTsconfig, null, 2) + '\n',
                 options: { encoding: 'utf-8' },
             },
             'Did not update tsconfig as expected!'
@@ -1183,7 +1183,7 @@ export default prettierConfigNdx
     protected static async doesNotUpdateTsconfigIfAlreadyUpToDate() {
         setFakeReadFileResult(
             this.tsconfigPath,
-            JSON.stringify(this.updatedTsconfig, null, 4)
+            JSON.stringify(this.updatedTsconfig, null, 2)
         )
 
         await this.run()
@@ -1927,7 +1927,7 @@ export default prettierConfigNdx
                 ],
             },
             null,
-            4
+            2
         )
     }
 

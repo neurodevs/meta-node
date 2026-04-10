@@ -597,7 +597,7 @@ export default prettierConfigNdx
     private async updateTsconfigFile() {
         await this.writeFile(
             this.tsconfigPath,
-            JSON.stringify(this.updatedTsconfig, null, 4) + '\n',
+            JSON.stringify(this.updatedTsconfig, null, 2) + '\n',
             {
                 encoding: 'utf-8',
             }
@@ -730,7 +730,7 @@ export default prettierConfigNdx
                 inputs: [...this.originalTasksJson.inputs, this.requiredInput],
             },
             null,
-            4
+            2
         )
     }
 
