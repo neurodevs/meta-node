@@ -613,7 +613,7 @@ export default prettierConfigNdx
                 lib: [
                     ...(
                         this.originalTsconfig?.compilerOptions?.lib ?? []
-                    ).filter((v) => !v.startsWith('es')),
+                    ).filter((v) => !v.toLowerCase().startsWith('es')),
                     'esnext',
                 ],
                 types: Array.from(

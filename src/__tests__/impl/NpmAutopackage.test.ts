@@ -1049,7 +1049,7 @@ export default prettierConfigNdx
                 ...this.originalTsconfig,
                 compilerOptions: {
                     ...this.originalTsconfig.compilerOptions,
-                    lib: ['es6', 'es2017', 'esnext'],
+                    lib: ['es6', 'es2017', 'esnext', 'ES2015'],
                 },
             })
         )
