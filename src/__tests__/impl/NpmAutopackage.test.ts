@@ -1178,6 +1178,32 @@ export default prettierConfigNdx
     }
 
     @test()
+    protected static async doesNotUpdateTsconfigIfTargetIsEsnext() {
+        // target: 'esnext' is a proxy for tsconfig has been updated previously
+
+        setFakeReadFileResult(
+            this.tsconfigPath,
+            JSON.stringify({
+                compilerOptions: {
+                    target: 'esnext',
+                },
+            })
+        )
+
+        await this.run()
+
+        const tsconfigWrites = callsToWriteFile.filter(
+            (call) => call.file === this.tsconfigPath
+        )
+
+        assert.isEqual(
+            tsconfigWrites.length,
+            0,
+            'Should not update tsconfig when only extra keys differ!'
+        )
+    }
+
+    @test()
     protected static async doesNotCommitSetupVscodeIfDone() {
         await this.runTwice()
 

@@ -588,7 +588,10 @@ export default prettierConfigNdx
     }
 
     private get shouldUpdateTsconfig() {
-        return this.originalTsconfig.compilerOptions?.module !== 'nodenext'
+        return (
+            this.originalTsconfig.compilerOptions?.module !== 'nodenext' &&
+            this.originalTsconfig.compilerOptions?.target !== 'esnext'
+        )
     }
 
     private async updateTsconfigFile() {
