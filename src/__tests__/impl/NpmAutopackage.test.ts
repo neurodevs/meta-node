@@ -1152,42 +1152,10 @@ export default prettierConfigNdx
     }
 
     @test()
-    protected static async doesNotUpdateTsconfigIfModuleIsNodenext() {
-        // module: 'nodenext' is a proxy for tsconfig has been updated previously
-
+    protected static async doesNotUpdateTsconfigIfAlreadyUpToDate() {
         setFakeReadFileResult(
             this.tsconfigPath,
-            JSON.stringify({
-                compilerOptions: {
-                    module: 'nodenext',
-                },
-            })
-        )
-
-        await this.run()
-
-        const tsconfigWrites = callsToWriteFile.filter(
-            (call) => call.file === this.tsconfigPath
-        )
-
-        assert.isEqual(
-            tsconfigWrites.length,
-            0,
-            'Should not update tsconfig when only extra keys differ!'
-        )
-    }
-
-    @test()
-    protected static async doesNotUpdateTsconfigIfTargetIsEsnext() {
-        // target: 'esnext' is a proxy for tsconfig has been updated previously
-
-        setFakeReadFileResult(
-            this.tsconfigPath,
-            JSON.stringify({
-                compilerOptions: {
-                    target: 'esnext',
-                },
-            })
+            JSON.stringify(this.updatedTsconfig, null, 4)
         )
 
         await this.run()
