@@ -1863,6 +1863,7 @@ export default prettierConfigNdx
             compilerOptions: {
                 lib: [this.customLib],
                 types: [this.customType],
+                customOption: this.customTsconfigOption,
             },
             include: [this.customInclude],
             customOption: this.customTsconfigOption,
@@ -1873,6 +1874,7 @@ export default prettierConfigNdx
         return {
             ...this.originalTsconfig,
             compilerOptions: {
+                ...this.originalTsconfig.compilerOptions,
                 module: 'nodenext',
                 target: 'esnext',
                 lib: [this.customLib, 'esnext'],
