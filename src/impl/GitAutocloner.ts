@@ -1,16 +1,14 @@
 import { exec as execSync } from 'child_process'
-import { chdir } from 'process'
 import { promisify } from 'util'
 import { pathExists } from 'fs-extra'
 
 export default class GitAutocloner implements Autocloner {
     public static Class?: AutoclonerConstructor
-    public static chdir = chdir
     public static exec = promisify(execSync)
     public static pathExists = pathExists
 
     private urls!: string[]
-    private dirPath!: string
+    protected cwd?: string
     private currentUrl!: string
     private currentError!: any
     private log = console
@@ -22,35 +20,12 @@ export default class GitAutocloner implements Autocloner {
     }
 
     public async run(options: AutoclonerOptions) {
-        const { urls, dirPath } = options
+        const { urls, cwd } = options
 
         this.urls = urls
-        this.dirPath = dirPath
-
-        await this.throwIfDirPathDoesNotExist()
-        this.chdirToDirPath()
+        this.cwd = cwd ?? process.cwd()
 
         await this.runForEachUrl()
-    }
-
-    private async throwIfDirPathDoesNotExist() {
-        const dirPathExists = await this.checkIfDirPathExists()
-
-        if (!dirPathExists) {
-            this.throwDirPathDoesNotExist()
-        }
-    }
-
-    private async checkIfDirPathExists() {
-        return this.pathExists(this.dirPath)
-    }
-
-    private throwDirPathDoesNotExist() {
-        throw new Error(`dirPath does not exist: ${this.dirPath}!`)
-    }
-
-    private chdirToDirPath() {
-        this.chdir(this.dirPath)
     }
 
     private async runForEachUrl() {
@@ -92,7 +67,7 @@ export default class GitAutocloner implements Autocloner {
 
     private async tryToCloneRepo() {
         try {
-            await this.exec(`git clone ${this.currentUrl}`)
+            await this.exec(`git clone ${this.currentUrl}`, { cwd: this.cwd })
         } catch (err: any) {
             this.currentError = err
             this.throwGitCloneFailed()
@@ -109,15 +84,15 @@ export default class GitAutocloner implements Autocloner {
 
     private async runYarnInstall() {
         this.log.info('\t\tRunning yarn install...')
-        await this.exec(`yarn --cwd ./${this.currentRepoName} install`)
+        await this.exec(`yarn --cwd ./${this.currentRepoName} install`, {
+            cwd: this.cwd,
+        })
     }
 
     private async runGitPull() {
-        return await this.exec(`git -C ./${this.currentRepoName} pull`)
-    }
-
-    private get chdir() {
-        return GitAutocloner.chdir
+        return await this.exec(`git -C ./${this.currentRepoName} pull`, {
+            cwd: this.cwd,
+        })
     }
 
     private get exec() {
@@ -137,5 +112,5 @@ export type AutoclonerConstructor = new () => Autocloner
 
 export interface AutoclonerOptions {
     urls: string[]
-    dirPath: string
+    cwd?: string
 }

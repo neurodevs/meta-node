@@ -1,11 +1,8 @@
 import { ChildProcess } from 'child_process'
 import {
-    callsToChdir,
     callsToExec,
-    fakeChdir,
     fakeExec,
     fakePathExists,
-    resetCallsToChdir,
     resetCallsToExec,
     setFakeExecResult,
     setPathShouldExist,
@@ -45,7 +42,6 @@ export default class AutoclonerTest extends AbstractPackageTest {
     protected static async beforeEach() {
         await super.beforeEach()
 
-        this.setFakeChdir()
         this.setFakeExec()
         this.setFakePathExists()
 
@@ -55,30 +51,6 @@ export default class AutoclonerTest extends AbstractPackageTest {
     @test()
     protected static async canCreateAutocloner() {
         assert.isTruthy(this.instance, 'Should create a new instance!')
-    }
-
-    @test()
-    protected static async throwsIfDirPathDoesNotExist() {
-        const err = await assert.doesThrowAsync(() =>
-            this.run({ dirPath: this.invalidDirPath })
-        )
-
-        assert.isEqual(
-            err.message,
-            `dirPath does not exist: ${this.invalidDirPath}!`,
-            'Did not receive the expected error!'
-        )
-    }
-
-    @test()
-    protected static async changesCurrentDirectoryToDirPath() {
-        await this.run()
-
-        assert.isEqual(
-            callsToChdir[0],
-            this.validDirPath,
-            'Should change current directory to the dirPath!'
-        )
     }
 
     @test()
@@ -211,7 +183,7 @@ export default class AutoclonerTest extends AbstractPackageTest {
     private static run(options?: Partial<AutoclonerOptions>) {
         return this.instance.run({
             urls: this.urls,
-            dirPath: this.validDirPath,
+            cwd: this.validCwd,
             ...options,
         })
     }
@@ -247,11 +219,6 @@ export default class AutoclonerTest extends AbstractPackageTest {
         setFakeExecResult(this.gitPullPackageB, fakeResult)
     }
 
-    private static setFakeChdir() {
-        GitAutocloner.chdir = fakeChdir
-        resetCallsToChdir()
-    }
-
     private static setFakeExec() {
         GitAutocloner.exec = fakeExec as unknown as typeof this.exec
         resetCallsToExec()
@@ -262,7 +229,7 @@ export default class AutoclonerTest extends AbstractPackageTest {
             fakePathExists as unknown as typeof pathExists
         resetCallsToExec()
 
-        setPathShouldExist(this.validDirPath, true)
+        setPathShouldExist(this.validCwd, true)
 
         this.urls.forEach((url) => {
             setPathShouldExist(url.match(this.regexForRepoName)![1], false)
@@ -273,8 +240,7 @@ export default class AutoclonerTest extends AbstractPackageTest {
         return `Git clone failed for repo: ${this.urls[0]}! Error: \n\n${this.gitCloneFailedError}\n\n`
     }
 
-    private static readonly validDirPath = this.generateId()
-    private static readonly invalidDirPath = this.generateId()
+    private static readonly validCwd = this.generateId()
     private static readonly gitCloneFailedError = 'Failed to clone repo!'
     private static readonly regexForRepoName = /\/([a-zA-Z0-9_.-]+)\.git/
 
