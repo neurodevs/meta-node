@@ -1820,7 +1820,7 @@ export default prettierConfigNdx
                 ...this.originalPackageJson.scripts,
                 'build.ci': 'yarn run build.tsc && yarn run lint',
                 'build.dev':
-                    'yarn run build.tsc --sourceMap ; yarn run fix.lint ; prettier --write .',
+                    'yarn run build.tsc --sourceMap ; yarn run fix.lint ; prettier --write . --log-level warn',
                 'build.copy-files':
                     "mkdir -p build && rsync -avzq --exclude='*.ts' ./src/ ./build/",
                 'build.tsc': 'yarn run build.copy-files && tsc',
