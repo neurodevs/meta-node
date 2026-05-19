@@ -415,17 +415,6 @@ export default prettierConfigNdx
         for (const key of keysToRemove) {
             this.deleteByPath(this.originalPackageJson, key)
         }
-
-        const jest = this.originalPackageJson?.jest as any
-        const moduleNameMapper = jest?.moduleNameMapper ?? {}
-
-        if (Object.keys(moduleNameMapper).some((k) => k === '^#spruce/(.*)$')) {
-            delete moduleNameMapper['^#spruce/(.*)$']
-        }
-
-        if (Object.keys(moduleNameMapper).length === 0) {
-            delete jest?.moduleNameMapper
-        }
     }
 
     private deleteByPath(obj: any, path: string): void {
@@ -821,15 +810,9 @@ export default prettierConfigNdx
         return Object.keys(this.originalPackageJson.devDependencies!).filter(
             (dep) =>
                 [
-                    '@sprucelabs/jest-json-reporter',
-                    '@sprucelabs/resolve-path-aliases',
-                    '@sprucelabs/spruce-test-fixtures',
-                    '@sprucelabs/test',
-                    '@sprucelabs/test-utils',
                     '@types/node',
                     'concurrently',
                     'eslint',
-                    'eslint-config-spruce',
                     'chokidar-cli',
                     'ts-node',
                 ].includes(dep)
