@@ -26,7 +26,7 @@ export default class NpmAutopackage implements Autopackage {
     private originalPackageJson!: Record<string, unknown>
     private originalGitignore!: string
 
-    private originalTsconfig!: TsConfig
+    private originalTsconfig?: TsConfig
     private metaNodeVersion!: string
 
     private originalEslintConfig!: string
@@ -573,7 +573,7 @@ export default prettierConfigNdx
         const raw = await this.readFile(this.tsconfigPath, {
             encoding: 'utf-8',
         })
-        return JSON.parse(raw)
+        return raw ? JSON.parse(raw) : undefined
     }
 
     private get shouldUpdateTsconfig() {
@@ -597,7 +597,7 @@ export default prettierConfigNdx
         return {
             ...this.originalTsconfig,
             compilerOptions: {
-                ...this.originalTsconfig.compilerOptions,
+                ...this.originalTsconfig?.compilerOptions,
                 module: 'nodenext',
                 target: 'esnext',
                 lib: [

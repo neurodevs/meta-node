@@ -1077,6 +1077,25 @@ export default prettierConfigNdx
     }
 
     @test()
+    protected static async createsTsconfigWhenItDoesNotExist() {
+        setFakeReadFileResult(this.tsconfigPath, '')
+
+        await this.run()
+
+        const tsconfigWrites = callsToWriteFile.filter(
+            (call) => call.file === this.tsconfigPath
+        )
+
+        const json = JSON.parse(tsconfigWrites[0].data)
+
+        assert.isEqualDeep(
+            json.compilerOptions.module,
+            'nodenext',
+            'Should write tsconfig with all defaults when tsconfig does not exist!'
+        )
+    }
+
+    @test()
     protected static async doesNotCreateRepoInGithubOrgIfDone() {
         await this.runTwice()
 
