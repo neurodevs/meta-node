@@ -228,14 +228,7 @@ export default prettierConfigNdx
 
     private async checkIfRepoExists() {
         const response = await this.fetch(
-            `https://api.github.com/repos/${this.gitNamespace}/${this.packageName}`,
-            {
-                method: 'GET',
-                headers: {
-                    Authorization: `token ${this.githubToken}`,
-                    Accept: 'application/vnd.github+json',
-                },
-            }
+            `https://api.github.com/repos/${this.gitNamespace}/${this.packageName}`
         )
         return response.status === 200
     }
