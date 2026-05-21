@@ -195,11 +195,9 @@ export default prettierConfigNdx
         await this.cloneGitRepo()
         await this.resetMainToOrigin()
         await this.setCurrentMetaNodeVersion()
-        await this.spruceCreateModule()
         await this.updatePackageJson()
         await this.updateGitignore()
         await this.updateTsconfig()
-        await this.setupVscode()
         await this.updateVscodeTasks()
         await this.installDefaultDevDependencies()
         await this.installAbstractPackageTest()
@@ -311,34 +309,6 @@ export default prettierConfigNdx
         const pkg = JSON.parse(raw)
 
         this.metaNodeVersion = pkg.version
-    }
-
-    private async spruceCreateModule() {
-        const packageJsonExists = await this.checkIfPackageJsonExists()
-
-        if (!packageJsonExists) {
-            console.info('Running spruce create.module...')
-
-            await this.execSpruceCreateModule()
-            await this.commitCreatePackage()
-        }
-    }
-
-    private async checkIfPackageJsonExists() {
-        return this.pathExists(this.packageJsonPath)
-    }
-
-    private async execSpruceCreateModule() {
-        await this.exec(
-            `spruce create.module --name "${this.packageName}" --destination "." --description "${this.description}"`,
-            { cwd: this.packageDir }
-        )
-    }
-
-    private async commitCreatePackage() {
-        await this.GitAutocommit(
-            `patch: create package (@neurodevs/meta-node: ${this.metaNodeVersion})`
-        )
     }
 
     private async updatePackageJson() {
@@ -650,33 +620,6 @@ export default prettierConfigNdx
     private async commitUpdateTsconfig() {
         await this.GitAutocommit(
             `patch: update tsconfig (@neurodevs/meta-node: ${this.metaNodeVersion})`
-        )
-    }
-
-    private async setupVscode() {
-        const vscodeTasksExist = await this.checkIfVscodeTasksExist()
-
-        if (!vscodeTasksExist) {
-            console.info('Setting up VSCode...')
-
-            await this.spruceSetupVscode()
-            await this.commitSetupVscode()
-        }
-    }
-
-    private async checkIfVscodeTasksExist() {
-        return this.pathExists(this.tasksJsonPath)
-    }
-
-    private async spruceSetupVscode() {
-        await this.exec('spruce setup.vscode --all true', {
-            cwd: this.packageDir,
-        })
-    }
-
-    private async commitSetupVscode() {
-        await this.GitAutocommit(
-            `patch: setup vscode (@neurodevs/meta-node: ${this.metaNodeVersion})`
         )
     }
 
@@ -1157,7 +1100,7 @@ export default prettierConfigNdx
         return NpmAutopackage.writeFile
     }
 
-    private GitAutocommit(commitMessage: string) {
+    private async GitAutocommit(commitMessage: string) {
         return GitAutocommit.Create(commitMessage, this.packageDir)
     }
 }

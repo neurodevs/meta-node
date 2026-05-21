@@ -150,34 +150,6 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
-    protected static async thenSpruceCreateModule() {
-        await this.run()
-
-        assert.isEqualDeep(
-            callsToExec[4],
-            {
-                command: this.createModuleCmd,
-                options: { cwd: this.packageDir },
-            },
-            'Did not call "spruce create.module"!'
-        )
-    }
-
-    @test()
-    protected static async thenCommitCreatePackage() {
-        await this.run()
-
-        assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[0],
-            {
-                commitMessage: `patch: create package (@neurodevs/meta-node: ${this.metaNodeVersion})`,
-                cwd: this.packageDir,
-            },
-            'Did not commit create package changes!'
-        )
-    }
-
-    @test()
     protected static async thenReadPackageJson() {
         await this.run()
 
@@ -213,7 +185,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[1],
+            FakeAutocommit.callsToConstructor[0],
             {
                 commitMessage: `patch: update package.json (@neurodevs/meta-node: ${this.metaNodeVersion})`,
                 cwd: this.packageDir,
@@ -242,7 +214,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[2],
+            FakeAutocommit.callsToConstructor[1],
             {
                 commitMessage: `patch: add build dir to gitignore (@neurodevs/meta-node: ${this.metaNodeVersion})`,
                 cwd: this.packageDir,
@@ -271,7 +243,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[5],
+            callsToExec[4],
             {
                 command: 'yarn build.dev',
                 options: { cwd: this.packageDir },
@@ -285,40 +257,12 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[3],
+            FakeAutocommit.callsToConstructor[2],
             {
                 commitMessage: `patch: update tsconfig (@neurodevs/meta-node: ${this.metaNodeVersion})`,
                 cwd: this.packageDir,
             },
             'Did not commit tsconfig changes!'
-        )
-    }
-
-    @test()
-    protected static async thenSpruceSetupVscode() {
-        await this.run()
-
-        assert.isEqualDeep(
-            callsToExec[6],
-            {
-                command: this.setupVscodeCmd,
-                options: { cwd: this.packageDir },
-            },
-            'Did not call "spruce setup.vscode"!'
-        )
-    }
-
-    @test()
-    protected static async thenCommitVscodeChanges() {
-        await this.run()
-
-        assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[4],
-            {
-                commitMessage: `patch: setup vscode (@neurodevs/meta-node: ${this.metaNodeVersion})`,
-                cwd: this.packageDir,
-            },
-            'Did not commit vscode changes!'
         )
     }
 
@@ -338,7 +282,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[5],
+            FakeAutocommit.callsToConstructor[3],
             {
                 commitMessage: `patch: update vscode tasks.json (@neurodevs/meta-node: ${this.metaNodeVersion})`,
                 cwd: this.packageDir,
@@ -352,8 +296,9 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         this.setShouldInstallDevDeps()
         await this.run()
 
+        debugger
         assert.isEqualDeep(
-            callsToExec[11],
+            callsToExec[9],
             {
                 command: this.yarnInstallDevDepsCommand,
                 options: { cwd: this.packageDir },
@@ -368,7 +313,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[6],
+            FakeAutocommit.callsToConstructor[4],
             {
                 commitMessage: `patch: install default devDependencies (@neurodevs/meta-node: ${this.metaNodeVersion})`,
                 cwd: this.packageDir,
@@ -413,7 +358,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[7],
+            FakeAutocommit.callsToConstructor[5],
             {
                 commitMessage: `patch: install AbstractPackageTest (@neurodevs/meta-node: ${this.metaNodeVersion})`,
                 cwd: this.packageDir,
@@ -444,7 +389,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[8],
+            FakeAutocommit.callsToConstructor[6],
             {
                 commitMessage: `patch: install eslint.config.js (@neurodevs/meta-node: ${this.metaNodeVersion})`,
                 cwd: this.packageDir,
@@ -475,7 +420,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[9],
+            FakeAutocommit.callsToConstructor[7],
             {
                 commitMessage: `patch: install prettier.config.js (@neurodevs/meta-node: ${this.metaNodeVersion})`,
                 cwd: this.packageDir,
@@ -506,7 +451,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[10],
+            FakeAutocommit.callsToConstructor[8],
             {
                 commitMessage: `patch: install settings.json (@neurodevs/meta-node: ${this.metaNodeVersion})`,
                 cwd: this.packageDir,
@@ -521,7 +466,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[12],
+            callsToExec[10],
             {
                 command: 'yarn build.dev',
                 options: { cwd: this.packageDir },
@@ -541,7 +486,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[11],
+            FakeAutocommit.callsToConstructor[9],
             {
                 commitMessage: `patch: fix eslint and prettier (@neurodevs/meta-node: ${this.metaNodeVersion})`,
                 cwd: this.packageDir,
@@ -597,7 +542,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[13],
+            callsToExec[11],
             {
                 command: 'code . --reuse-window --reload-window',
                 options: { cwd: this.packageDir },
@@ -904,45 +849,6 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
-    protected static async doesNotSpruceCreateModuleIfDone() {
-        await this.runTwice()
-
-        assert.isEqual(
-            callsToExec.filter((call) => call?.command === this.createModuleCmd)
-                .length,
-            1,
-            'Did not call spruce create.module once!'
-        )
-    }
-
-    @test()
-    protected static async doesNotRunSetupVscodeIfDone() {
-        await this.runTwice()
-
-        assert.isEqual(
-            callsToExec.filter((call) => call?.command === this.setupVscodeCmd)
-                .length,
-            1,
-            'Did not call spruce setup.vscode once!'
-        )
-    }
-
-    @test()
-    protected static async doesNotCommitCreatePackageIfDone() {
-        await this.runTwice()
-
-        assert.isEqual(
-            FakeAutocommit.callsToConstructor.filter(
-                (call) =>
-                    call?.commitMessage ===
-                    `patch: create package (@neurodevs/meta-node: ${this.metaNodeVersion})`
-            ).length,
-            1,
-            'Did not commit create package changes once!'
-        )
-    }
-
-    @test()
     protected static async doesNotCommitUpdatePackageIfDone() {
         await this.runTwice()
 
@@ -1004,21 +910,6 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
             tsconfigWrites.length,
             0,
             'Should not update tsconfig when only extra keys differ!'
-        )
-    }
-
-    @test()
-    protected static async doesNotCommitSetupVscodeIfDone() {
-        await this.runTwice()
-
-        assert.isEqual(
-            FakeAutocommit.callsToConstructor.filter(
-                (call) =>
-                    call?.commitMessage ===
-                    `patch: setup vscode (@neurodevs/meta-node: ${this.metaNodeVersion})`
-            ).length,
-            1,
-            'Did not commit vscode changes once!'
         )
     }
 
@@ -1369,10 +1260,6 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         setFakeExecResult(this.checkGenerateIdVersionCmd, {
             stdout: '0.0.1',
         } as unknown as ChildProcess)
-    }
-
-    private static get createModuleCmd() {
-        return `spruce create.module --name "${this.packageName}" --destination "." --description "${this.description}"`
     }
 
     private static fakeExec() {

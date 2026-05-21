@@ -475,8 +475,6 @@ export default prettierConfigNdx
 }
 `
 
-    protected static readonly setupVscodeCmd = 'spruce setup.vscode --all true'
-
     protected static readonly checkGenerateIdVersionCmd = `yarn info @neurodevs/generate-id version --silent`
     protected static readonly checkNodeTddVersionCmd = `yarn info @neurodevs/node-tdd version --silent`
     protected static readonly checkEslintConfigNdxVersionCmd = `yarn info @neurodevs/eslint-config-ndx version --silent`
