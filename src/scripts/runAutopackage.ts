@@ -5,13 +5,8 @@ async function main() {
     console.log('Running autopackage...')
 
     const instance = NpmAutopackage.Create({
-        name: 'node-osf',
-        description: 'Node.js client for the Open Science Framework (OSF) API',
-        gitNamespace: 'neurodevs',
-        npmNamespace: 'neurodevs',
         installDir: expandHomeDir('~/dev'),
-        license: 'MIT',
-        author: 'Eric Yates <hello@ericthecurious.com>',
+        name: 'meta-node',
     })
 
     await instance.run()
