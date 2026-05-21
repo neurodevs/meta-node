@@ -7,6 +7,7 @@ async function main() {
     const instance = NpmAutopackage.Create({
         installDir: expandHomeDir('~/dev'),
         name: 'meta-node',
+        gitNamespace: 'neurodevs',
     })
 
     await instance.run()
