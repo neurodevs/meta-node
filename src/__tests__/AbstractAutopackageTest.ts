@@ -444,66 +444,70 @@ export default class AbstractAutopackageTest extends AbstractPackageTest {
         'launch.json'
     )
 
-    protected static readonly launchJsonFile = {
-        version: '1.0.0',
-        configurations: [
-            {
-                type: 'node',
-                request: 'attach',
-                name: 'attach.tests',
-                port: 5200,
-                restart: true,
-                timeout: 10000,
-            },
-            {
-                type: 'node',
-                request: 'launch',
-                name: 'test.file',
-                runtimeExecutable: 'node',
-                runtimeArgs: [
-                    '--inspect-brk',
-                    '--trace-warnings',
-                    '--experimental-vm-modules',
-                    '${workspaceFolder}/node_modules/.bin/jest',
-                    '${fileBasenameNoExtension}',
-                    '--detectOpenHandles',
-                ],
-                cwd: '${workspaceFolder}',
-                console: 'integratedTerminal',
-                internalConsoleOptions: 'neverOpen',
-            },
-            {
-                type: 'node',
-                request: 'launch',
-                name: 'test.all',
-                runtimeExecutable: 'node',
-                runtimeArgs: [
-                    '--inspect-brk',
-                    '--trace-warnings',
-                    '--experimental-vm-modules',
-                    '${workspaceFolder}/node_modules/.bin/jest',
-                ],
-                cwd: '${workspaceFolder}',
-                console: 'integratedTerminal',
-                internalConsoleOptions: 'neverOpen',
-            },
-            {
-                type: 'node',
-                request: 'launch',
-                name: 'boot',
-                runtimeExecutable: 'yarn',
-                runtimeArgs: [
-                    'run',
-                    '--inspect-brk',
-                    '--trace-warnings',
-                    'boot',
-                ],
-                cwd: '${workspaceFolder}',
-                console: 'integratedTerminal',
-                internalConsoleOptions: 'neverOpen',
-            },
-        ],
-    }
+    protected static readonly launchJsonFile = JSON.stringify(
+        {
+            version: '1.0.0',
+            configurations: [
+                {
+                    type: 'node',
+                    request: 'attach',
+                    name: 'attach.tests',
+                    port: 5200,
+                    restart: true,
+                    timeout: 10000,
+                },
+                {
+                    type: 'node',
+                    request: 'launch',
+                    name: 'test.file',
+                    runtimeExecutable: 'node',
+                    runtimeArgs: [
+                        '--inspect-brk',
+                        '--trace-warnings',
+                        '--experimental-vm-modules',
+                        '${workspaceFolder}/node_modules/.bin/jest',
+                        '${fileBasenameNoExtension}',
+                        '--detectOpenHandles',
+                    ],
+                    cwd: '${workspaceFolder}',
+                    console: 'integratedTerminal',
+                    internalConsoleOptions: 'neverOpen',
+                },
+                {
+                    type: 'node',
+                    request: 'launch',
+                    name: 'test.all',
+                    runtimeExecutable: 'node',
+                    runtimeArgs: [
+                        '--inspect-brk',
+                        '--trace-warnings',
+                        '--experimental-vm-modules',
+                        '${workspaceFolder}/node_modules/.bin/jest',
+                    ],
+                    cwd: '${workspaceFolder}',
+                    console: 'integratedTerminal',
+                    internalConsoleOptions: 'neverOpen',
+                },
+                {
+                    type: 'node',
+                    request: 'launch',
+                    name: 'boot',
+                    runtimeExecutable: 'yarn',
+                    runtimeArgs: [
+                        'run',
+                        '--inspect-brk',
+                        '--trace-warnings',
+                        'boot',
+                    ],
+                    cwd: '${workspaceFolder}',
+                    console: 'integratedTerminal',
+                    internalConsoleOptions: 'neverOpen',
+                },
+            ],
+        },
+        null,
+        2
+    )
 
     protected static readonly testsDir = path.join(
         this.packageDir,

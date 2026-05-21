@@ -265,16 +265,10 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            JSON.parse(callsToWriteFile[5].data),
-            this.launchJsonFile,
-            'Did not update .vscode/launch.json as expected!'
-        )
-
-        assert.isEqualDeep(
             callsToWriteFile[5],
             {
                 file: this.launchJsonPath,
-                data: JSON.stringify(this.launchJsonFile, null, 2),
+                data: this.launchJsonFile,
                 options: { encoding: 'utf-8' },
             },
             'Did not update .vscode/launch.json!'
@@ -763,6 +757,52 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
+    protected static async doesNotInstallTasksJsonIfEqual() {
+        await this.runTwice()
+
+        assert.isEqualDeep(
+            callsToWriteFile.filter((call) => call.file === this.tasksJsonPath)
+                .length,
+            1,
+            'Did not update tasks.json once!'
+        )
+    }
+
+    @test()
+    protected static async doesNotInstallSettingsJsonIfEqual() {
+        setFakeReadFileResult(this.settingsJsonPath, this.settingsJsonFile)
+
+        await this.run()
+
+        const calls = callsToWriteFile.filter(
+            (call) => call.file === this.settingsJsonPath
+        )
+
+        assert.isEqual(
+            calls.length,
+            0,
+            'Should not install settings.json if contents are equal!'
+        )
+    }
+
+    @test()
+    protected static async doesNotInstallLaunchJsonIfEqual() {
+        setFakeReadFileResult(this.launchJsonPath, this.launchJsonFile)
+
+        await this.run()
+
+        const calls = callsToWriteFile.filter(
+            (call) => call.file === this.launchJsonPath
+        )
+
+        assert.isEqual(
+            calls.length,
+            0,
+            'Should not install launch.json if contents are equal!'
+        )
+    }
+
+    @test()
     protected static async doesNotRemoveOldDevDependenciesIfNotPresent() {
         setFakeReadFileResult(
             this.packageJsonPath,
@@ -820,35 +860,6 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
             JSON.parse(callsToWriteFile[0]?.data).dependencies,
             this.dependencies,
             'Did not update package.json as expected!'
-        )
-    }
-
-    @test()
-    protected static async doesNotUpdateTasksJsonIfAlreadyDone() {
-        await this.runTwice()
-
-        assert.isEqualDeep(
-            callsToWriteFile.filter((call) => call.file === this.tasksJsonPath)
-                .length,
-            1,
-            'Did not update tasks.json once!'
-        )
-    }
-
-    @test()
-    protected static async doesNotInstallSettingsJsonFileIfContentsEqual() {
-        setFakeReadFileResult(this.settingsJsonPath, this.settingsJsonFile)
-
-        await this.run()
-
-        const calls = callsToWriteFile.filter(
-            (call) => call.file === this.settingsJsonPath
-        )
-
-        assert.isEqual(
-            calls.length,
-            0,
-            'Should not install settings.json if contents are equal!'
         )
     }
 

@@ -27,6 +27,7 @@ export default class NpmAutopackage implements Autopackage {
     private originalTsconfig?: TsConfig
     private originalTasksJson?: TasksJson
     private originalSettingsJson?: string
+    private originalLaunchJson?: string
     private originalEslintConfig?: string
     private originalPrettierConfig?: string
     private originalNvmrc?: string
@@ -611,13 +612,13 @@ export default prettierConfigNdx
     private async installVscodeTasks() {
         this.originalTasksJson = await this.readJson(this.tasksJsonPath)
 
-        if (!this.isTasksJsonUpdated) {
+        if (!this.isTasksJsonUpToDate) {
             console.info('Updating vscode tasks...')
             await this.updateTasksJsonFile()
         }
     }
 
-    private get isTasksJsonUpdated() {
+    private get isTasksJsonUpToDate() {
         return (
             JSON.stringify(this.originalTasksJson, null, 2) ===
             this.updatedTasksJsonFile
@@ -788,17 +789,24 @@ export default prettierConfigNdx
     }
 
     private async installLaunchJsonFile() {
-        await this.loadLaunchJson()
+        this.originalLaunchJson = await this.loadLaunchJson()
 
-        await this.writeFile(this.launchJsonPath, this.launchJsonFile, {
-            encoding: 'utf-8',
-        })
+        if (!this.launchJsonIsUpToDate) {
+            console.info('Installing .vscode/launch.json...')
+            await this.writeFile(this.launchJsonPath, this.launchJsonFile, {
+                encoding: 'utf-8',
+            })
+        }
     }
 
     private async loadLaunchJson() {
         return await this.readFile(this.launchJsonPath, {
             encoding: 'utf-8',
         }).catch(() => undefined)
+    }
+
+    private get launchJsonIsUpToDate() {
+        return this.originalLaunchJson?.trim() === this.launchJsonFile.trim()
     }
 
     private get launchJsonFile() {
