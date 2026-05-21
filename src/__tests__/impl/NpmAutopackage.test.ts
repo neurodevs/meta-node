@@ -325,6 +325,21 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
+    protected static async thenInstallsNvmrcFile() {
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToWriteFile[8],
+            {
+                file: path.join(this.packageDir, '.nvmrc'),
+                data: this.nvmrcFile,
+                options: { encoding: 'utf-8' },
+            },
+            'Did not install .nvmrc file!'
+        )
+    }
+
+    @test()
     protected static async thenFixesEslintAndPrettier() {
         this.setShouldInstallDevDeps()
         await this.run()

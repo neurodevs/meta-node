@@ -206,6 +206,7 @@ export default prettierConfigNdx
         await this.installAbstractPackageTest()
         await this.installEslintConfigFile()
         await this.installPrettierConfigFile()
+        await this.installNvmrcFile()
         await this.fixEslintAndPrettier()
         await this.commitChangesIfPresent()
         await this.openVscode()
@@ -973,6 +974,14 @@ export default prettierConfigNdx
                 this.prettierConfigFile.trim() &&
             this.packageName !== 'prettier-config-ndx'
         )
+    }
+
+    private async installNvmrcFile() {
+        const nvmrcPath = path.join(this.packageDir, '.nvmrc')
+
+        await this.writeFile(nvmrcPath, 'lts/*\n', {
+            encoding: 'utf-8',
+        })
     }
 
     private async fixEslintAndPrettier() {
