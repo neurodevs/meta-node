@@ -43,11 +43,12 @@ export default class NpmAutopackage implements Autopackage {
     private readonly tsconfigPath: string
     private readonly vscodeDir: string
     private readonly tasksJsonPath: string
+    private readonly settingsJsonPath: string
+    private readonly launchJsonPath: string
     private readonly testsDir: string
     private readonly abstractTestPath: string
     private readonly eslintConfigPath: string
     private readonly prettierConfigPath: string
-    private readonly settingsJsonPath: string
 
     private readonly abstractPackageTestFile = `import AbstractModuleTest from '@neurodevs/node-tdd'
 
@@ -159,6 +160,8 @@ export default prettierConfigNdx
         this.tsconfigPath = path.join(this.packageDir, 'tsconfig.json')
         this.vscodeDir = path.join(this.packageDir, '.vscode')
         this.tasksJsonPath = path.join(this.vscodeDir, 'tasks.json')
+        this.settingsJsonPath = path.join(this.vscodeDir, 'settings.json')
+        this.launchJsonPath = path.join(this.vscodeDir, 'launch.json')
         this.testsDir = path.join(this.packageDir, 'src', '__tests__')
 
         this.abstractTestPath = path.join(
@@ -171,12 +174,6 @@ export default prettierConfigNdx
         this.prettierConfigPath = path.join(
             this.packageDir,
             'prettier.config.js'
-        )
-
-        this.settingsJsonPath = path.join(
-            this.packageDir,
-            '.vscode',
-            'settings.json'
         )
     }
 
@@ -606,11 +603,12 @@ export default prettierConfigNdx
     }
 
     private async updateVscode() {
-        await this.updateVscodeTasks()
+        await this.installVscodeTasks()
         await this.installSettingsJsonFile()
+        await this.installLaunchJsonFile()
     }
 
-    private async updateVscodeTasks() {
+    private async installVscodeTasks() {
         this.originalTasksJson = await this.readJson(this.tasksJsonPath)
 
         if (!this.isTasksJsonUpdated) {
@@ -766,7 +764,7 @@ export default prettierConfigNdx
     }
 
     private async installSettingsJsonFile() {
-        this.originalSettingsJson = await this.loadSettingsJsonFile()
+        this.originalSettingsJson = await this.loadSettingsJson()
 
         if (!this.settingsJsonIsUpToDate) {
             console.info('Installing .vscode/settings.json...')
@@ -777,7 +775,7 @@ export default prettierConfigNdx
         }
     }
 
-    private async loadSettingsJsonFile() {
+    private async loadSettingsJson() {
         return await this.readFile(this.settingsJsonPath, {
             encoding: 'utf-8',
         }).catch(() => undefined)
@@ -786,6 +784,87 @@ export default prettierConfigNdx
     private get settingsJsonIsUpToDate() {
         return (
             this.originalSettingsJson?.trim() === this.settingsJsonFile.trim()
+        )
+    }
+
+    private async installLaunchJsonFile() {
+        await this.loadLaunchJson()
+
+        await this.writeFile(this.launchJsonPath, this.launchJsonFile, {
+            encoding: 'utf-8',
+        })
+    }
+
+    private async loadLaunchJson() {
+        return await this.readFile(this.launchJsonPath, {
+            encoding: 'utf-8',
+        }).catch(() => undefined)
+    }
+
+    private get launchJsonFile() {
+        return JSON.stringify(
+            {
+                version: '1.0.0',
+                configurations: [
+                    {
+                        type: 'node',
+                        request: 'attach',
+                        name: 'attach.tests',
+                        port: 5200,
+                        restart: true,
+                        timeout: 10000,
+                    },
+                    {
+                        type: 'node',
+                        request: 'launch',
+                        name: 'test.file',
+                        runtimeExecutable: 'node',
+                        runtimeArgs: [
+                            '--inspect-brk',
+                            '--trace-warnings',
+                            '--experimental-vm-modules',
+                            '${workspaceFolder}/node_modules/.bin/jest',
+                            '${fileBasenameNoExtension}',
+                            '--detectOpenHandles',
+                        ],
+                        cwd: '${workspaceFolder}',
+                        console: 'integratedTerminal',
+                        internalConsoleOptions: 'neverOpen',
+                    },
+                    {
+                        type: 'node',
+                        request: 'launch',
+                        name: 'test.all',
+                        runtimeExecutable: 'node',
+                        runtimeArgs: [
+                            '--inspect-brk',
+                            '--trace-warnings',
+                            '--experimental-vm-modules',
+                            '${workspaceFolder}/node_modules/.bin/jest',
+                        ],
+                        cwd: '${workspaceFolder}',
+                        console: 'integratedTerminal',
+                        internalConsoleOptions: 'neverOpen',
+                    },
+                    {
+                        type: 'node',
+                        request: 'launch',
+                        name: 'boot',
+                        runtimeExecutable: 'yarn',
+                        runtimeArgs: [
+                            'run',
+                            '--inspect-brk',
+                            '--trace-warnings',
+                            'boot',
+                        ],
+                        cwd: '${workspaceFolder}',
+                        console: 'integratedTerminal',
+                        internalConsoleOptions: 'neverOpen',
+                    },
+                ],
+            },
+            null,
+            2
         )
     }
 
@@ -908,7 +987,7 @@ export default prettierConfigNdx
     }
 
     private async installEslintConfigFile() {
-        this.originalEslintConfig = await this.loadEslintConfigFile()
+        this.originalEslintConfig = await this.loadEslintConfig()
 
         if (this.shouldUpdateEslintConfig) {
             console.info('Installing eslint.config.js...')
@@ -919,7 +998,7 @@ export default prettierConfigNdx
         }
     }
 
-    private async loadEslintConfigFile() {
+    private async loadEslintConfig() {
         try {
             return await this.readFile(this.eslintConfigPath, {
                 encoding: 'utf-8',
@@ -938,7 +1017,7 @@ export default prettierConfigNdx
     }
 
     private async installPrettierConfigFile() {
-        this.originalPrettierConfig = await this.loadPrettierConfigFile()
+        this.originalPrettierConfig = await this.loadPrettierConfig()
 
         if (this.shouldUpdatePrettierConfig) {
             console.info('Installing prettier.config.js...')
@@ -953,7 +1032,7 @@ export default prettierConfigNdx
         }
     }
 
-    private async loadPrettierConfigFile() {
+    private async loadPrettierConfig() {
         try {
             return await this.readFile(this.prettierConfigPath, {
                 encoding: 'utf-8',

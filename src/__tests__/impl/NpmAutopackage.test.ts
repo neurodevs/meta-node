@@ -241,13 +241,12 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
                 data: this.updatedTasksJson,
                 options: { encoding: 'utf-8' },
             },
-            'Did not update .vscode/tasks.json as expected!'
+            'Did not update .vscode/tasks.json!'
         )
     }
 
     @test()
-    protected static async thenUpdatesSettingsJsonFile() {
-        this.setShouldInstallDevDeps()
+    protected static async thenUpdatesVscodeSettingsJson() {
         await this.run()
 
         assert.isEqualDeep(
@@ -258,6 +257,27 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
                 options: { encoding: 'utf-8' },
             },
             'Did not update .vscode/settings.json!'
+        )
+    }
+
+    @test()
+    protected static async thenUpdatesVscodeLaunchJson() {
+        await this.run()
+
+        assert.isEqualDeep(
+            JSON.parse(callsToWriteFile[5].data),
+            this.launchJsonFile,
+            'Did not update .vscode/launch.json as expected!'
+        )
+
+        assert.isEqualDeep(
+            callsToWriteFile[5],
+            {
+                file: this.launchJsonPath,
+                data: JSON.stringify(this.launchJsonFile, null, 2),
+                options: { encoding: 'utf-8' },
+            },
+            'Did not update .vscode/launch.json!'
         )
     }
 
@@ -282,7 +302,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToWriteFile[5],
+            callsToWriteFile[6],
             {
                 file: this.abstractTestPath,
                 data: this.abstractTestFile,
@@ -298,7 +318,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToWriteFile[6],
+            callsToWriteFile[7],
             {
                 file: this.eslintConfigPath,
                 data: this.eslintConfigFile,
@@ -314,7 +334,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToWriteFile[7],
+            callsToWriteFile[8],
             {
                 file: this.prettierConfigPath,
                 data: this.prettierConfigFile,
@@ -329,7 +349,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToWriteFile[8],
+            callsToWriteFile[9],
             {
                 file: path.join(this.packageDir, '.nvmrc'),
                 data: this.nvmrcFile,
