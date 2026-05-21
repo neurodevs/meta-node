@@ -56,6 +56,11 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
 
         process.env.GITHUB_TOKEN = this.githubToken
 
+        setFakeExecResult('git status --porcelain', {
+            stdout: 'M somefile.ts',
+            stderr: '',
+        } as unknown as ChildProcess)
+
         this.instance = this.NpmAutopackage()
     }
 
@@ -405,7 +410,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[10],
+            callsToExec[11],
             {
                 command: 'code . --reuse-window --reload-window',
                 options: { cwd: this.packageDir },
@@ -801,6 +806,22 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
                 .length,
             1,
             'Did not update tasks.json once!'
+        )
+    }
+
+    @test()
+    protected static async doesNotCommitIfNoChanges() {
+        setFakeExecResult('git status --porcelain', {
+            stdout: '',
+            stderr: '',
+        } as unknown as ChildProcess)
+
+        await this.run()
+
+        assert.isEqual(
+            FakeAutocommit.callsToConstructor.length,
+            0,
+            'Should not commit if no changes!'
         )
     }
 

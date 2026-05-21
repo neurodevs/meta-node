@@ -205,7 +205,7 @@ export default prettierConfigNdx
         await this.installPrettierConfigFile()
         await this.installSettingsJsonFile()
         await this.fixEslintAndPrettier()
-        await this.commitChanges()
+        await this.commitChangesIfPresent()
         await this.openVscode()
 
         console.info('\nAutopackage process completed!\n')
@@ -977,10 +977,21 @@ export default prettierConfigNdx
         })
     }
 
-    private async commitChanges() {
-        await this.GitAutocommit(
-            `patch: autopackage changes (@neurodevs/meta-node: ${this.metaNodeVersion})`
-        )
+    private async commitChangesIfPresent() {
+        const hasChanges = await this.hasGitChanges()
+
+        if (hasChanges) {
+            await this.GitAutocommit(
+                `patch: autopackage changes (@neurodevs/meta-node: ${this.metaNodeVersion})`
+            )
+        }
+    }
+
+    private async hasGitChanges() {
+        const { stdout } = await this.exec('git status --porcelain', {
+            cwd: this.packageDir,
+        })
+        return stdout.trim() !== ''
     }
 
     private async openVscode() {
