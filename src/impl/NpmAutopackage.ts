@@ -804,7 +804,14 @@ export default prettierConfigNdx
     }
 
     private get launchJsonIsUpToDate() {
-        return this.originalLaunchJson?.trim() === this.launchJsonFile.trim()
+        try {
+            return (
+                JSON.stringify(JSON.parse(this.originalLaunchJson || '')) ===
+                JSON.stringify(JSON.parse(this.launchJsonFile))
+            )
+        } catch {
+            return false
+        }
     }
 
     private get launchJsonFile() {

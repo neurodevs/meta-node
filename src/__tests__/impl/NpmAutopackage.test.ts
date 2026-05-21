@@ -803,6 +803,25 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
+    protected static async doesNotInstallLaunchJsonIfSemanticallyEqual() {
+        const parsed = JSON.parse(this.launchJsonFile)
+        const reformatted = JSON.stringify(parsed, null, '\t')
+        setFakeReadFileResult(this.launchJsonPath, reformatted)
+
+        await this.run()
+
+        const calls = callsToWriteFile.filter(
+            (call) => call.file === this.launchJsonPath
+        )
+
+        assert.isEqual(
+            calls.length,
+            0,
+            'Should not install launch.json if contents are semantically equal!'
+        )
+    }
+
+    @test()
     protected static async doesNotRemoveOldDevDependenciesIfNotPresent() {
         setFakeReadFileResult(
             this.packageJsonPath,
