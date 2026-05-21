@@ -197,6 +197,7 @@ export default prettierConfigNdx
         await this.cloneGitRepo()
         await this.resetMainToOrigin()
         await this.setCurrentMetaNodeVersion()
+        await this.makeDirectories()
         await this.updatePackageJson()
         await this.updateGitignore()
         await this.updateTsconfig()
@@ -311,6 +312,11 @@ export default prettierConfigNdx
         const pkg = JSON.parse(raw)
 
         this.metaNodeVersion = pkg.version
+    }
+
+    private async makeDirectories() {
+        await this.mkdir(this.vscodeDir, { recursive: true })
+        await this.mkdir(this.testsDir, { recursive: true })
     }
 
     private async updatePackageJson() {
@@ -604,8 +610,6 @@ export default prettierConfigNdx
     }
 
     private async updateVscode() {
-        await this.mkdir(this.vscodeDir, { recursive: true })
-
         await this.updateVscodeTasks()
         await this.installSettingsJsonFile()
     }
@@ -888,8 +892,6 @@ export default prettierConfigNdx
 
         if (shouldInstall) {
             console.info(`Installing ${this.abstractTestPath}...`)
-
-            await this.mkdir(this.testsDir, { recursive: true })
 
             await this.writeFile(
                 this.abstractTestPath,

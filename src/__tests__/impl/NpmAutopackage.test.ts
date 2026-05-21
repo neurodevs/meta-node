@@ -154,6 +154,34 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
+    protected static async createsVscodeDirectory() {
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToMkdir[0],
+            {
+                path: path.join(this.packageDir, '.vscode'),
+                options: { recursive: true },
+            },
+            'Did not create .vscode directory!'
+        )
+    }
+
+    @test()
+    protected static async thenInstallsTestsDirectory() {
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToMkdir[1],
+            {
+                path: this.testsDir,
+                options: { recursive: true },
+            },
+            'Did not install tests directory!'
+        )
+    }
+
+    @test()
     protected static async thenUpdatePackageJson() {
         await this.run()
 
@@ -203,20 +231,6 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
-    protected static async createsVscodeDirectory() {
-        await this.run()
-
-        assert.isEqualDeep(
-            callsToMkdir[0],
-            {
-                path: path.join(this.packageDir, '.vscode'),
-                options: { recursive: true },
-            },
-            'Did not create .vscode directory!'
-        )
-    }
-
-    @test()
     protected static async thenUpdatesVscodeTasksJson() {
         await this.run()
 
@@ -259,20 +273,6 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
                 options: { cwd: this.packageDir },
             },
             'Did not install default devDependencies!'
-        )
-    }
-
-    @test()
-    protected static async thenInstallsTestsDirectory() {
-        await this.run()
-
-        assert.isEqualDeep(
-            callsToMkdir[1],
-            {
-                path: this.testsDir,
-                options: { recursive: true },
-            },
-            'Did not install tests directory!'
         )
     }
 
