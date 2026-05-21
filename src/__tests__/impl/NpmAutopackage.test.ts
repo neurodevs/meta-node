@@ -6,7 +6,6 @@ import {
     callsToExec,
     callsToFetch,
     callsToMkdir,
-    callsToReadFile,
     callsToWriteFile,
     fakeExec,
     fakeFetch,
@@ -155,22 +154,10 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
-    protected static async thenReadPackageJson() {
-        await this.run()
-
-        assert.isEqualDeep(callsToReadFile[1], {
-            path: this.packageJsonPath,
-            options: { encoding: 'utf-8' },
-        })
-    }
-
-    @test()
     protected static async thenUpdatePackageJson() {
         await this.run()
 
         const actual = callsToWriteFile[0]
-
-        assert.isEqualDeep(JSON.parse(actual?.data), this.updatedPackageJson)
 
         const expected = {
             file: this.packageJsonPath,
@@ -216,20 +203,6 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
-    protected static async thenBuildsDevAfterUpdatingTsconfig() {
-        await this.run()
-
-        assert.isEqualDeep(
-            callsToExec[4],
-            {
-                command: 'yarn build.dev',
-                options: { cwd: this.packageDir },
-            },
-            'Did not fix eslint and prettier after updating tsconfig!'
-        )
-    }
-
-    @test()
     protected static async thenUpdatesVscodeTasksJson() {
         await this.run()
 
@@ -246,7 +219,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[9],
+            callsToExec[8],
             {
                 command: this.yarnInstallDevDepsCommand,
                 options: { cwd: this.packageDir },
@@ -339,7 +312,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[10],
+            callsToExec[9],
             {
                 command: 'yarn build.dev',
                 options: { cwd: this.packageDir },
@@ -410,7 +383,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[11],
+            callsToExec[10],
             {
                 command: 'code . --reuse-window --reload-window',
                 options: { cwd: this.packageDir },

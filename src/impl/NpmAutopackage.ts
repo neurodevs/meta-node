@@ -524,7 +524,6 @@ export default prettierConfigNdx
         if (this.shouldUpdateTsconfig) {
             console.info('Updating tsconfig...')
             await this.updateTsconfigFile()
-            await this.executeYarnBuildDev()
         }
     }
 
@@ -968,10 +967,7 @@ export default prettierConfigNdx
 
     private async fixEslintAndPrettier() {
         console.info('Fixing eslint and prettier...')
-        await this.executeYarnBuildDev()
-    }
 
-    private async executeYarnBuildDev() {
         await this.exec('yarn build.dev', {
             cwd: this.packageDir,
         })
