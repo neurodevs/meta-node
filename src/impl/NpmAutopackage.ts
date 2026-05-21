@@ -975,13 +975,17 @@ export default prettierConfigNdx
         const nvmrcPath = path.join(this.packageDir, '.nvmrc')
         this.originalNvmrc = await this.readUtf8(nvmrcPath)
 
-        if (this.originalNvmrc?.trim() !== this.nvmrcFile.trim()) {
+        if (!this.isNvmrcInstalled) {
             console.info('Installing .nvmrc...')
 
             await this.writeFile(nvmrcPath, this.nvmrcFile, {
                 encoding: 'utf-8',
             })
         }
+    }
+
+    private get isNvmrcInstalled() {
+        return this.originalNvmrc?.trim() === this.nvmrcFile.trim()
     }
 
     private get nvmrcFile() {
