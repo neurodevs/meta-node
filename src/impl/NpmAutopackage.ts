@@ -806,7 +806,7 @@ export default prettierConfigNdx
     private get launchJsonIsUpToDate() {
         try {
             return (
-                JSON.stringify(JSON.parse(this.originalLaunchJson || '')) ===
+                JSON.stringify(JSON.parse(this.originalLaunchJson || '{}')) ===
                 JSON.stringify(JSON.parse(this.launchJsonFile))
             )
         } catch {
