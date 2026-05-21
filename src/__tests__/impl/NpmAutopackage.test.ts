@@ -33,204 +33,12 @@ import GitAutocommit from '../../impl/GitAutocommit.js'
 import NpmAutopackage, {
     Autopackage,
     AutopackageOptions,
-    TsConfig,
 } from '../../impl/NpmAutopackage.js'
 import FakeAutocommit from '../../testDoubles/Autocommit/FakeAutocommit.js'
-import AbstractPackageTest from '../AbstractPackageTest.js'
+import AbstractAutopackageTest from '../AbstractAutopackageTest.js'
 
-export default class NpmAutopackageTest extends AbstractPackageTest {
+export default class NpmAutopackageTest extends AbstractAutopackageTest {
     private static instance: Autopackage
-
-    private static readonly installDir = this.generateId()
-    private static readonly description = this.generateId()
-    private static readonly gitNamespace = this.generateId()
-    private static readonly npmNamespace = this.generateId()
-    private static readonly keywords = [this.generateId(), this.generateId()]
-    private static readonly license = this.generateId()
-    private static readonly author = this.generateId()
-    private static readonly githubToken = this.generateId()
-    private static readonly randomId = this.generateId()
-
-    private static readonly packageDir = path.join(
-        this.installDir,
-        this.packageName
-    )
-
-    private static readonly packageJsonPath = path.join(
-        this.packageDir,
-        'package.json'
-    )
-
-    private static readonly gitignorePath = path.join(
-        this.packageDir,
-        '.gitignore'
-    )
-
-    private static readonly originalGitignore = this.generateId()
-
-    private static readonly updatedGitignore = `${this.originalGitignore}\nbuild/`
-
-    private static readonly tsconfigPath = path.join(
-        this.packageDir,
-        'tsconfig.json'
-    )
-
-    private static readonly tasksJsonPath = path.join(
-        this.packageDir,
-        '.vscode',
-        'tasks.json'
-    )
-
-    private static readonly testsDir = path.join(
-        this.packageDir,
-        'src',
-        '__tests__'
-    )
-
-    private static readonly abstractTestPath = path.join(
-        this.testsDir,
-        'AbstractPackageTest.ts'
-    )
-
-    private static readonly eslintConfigMjsPath = path.join(
-        this.packageDir,
-        'eslint.config.mjs'
-    )
-
-    private static readonly eslintConfigJsPath = path.join(
-        this.packageDir,
-        'eslint.config.js'
-    )
-
-    private static readonly prettierConfigPath = path.join(
-        this.packageDir,
-        'prettier.config.js'
-    )
-
-    private static readonly settingsJsonPath = path.join(
-        this.packageDir,
-        '.vscode',
-        'settings.json'
-    )
-
-    private static readonly customLib = this.generateId()
-    private static readonly customType = this.generateId()
-    private static readonly customInclude = this.generateId()
-    private static readonly customTsconfigOption = this.generateId()
-    private static readonly customJestOption = this.generateId()
-    private static readonly customScript = this.generateId()
-
-    private static readonly setupVscodeCmd = 'spruce setup.vscode --all true'
-
-    private static readonly checkGenerateIdVersionCmd = `yarn info @neurodevs/generate-id version --silent`
-    private static readonly checkNodeTddVersionCmd = `yarn info @neurodevs/node-tdd version --silent`
-    private static readonly checkEslintConfigNdxVersionCmd = `yarn info @neurodevs/eslint-config-ndx version --silent`
-    private static readonly checkPrettierConfigNdxVersionCmd = `yarn info @neurodevs/prettier-config-ndx version --silent`
-
-    private static readonly dependencies = {
-        [this.generateId()]: this.generateId(),
-        [this.generateId()]: this.generateId(),
-    }
-
-    private static readonly yarnRemoveDevDepsCommand =
-        'yarn remove @types/node concurrently eslint chokidar-cli ts-node'
-
-    private static readonly yarnInstallDevDepsCommand =
-        'yarn add -D @neurodevs/generate-id @neurodevs/node-tdd @neurodevs/eslint-config-ndx @neurodevs/prettier-config-ndx prettier'
-
-    private static readonly abstractTestFile = `import AbstractModuleTest from '@neurodevs/node-tdd'
-
-export default abstract class AbstractPackageTest extends AbstractModuleTest {
-    protected static async beforeEach() {
-        await super.beforeEach()
-    }
-}
-`
-
-    private static readonly eslintConfigFile = `import eslintConfigNdx from '@neurodevs/eslint-config-ndx'
-
-export default eslintConfigNdx
-`
-
-    private static readonly prettierConfigFile = `import prettierConfigNdx from '@neurodevs/prettier-config-ndx'
-
-export default prettierConfigNdx
-`
-
-    private static readonly settingsJsonFile = `{
-  "debug.node.autoAttach": "on",
-  "git.ignoreLimitWarning": true,
-  "javascript.validate.enable": false,
-  "files.watcherExclude": {
-    "**/.git/objects/**": true,
-    "**/.git/subtree-cache/**": true,
-    "**/build/**": true,
-    "**/node_modules/**": true
-  },
-  "search.exclude": {
-    "**/build/**": true,
-    "**/node_modules/**": true,
-    "**/.next/**": true
-  },
-  "editor.codeActionsOnSave": {
-    "source.fixAll.eslint": "always"
-  },
-  "editor.formatOnSave": true,
-  "editor.formatOnSaveMode": "file",
-  "editor.defaultFormatter": "esbenp.prettier-vscode",
-  "editor.maxTokenizationLineLength": 20000000,
-  "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true
-  },
-  "[javascriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true
-  },
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true
-  },
-  "eslint.enable": true,
-  "eslint.useFlatConfig": true,
-  "eslint.validate": [
-    "javascript",
-    "javascriptreact",
-    "typescript",
-    "typescriptreact"
-  ],
-  "eslint.workingDirectories": ["./"],
-  "debug.javascript.unmapMissingSources": true,
-  "javascript.preferences.importModuleSpecifier": "relative",
-  "typescript.preferences.importModuleSpecifier": "relative",
-  "typescript.tsdk": "node_modules/typescript/lib",
-  "typescript.validate.enable": true,
-  "cSpell.ignorePaths": [
-    "**/package-lock.json",
-    "**/node_modules/**",
-    "**/build/**",
-    "**/vscode-extension/**",
-    "**/.git/objects/**",
-    ".vscode",
-  ],
-  "cSpell.words": ["arkit", "autogenerated", "scrollable", "serializable"]
-}
-`
-
-    private static readonly defaultOptions = {
-        installDir: this.installDir,
-        name: this.packageName,
-        description: this.description,
-        gitNamespace: this.gitNamespace,
-        npmNamespace: this.npmNamespace,
-        keywords: this.keywords,
-        license: this.license,
-        author: this.author,
-    }
 
     protected static async beforeEach() {
         await super.beforeEach()
@@ -385,42 +193,17 @@ export default prettierConfigNdx
 
         const actual = callsToWriteFile[0]
 
-        const ordered = this.orderJsonKeys(this.updatedPackageJson, [
-            'name',
-            'version',
-            'description',
-            'type',
-            'keywords',
-            'license',
-            'author',
-            'homepage',
-            'repository',
-            'bugs',
-            'main',
-            'bin',
-            'files',
-            'scripts',
-            'dependencies',
-            'devDependencies',
-            'peerDependencies',
-            'jest',
-        ])
+        assert.isEqualDeep(JSON.parse(actual?.data), this.updatedPackageJson)
 
         const expected = {
             file: this.packageJsonPath,
-            data: JSON.stringify(ordered, null, 2) + '\n',
+            data: JSON.stringify(this.updatedPackageJson, null, 2) + '\n',
             options: { encoding: 'utf-8' },
         }
 
         assert.isEqualDeep(
-            {
-                ...actual,
-                data: this.normalize(actual.data),
-            },
-            {
-                ...expected,
-                data: this.normalize(expected.data),
-            },
+            actual,
+            expected,
             'Did not update package.json as expected!'
         )
     }
@@ -565,66 +348,12 @@ export default prettierConfigNdx
     }
 
     @test()
-    protected static async thenRemovesOldDevDependencies() {
-        setFakeReadFileResult(
-            this.packageJsonPath,
-            JSON.stringify({
-                ...this.originalPackageJson,
-                devDependencies: {
-                    '@types/node': '^1.0.0',
-                    concurrently: '^1.0.0',
-                    eslint: '^1.0.0',
-                    'chokidar-cli': '^1.0.0',
-                    'ts-node': '^1.0.0',
-                },
-            })
-        )
-
-        this.setShouldInstallDevDeps()
-        await this.run()
-
-        assert.isEqualDeep(
-            callsToExec[7],
-            {
-                command: this.yarnRemoveDevDepsCommand,
-                options: { cwd: this.packageDir },
-            },
-            'Did not remove old devDependencies!'
-        )
-    }
-
-    @test()
-    protected static async onlyRemovesOldDevDependenciesActuallyMissing() {
-        setFakeReadFileResult(
-            this.packageJsonPath,
-            JSON.stringify({
-                ...this.originalPackageJson,
-                devDependencies: {
-                    eslint: '^1.0.0',
-                },
-            })
-        )
-
-        this.setShouldInstallDevDeps()
-        await this.run()
-
-        assert.isEqualDeep(
-            callsToExec[7],
-            {
-                command: 'yarn remove eslint',
-                options: { cwd: this.packageDir },
-            },
-            'Did not remove old devDependencies!'
-        )
-    }
-
-    @test()
     protected static async thenInstallsDefaultDevDependencies() {
         this.setShouldInstallDevDeps()
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[12],
+            callsToExec[11],
             {
                 command: this.yarnInstallDevDepsCommand,
                 options: { cwd: this.packageDir },
@@ -694,34 +423,14 @@ export default prettierConfigNdx
     }
 
     @test()
-    protected static async thenRemovesOldEslintConfigMjs() {
-        setPathShouldExist(
-            path.join(this.packageDir, 'eslint.config.mjs'),
-            true
-        )
-
-        this.setShouldInstallDevDeps()
-        await this.run()
-
-        assert.isEqualDeep(
-            callsToExec[13],
-            {
-                command: `git rm eslint.config.mjs`,
-                options: { cwd: this.packageDir },
-            },
-            'Did not remove old eslint.config.mjs!'
-        )
-    }
-
-    @test()
-    protected static async thenInstallsNewEslintConfigJs() {
+    protected static async thenInstallsEslintConfigJs() {
         this.setShouldInstallDevDeps()
         await this.run()
 
         assert.isEqualDeep(
             callsToWriteFile[5],
             {
-                file: this.eslintConfigJsPath,
+                file: this.eslintConfigPath,
                 data: this.eslintConfigFile,
                 options: { encoding: 'utf-8' },
             },
@@ -812,7 +521,7 @@ export default prettierConfigNdx
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[14],
+            callsToExec[12],
             {
                 command: 'yarn build.dev',
                 options: { cwd: this.packageDir },
@@ -888,7 +597,7 @@ export default prettierConfigNdx
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[15],
+            callsToExec[13],
             {
                 command: 'code . --reuse-window --reload-window',
                 options: { cwd: this.packageDir },
@@ -900,7 +609,6 @@ export default prettierConfigNdx
     @test()
     protected static async removesCertainKeysFromPackageJson() {
         const keysToRemove = [
-            'skill',
             'jest.testPathIgnorePatterns',
             'scripts.build.resolve-paths',
             'scripts.lint.tsc',
@@ -920,12 +628,12 @@ export default prettierConfigNdx
 
     @test()
     protected static async installsEslintConfigIfNotExists() {
-        setFakeReadFileThrowsFor(this.eslintConfigJsPath)
+        setFakeReadFileThrowsFor(this.eslintConfigPath)
 
         await this.run()
 
         const calls = callsToWriteFile.filter(
-            (call) => call.file === this.eslintConfigJsPath
+            (call) => call.file === this.eslintConfigPath
         )
 
         assert.isEqual(
@@ -1053,9 +761,9 @@ export default prettierConfigNdx
         setFakeReadFileResult(
             this.tsconfigPath,
             JSON.stringify({
-                ...this.originalTsconfig,
+                ...this.tsconfigCustom,
                 compilerOptions: {
-                    ...this.originalTsconfig.compilerOptions,
+                    ...this.tsconfigCustom.compilerOptions,
                     lib: ['es6', 'es2017', 'esnext', 'ES2015'],
                 },
             })
@@ -1077,8 +785,8 @@ export default prettierConfigNdx
     }
 
     @test()
-    protected static async createsTsconfigWhenItDoesNotExist() {
-        setFakeReadFileResult(this.tsconfigPath, '')
+    protected static async createsTsconfigFromTemplateWhenItDoesNotExist() {
+        setFakeReadFileThrowsFor(this.tsconfigPath)
 
         await this.run()
 
@@ -1089,9 +797,83 @@ export default prettierConfigNdx
         const json = JSON.parse(tsconfigWrites[0].data)
 
         assert.isEqualDeep(
-            json.compilerOptions.module,
-            'nodenext',
-            'Should write tsconfig with all defaults when tsconfig does not exist!'
+            json,
+            this.tsconfigTemplate,
+            'Did not create tsconfig from template!'
+        )
+    }
+
+    @test()
+    protected static async createsGitignoreFromTemplateWhenItDoesNotExist() {
+        setFakeReadFileThrowsFor(this.gitignorePath)
+
+        await this.run()
+
+        const gitignoreWrites = callsToWriteFile.filter(
+            (call) => call.file === this.gitignorePath
+        )
+
+        const text = gitignoreWrites[0].data
+
+        assert.isEqualDeep(
+            text,
+            this.gitignoreTemplate,
+            'Did not create gitignore from template!'
+        )
+    }
+
+    @test()
+    protected static async createsTasksJsonFromTemplateWhenItDoesNotExist() {
+        setFakeReadFileThrowsFor(this.tasksJsonPath)
+
+        await this.run()
+
+        const tasksJsonWrites = callsToWriteFile.filter(
+            (call) => call.file === this.tasksJsonPath
+        )
+
+        const json = JSON.parse(tasksJsonWrites[0].data)
+
+        assert.isEqualDeep(
+            json,
+            this.tasksJsonTemplate,
+            'Did not create tasks.json from template!'
+        )
+    }
+
+    @test()
+    protected static async createsPackageJsonFromTemplateWhenItDoesNotExist() {
+        setFakeReadFileThrowsFor(this.packageJsonPath)
+
+        await this.run()
+
+        const packageJsonWrites = callsToWriteFile.filter(
+            (call) => call.file === this.packageJsonPath
+        )
+
+        const json = JSON.parse(packageJsonWrites[0].data)
+
+        assert.isEqualDeep(
+            json,
+            this.packageJsonTemplate,
+            'Did not create package.json from template!'
+        )
+    }
+
+    @test()
+    protected static async createsSettingsJsonFromTemplateWhenItDoesNotExist() {
+        setFakeReadFileThrowsFor(this.settingsJsonPath)
+
+        await this.run()
+
+        const settingsJsonWrites = callsToWriteFile.filter(
+            (call) => call.file === this.settingsJsonPath
+        )
+
+        assert.isEqualDeep(
+            settingsJsonWrites[0].data,
+            this.settingsJsonFile,
+            'Did not create settings.json from template!'
         )
     }
 
@@ -1244,7 +1026,7 @@ export default prettierConfigNdx
     protected static async doesNotRemoveOldDevDependenciesIfNotPresent() {
         setFakeReadFileResult(
             this.packageJsonPath,
-            JSON.stringify(this.originalPackageJson)
+            JSON.stringify(this.packageJsonCustom)
         )
 
         this.setShouldInstallDevDeps()
@@ -1266,7 +1048,7 @@ export default prettierConfigNdx
         setFakeReadFileResult(
             this.packageJsonPath,
             JSON.stringify({
-                ...this.originalPackageJson,
+                ...this.packageJsonCustom,
                 dependencies: {
                     '@neurodevs/generate-id': '^1.0.0',
                     '@neurodevs/node-tdd': '^1.0.0',
@@ -1329,7 +1111,7 @@ export default prettierConfigNdx
     protected static async doesNotThrowIfGenerateIdNotInPackageJson() {
         setFakeReadFileResult(
             this.packageJsonPath,
-            JSON.stringify(this.originalPackageJson).replace(
+            JSON.stringify(this.packageJsonCustom).replace(
                 '@neurodevs/generate-id',
                 ''
             )
@@ -1408,29 +1190,13 @@ export default prettierConfigNdx
     }
 
     @test()
-    protected static async doesNotRemoveEslintConfigMjsIfNotExists() {
-        setPathShouldExist(this.eslintConfigMjsPath, false)
-        await this.run()
-
-        const calls = callsToExec.filter(
-            (call) => call?.command === `git rm eslint.config.mjs`
-        )
-
-        assert.isEqual(
-            calls.length,
-            0,
-            'Should not remove eslint.config.mjs if it does not exist!'
-        )
-    }
-
-    @test()
     protected static async doesNotInstallEslintConfigFileIfContentsEqual() {
-        setFakeReadFileResult(this.eslintConfigJsPath, this.eslintConfigFile)
+        setFakeReadFileResult(this.eslintConfigPath, this.eslintConfigFile)
 
         await this.run()
 
         const calls = callsToWriteFile.filter(
-            (call) => call.file === this.eslintConfigJsPath
+            (call) => call.file === this.eslintConfigPath
         )
 
         assert.isEqual(
@@ -1537,7 +1303,7 @@ export default prettierConfigNdx
         setFakeReadFileResult(
             this.packageJsonPath,
             JSON.stringify({
-                ...this.originalPackageJson,
+                ...this.packageJsonCustom,
                 jest: {
                     moduleNameMapper: {
                         [moduleNameMapperKey]: '',
@@ -1572,7 +1338,7 @@ export default prettierConfigNdx
 
         setFakeReadFileResult(
             this.packageJsonPath,
-            JSON.stringify(this.orderedPackageJson)
+            JSON.stringify(this.updatedPackageJson)
         )
 
         setFakeReadFileResult(this.gitignorePath, this.updatedGitignore)
@@ -1605,35 +1371,8 @@ export default prettierConfigNdx
         } as unknown as ChildProcess)
     }
 
-    private static get scopedPackageName() {
-        return `@${this.npmNamespace}/${this.packageName}`
-    }
-
     private static get createModuleCmd() {
         return `spruce create.module --name "${this.packageName}" --destination "." --description "${this.description}"`
-    }
-
-    private static orderJsonKeys(
-        json: Record<string, unknown>,
-        keyOrder: string[]
-    ) {
-        const ordered: Record<string, any> = {}
-
-        for (const key of keyOrder) {
-            if (key in json) {
-                ordered[key] = json[key]
-            }
-        }
-
-        const remainingKeys = Object.keys(json)
-            .filter((k) => !keyOrder.includes(k))
-            .sort()
-
-        for (const key of remainingKeys) {
-            ordered[key] = json[key]
-        }
-
-        return ordered
     }
 
     private static fakeExec() {
@@ -1687,20 +1426,20 @@ export default prettierConfigNdx
 
         setFakeReadFileResult(
             this.packageJsonPath,
-            JSON.stringify(this.originalPackageJsonWithDummies)
+            JSON.stringify(this.packageJsonCustom)
         )
 
         setFakeReadFileResult(
             this.tasksJsonPath,
-            JSON.stringify(this.originalTasksJson)
+            JSON.stringify(this.tasksJsonCustom)
         )
 
         setFakeReadFileResult(
             this.tsconfigPath,
-            JSON.stringify(this.originalTsconfig)
+            JSON.stringify(this.tsconfigCustom)
         )
 
-        setFakeReadFileResult(this.gitignorePath, this.originalGitignore)
+        setFakeReadFileResult(this.gitignorePath, this.gitignoreCustom)
 
         resetFakeReadFileThrowsFor()
     }
@@ -1737,226 +1476,7 @@ export default prettierConfigNdx
         return `https://api.github.com/orgs/${this.gitNamespace}/repos`
     }
 
-    private static get originalPackageJson() {
-        return {
-            name: this.packageName,
-            description: 'Old description',
-            scripts: {
-                customScript: this.customScript,
-            },
-            dependencies: this.dependencies,
-            devDependencies: {
-                '@neurodevs/generate-id': '^1.0.0',
-                '@neurodevs/node-tdd': '^1.0.0',
-                '@neurodevs/eslint-config-ndx': '^1.0.0',
-                '@neurodevs/prettier-config-ndx': '^1.0.0',
-            },
-            peerDependencies: {
-                customPeerDependency: '^1.0.0',
-            },
-            jest: {
-                ['customOption']: this.customJestOption,
-            },
-        }
-    }
-
-    private static get originalPackageJsonWithDummies() {
-        return {
-            ...this.originalPackageJson,
-            scripts: {
-                ...this.originalPackageJson.scripts,
-                'build.resolve-paths': 'dummy',
-                'lint.tsc': 'dummy',
-                'post.watch.build': 'dummy',
-                'resolve-paths.lint': 'dummy',
-                'watch.rebuild': 'dummy',
-                'watch.tsc': 'dummy',
-            },
-            devDependencies: {
-                ...this.originalPackageJson.devDependencies,
-                eslint: '^1.0.0',
-            },
-            jest: {
-                ...this.originalPackageJson.jest,
-                testPathIgnorePatterns: 'dummy',
-            },
-            skill: 'dummy',
-        }
-    }
-
-    private static get orderedPackageJson() {
-        return this.orderJsonKeys(this.updatedPackageJson, [
-            'name',
-            'version',
-            'description',
-            'type',
-            'keywords',
-            'license',
-            'author',
-            'homepage',
-            'repository',
-            'bugs',
-            'main',
-            'bin',
-            'files',
-            'scripts',
-            'dependencies',
-            'devDependencies',
-            'peerDependencies',
-            'jest',
-        ])
-    }
-
-    private static get updatedPackageJson() {
-        return {
-            ...this.originalPackageJson,
-            name: this.scopedPackageName,
-            description: this.description,
-            type: 'module',
-            keywords: this.keywords,
-            license: this.license,
-            author: this.author,
-            main: 'build/index.js',
-            homepage: `https://github.com/${this.gitNamespace}/${this.packageName}`,
-            repository: {
-                type: 'git',
-                url: `git+https://github.com/${this.gitNamespace}/${this.packageName}.git`,
-            },
-            bugs: {
-                url: `https://github.com/${this.gitNamespace}/${this.packageName}/issues`,
-            },
-            scripts: {
-                ...this.originalPackageJson.scripts,
-                'build.ci': 'yarn run build.tsc && yarn run lint',
-                'build.dev':
-                    'yarn run build.tsc --sourceMap ; yarn run fix.lint ; prettier --write . --log-level warn',
-                'build.copy-files':
-                    "mkdir -p build && rsync -avzq --exclude='*.ts' ./src/ ./build/",
-                'build.tsc': 'yarn run build.copy-files && tsc',
-                clean: 'yarn run clean.build',
-                'clean.all':
-                    'yarn run clean.dependencies && yarn run clean.build',
-                'clean.build': 'rm -rf build/',
-                'clean.dependencies':
-                    'rm -rf node_modules/ package-lock.json yarn.lock',
-                'fix.lint': "eslint --fix --cache '**/*.ts'",
-                lint: "eslint --cache '**/*.ts'",
-                rebuild:
-                    'yarn run clean.all && yarn install && yarn run build.dev',
-                'update.dependencies': 'yarn run clean.dependencies && yarn',
-                test: 'NODE_OPTIONS=--experimental-vm-modules jest',
-                'watch.build.dev':
-                    "tsc-watch --sourceMap --onCompilationComplete 'yarn run build.copy-files'",
-            },
-            dependencies: this.dependencies,
-            devDependencies: {
-                ...this.originalPackageJson.devDependencies,
-                eslint: '^1.0.0',
-            },
-            peerDependencies: {
-                customPeerDependency: '^1.0.0',
-            },
-            jest: {
-                ['customOption']: this.customJestOption,
-                testEnvironment: 'node',
-                testRunner: 'jest-circus/runner',
-                testMatch: ['<rootDir>/build/__tests__/**/*.test.js?(x)'],
-                testTimeout: 5000,
-                maxWorkers: 4,
-            },
-        }
-    }
-
-    private static get originalTsconfig(): TsConfig {
-        return {
-            compilerOptions: {
-                lib: [this.customLib],
-                types: [this.customType],
-                customOption: this.customTsconfigOption,
-            },
-            include: [this.customInclude],
-            customOption: this.customTsconfigOption,
-        }
-    }
-
-    private static get updatedTsconfig() {
-        return {
-            ...this.originalTsconfig,
-            compilerOptions: {
-                ...this.originalTsconfig.compilerOptions,
-                module: 'nodenext',
-                target: 'esnext',
-                lib: [this.customLib, 'esnext'],
-                types: [this.customType, 'node'],
-                rootDir: 'src',
-                outDir: 'build',
-                sourceMap: false,
-                strict: true,
-                noImplicitAny: true,
-                noImplicitReturns: true,
-                noUnusedLocals: true,
-                forceConsistentCasingInFileNames: true,
-                declaration: true,
-                skipLibCheck: true,
-                esModuleInterop: true,
-                moduleDetection: 'force',
-                allowJs: true,
-                resolveJsonModule: true,
-                experimentalDecorators: true,
-            },
-            include: [this.customInclude, './src/*.ts', './src/**/*.ts'],
-        }
-    }
-
-    private static originalTasksJson = {
-        [this.randomId]: this.randomId,
-        tasks: [
-            {
-                [this.randomId]: this.randomId,
-            },
-        ],
-        inputs: [
-            {
-                [this.randomId]: this.randomId,
-            },
-        ],
-    }
-
-    private static get updatedTasksJson() {
-        return JSON.stringify(
-            {
-                ...this.originalTasksJson,
-                tasks: [
-                    ...this.originalTasksJson.tasks,
-                    {
-                        label: 'ndx',
-                        type: 'shell',
-                        command: 'ndx ${input:ndxCommand}',
-                        problemMatcher: [],
-                        presentation: {
-                            reveal: 'always',
-                            focus: true,
-                            panel: 'new',
-                            clear: false,
-                        },
-                    },
-                ],
-                inputs: [
-                    ...this.originalTasksJson.inputs,
-                    {
-                        id: 'ndxCommand',
-                        description: 'ndx command',
-                        default: 'create.module',
-                        type: 'promptString',
-                    },
-                ],
-            },
-            null,
-            2
-        )
-    }
-
     private static NpmAutopackage(options?: Partial<AutopackageOptions>) {
-        return NpmAutopackage.Create({ ...this.defaultOptions, ...options })
+        return NpmAutopackage.Create({ ...this.autopackageOptions, ...options })
     }
 }
