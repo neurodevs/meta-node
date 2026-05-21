@@ -2,7 +2,7 @@ import expandHomeDir from '../functions/expandHomeDir.js'
 import NpmAutopackage from '../impl/NpmAutopackage.js'
 
 async function main() {
-    console.log('Running autopackage...')
+    console.log('\nRunning autopackage...')
 
     const instance = NpmAutopackage.Create({
         installDir: expandHomeDir('~/dev'),
