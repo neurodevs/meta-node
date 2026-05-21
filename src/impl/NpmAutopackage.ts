@@ -150,8 +150,8 @@ export default prettierConfigNdx
 
         this.installDir = installDir
         this.packageName = name
-        this.description = description
-        this.gitNamespace = gitNamespace
+        this.description = description ?? ''
+        this.gitNamespace = gitNamespace ?? ''
         this.npmNamespace = npmNamespace
         this.keywords = keywords
         this.license = license
@@ -1028,8 +1028,8 @@ export interface Autopackage {
 export interface AutopackageOptions {
     installDir: string
     name: string
-    description: string
-    gitNamespace: string
+    description?: string
+    gitNamespace?: string
     npmNamespace?: string
     keywords?: string[]
     license?: string
