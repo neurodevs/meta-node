@@ -604,34 +604,31 @@ export default prettierConfigNdx
     }
 
     private async updateVscode() {
-        await this.installVscodeTasks()
-        await this.installSettingsJsonFile()
-        await this.installLaunchJsonFile()
+        await this.installTasksJson()
+        await this.installSettingsJson()
+        await this.installLaunchJson()
     }
 
-    private async installVscodeTasks() {
+    private async installTasksJson() {
         this.originalTasksJson = await this.readJson(this.tasksJsonPath)
 
         if (!this.isTasksJsonUpToDate) {
-            console.info('Updating vscode tasks...')
-            await this.updateTasksJsonFile()
+            console.info('Installing .vscode/tasks.json...')
+
+            await this.writeFile(this.tasksJsonPath, this.updatedTasksJson, {
+                encoding: 'utf-8',
+            })
         }
     }
 
     private get isTasksJsonUpToDate() {
         return (
             JSON.stringify(this.originalTasksJson, null, 2) ===
-            this.updatedTasksJsonFile
+            this.updatedTasksJson
         )
     }
 
-    private async updateTasksJsonFile() {
-        await this.writeFile(this.tasksJsonPath, this.updatedTasksJsonFile, {
-            encoding: 'utf-8',
-        })
-    }
-
-    private get updatedTasksJsonFile() {
+    private get updatedTasksJson() {
         const mergedTasks = [
             ...this.tasksJsonTemplate.tasks,
             ...(this.originalTasksJson?.tasks ?? []),
@@ -764,7 +761,7 @@ export default prettierConfigNdx
         }
     }
 
-    private async installSettingsJsonFile() {
+    private async installSettingsJson() {
         this.originalSettingsJson = await this.loadSettingsJson()
 
         if (!this.settingsJsonIsUpToDate) {
@@ -788,11 +785,12 @@ export default prettierConfigNdx
         )
     }
 
-    private async installLaunchJsonFile() {
+    private async installLaunchJson() {
         this.originalLaunchJson = await this.loadLaunchJson()
 
         if (!this.launchJsonIsUpToDate) {
             console.info('Installing .vscode/launch.json...')
+
             await this.writeFile(this.launchJsonPath, this.launchJsonFile, {
                 encoding: 'utf-8',
             })
