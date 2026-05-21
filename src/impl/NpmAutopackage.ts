@@ -205,6 +205,7 @@ export default prettierConfigNdx
         await this.installPrettierConfigFile()
         await this.installSettingsJsonFile()
         await this.fixEslintAndPrettier()
+        await this.commitChanges()
         await this.openVscode()
 
         console.info('\nAutopackage process completed!\n')
@@ -316,9 +317,7 @@ export default prettierConfigNdx
 
         if (!this.isPackageUpToDate) {
             console.info('Updating package.json...')
-
             await this.updatePackageJsonFile()
-            await this.commitUpdatePackageJson()
         }
     }
 
@@ -493,12 +492,6 @@ export default prettierConfigNdx
         return ordered
     }
 
-    private async commitUpdatePackageJson() {
-        await this.GitAutocommit(
-            `patch: update package.json (@neurodevs/meta-node: ${this.metaNodeVersion})`
-        )
-    }
-
     private async updateGitignore() {
         this.originalGitignore = await this.readUtf8(this.gitignorePath)
 
@@ -506,7 +499,6 @@ export default prettierConfigNdx
             console.info('Updating .gitignore...')
 
             await this.updateGitignoreFile()
-            await this.commitUpdateGitignore()
         }
     }
 
@@ -525,12 +517,6 @@ export default prettierConfigNdx
         })
     }
 
-    private async commitUpdateGitignore() {
-        await this.GitAutocommit(
-            `patch: add build dir to gitignore (@neurodevs/meta-node: ${this.metaNodeVersion})`
-        )
-    }
-
     private async updateTsconfig() {
         this.originalTsconfig = await this.readJson(this.tsconfigPath)
 
@@ -538,7 +524,6 @@ export default prettierConfigNdx
             console.info('Updating tsconfig...')
             await this.updateTsconfigFile()
             await this.executeYarnBuildDev()
-            await this.commitUpdateTsconfig()
         }
     }
 
@@ -617,19 +602,12 @@ export default prettierConfigNdx
         }
     }
 
-    private async commitUpdateTsconfig() {
-        await this.GitAutocommit(
-            `patch: update tsconfig (@neurodevs/meta-node: ${this.metaNodeVersion})`
-        )
-    }
-
     private async updateVscodeTasks() {
         this.originalTasksJson = await this.readJson(this.tasksJsonPath)
 
         if (!this.isTasksJsonUpdated) {
             console.info('Updating vscode tasks...')
             await this.updateTasksJsonFile()
-            await this.commitUpdateVscodeTasks()
         }
     }
 
@@ -779,12 +757,6 @@ export default prettierConfigNdx
         }
     }
 
-    private async commitUpdateVscodeTasks() {
-        await this.GitAutocommit(
-            `patch: update vscode tasks.json (@neurodevs/meta-node: ${this.metaNodeVersion})`
-        )
-    }
-
     private async installDefaultDevDependencies() {
         const testsDirExists = await this.pathExists(this.testsDir)
 
@@ -820,7 +792,6 @@ export default prettierConfigNdx
                 'yarn add -D @neurodevs/generate-id @neurodevs/node-tdd @neurodevs/eslint-config-ndx @neurodevs/prettier-config-ndx prettier',
                 { cwd: this.packageDir }
             )
-            await this.commitInstallDevDependencies()
         }
     }
 
@@ -880,12 +851,6 @@ export default prettierConfigNdx
         ).replace('^', '')
     }
 
-    private async commitInstallDevDependencies() {
-        await this.GitAutocommit(
-            `patch: install default devDependencies (@neurodevs/meta-node: ${this.metaNodeVersion})`
-        )
-    }
-
     private async installAbstractPackageTest() {
         const shouldInstall = await this.checkShouldInstallAbstractTest()
 
@@ -901,8 +866,6 @@ export default prettierConfigNdx
                     encoding: 'utf-8',
                 }
             )
-
-            await this.commitInstallAbstractPackageTest()
         }
     }
 
@@ -914,12 +877,6 @@ export default prettierConfigNdx
         return !(doesTsExist || doesTsxExist) && doesTestsDirExist
     }
 
-    private async commitInstallAbstractPackageTest() {
-        await this.GitAutocommit(
-            `patch: install AbstractPackageTest (@neurodevs/meta-node: ${this.metaNodeVersion})`
-        )
-    }
-
     private async installEslintConfigFile() {
         this.originalEslintConfig = await this.loadEslintConfigFile()
 
@@ -929,8 +886,6 @@ export default prettierConfigNdx
             await this.writeFile(this.eslintConfigPath, this.eslintConfigFile, {
                 encoding: 'utf-8',
             })
-
-            await this.commitInstallEslintConfigFile()
         }
     }
 
@@ -952,12 +907,6 @@ export default prettierConfigNdx
         )
     }
 
-    private async commitInstallEslintConfigFile() {
-        await this.GitAutocommit(
-            `patch: install eslint.config.js (@neurodevs/meta-node: ${this.metaNodeVersion})`
-        )
-    }
-
     private async installPrettierConfigFile() {
         this.originalPrettierConfig = await this.loadPrettierConfigFile()
 
@@ -971,8 +920,6 @@ export default prettierConfigNdx
                     encoding: 'utf-8',
                 }
             )
-
-            await this.commitInstallPrettierConfigFile()
         }
     }
 
@@ -994,12 +941,6 @@ export default prettierConfigNdx
         )
     }
 
-    private async commitInstallPrettierConfigFile() {
-        await this.GitAutocommit(
-            `patch: install prettier.config.js (@neurodevs/meta-node: ${this.metaNodeVersion})`
-        )
-    }
-
     private async installSettingsJsonFile() {
         this.originalSettingsJson = await this.loadSettingsJsonFile()
 
@@ -1009,8 +950,6 @@ export default prettierConfigNdx
             await this.writeFile(this.settingsJsonPath, this.settingsJsonFile, {
                 encoding: 'utf-8',
             })
-
-            await this.commitInstallSettingsJsonFile()
         }
     }
 
@@ -1026,25 +965,9 @@ export default prettierConfigNdx
         )
     }
 
-    private async commitInstallSettingsJsonFile() {
-        await this.GitAutocommit(
-            `patch: install settings.json (@neurodevs/meta-node: ${this.metaNodeVersion})`
-        )
-    }
-
     private async fixEslintAndPrettier() {
         console.info('Fixing eslint and prettier...')
-
         await this.executeYarnBuildDev()
-
-        const hasChanges = await this.checkIfThereAreChangesToCommit()
-
-        if (hasChanges) {
-            console.info('Committing eslint and prettier fixes...')
-            await this.commitFixEslintAndPrettier()
-        } else {
-            console.info('No eslint or prettier fixes needed. Continuing...')
-        }
     }
 
     private async executeYarnBuildDev() {
@@ -1053,16 +976,9 @@ export default prettierConfigNdx
         })
     }
 
-    private async checkIfThereAreChangesToCommit() {
-        const { stdout, stderr } = await this.exec('git status --porcelain', {
-            cwd: this.packageDir,
-        })
-        return stdout.trim() !== '' && stderr.trim() === ''
-    }
-
-    private async commitFixEslintAndPrettier() {
+    private async commitChanges() {
         await this.GitAutocommit(
-            `patch: fix eslint and prettier (@neurodevs/meta-node: ${this.metaNodeVersion})`
+            `patch: autopackage changes (@neurodevs/meta-node: ${this.metaNodeVersion})`
         )
     }
 

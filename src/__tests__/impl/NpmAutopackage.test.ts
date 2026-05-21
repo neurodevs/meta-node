@@ -181,20 +181,6 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
-    protected static async thenCommitUpdatePackage() {
-        await this.run()
-
-        assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[0],
-            {
-                commitMessage: `patch: update package.json (@neurodevs/meta-node: ${this.metaNodeVersion})`,
-                cwd: this.packageDir,
-            },
-            'Did not commit update package changes!'
-        )
-    }
-
-    @test()
     protected static async thenAddBuildDirToGitignore() {
         await this.run()
 
@@ -206,20 +192,6 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
                 options: { encoding: 'utf-8', flag: 'a' },
             },
             'Did not update .gitignore as expected!'
-        )
-    }
-
-    @test()
-    protected static async thenCommitUpdateGitignore() {
-        await this.run()
-
-        assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[1],
-            {
-                commitMessage: `patch: add build dir to gitignore (@neurodevs/meta-node: ${this.metaNodeVersion})`,
-                cwd: this.packageDir,
-            },
-            'Did not commit .gitignore changes!'
         )
     }
 
@@ -253,20 +225,6 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
-    protected static async thenCommitsUpdateTsconfig() {
-        await this.run()
-
-        assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[2],
-            {
-                commitMessage: `patch: update tsconfig (@neurodevs/meta-node: ${this.metaNodeVersion})`,
-                cwd: this.packageDir,
-            },
-            'Did not commit tsconfig changes!'
-        )
-    }
-
-    @test()
     protected static async thenUpdatesVscodeTasksJson() {
         await this.run()
 
@@ -278,25 +236,10 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
-    protected static async thenCommitsUpdateVscodeTasksJson() {
-        await this.run()
-
-        assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[3],
-            {
-                commitMessage: `patch: update vscode tasks.json (@neurodevs/meta-node: ${this.metaNodeVersion})`,
-                cwd: this.packageDir,
-            },
-            'Did not commit updated vscode tasks.json changes!'
-        )
-    }
-
-    @test()
     protected static async thenInstallsDefaultDevDependencies() {
         this.setShouldInstallDevDeps()
         await this.run()
 
-        debugger
         assert.isEqualDeep(
             callsToExec[9],
             {
@@ -304,21 +247,6 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
                 options: { cwd: this.packageDir },
             },
             'Did not install default devDependencies!'
-        )
-    }
-
-    @test()
-    protected static async thenCommitsInstallDefaultDevDependencies() {
-        this.setShouldInstallDevDeps()
-        await this.run()
-
-        assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[4],
-            {
-                commitMessage: `patch: install default devDependencies (@neurodevs/meta-node: ${this.metaNodeVersion})`,
-                cwd: this.packageDir,
-            },
-            'Did not commit install devDependencies changes!'
         )
     }
 
@@ -353,21 +281,6 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
-    protected static async thenCommitsInstallAbstractPackageTest() {
-        this.setShouldInstallDevDeps()
-        await this.run()
-
-        assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[5],
-            {
-                commitMessage: `patch: install AbstractPackageTest (@neurodevs/meta-node: ${this.metaNodeVersion})`,
-                cwd: this.packageDir,
-            },
-            'Did not commit install AbstractPackageTest changes!'
-        )
-    }
-
-    @test()
     protected static async thenInstallsEslintConfigJs() {
         this.setShouldInstallDevDeps()
         await this.run()
@@ -380,21 +293,6 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
                 options: { encoding: 'utf-8' },
             },
             'Did not install eslint.config.js!'
-        )
-    }
-
-    @test()
-    protected static async thenCommitsInstallEslintConfigFile() {
-        this.setShouldInstallDevDeps()
-        await this.run()
-
-        assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[6],
-            {
-                commitMessage: `patch: install eslint.config.js (@neurodevs/meta-node: ${this.metaNodeVersion})`,
-                cwd: this.packageDir,
-            },
-            'Did not commit install eslint.config.js changes!'
         )
     }
 
@@ -415,21 +313,6 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
-    protected static async thenCommitsInstallPrettierConfigFile() {
-        this.setShouldInstallDevDeps()
-        await this.run()
-
-        assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[7],
-            {
-                commitMessage: `patch: install prettier.config.js (@neurodevs/meta-node: ${this.metaNodeVersion})`,
-                cwd: this.packageDir,
-            },
-            'Did not commit install prettier.config.js changes!'
-        )
-    }
-
-    @test()
     protected static async thenInstallsSettingsJsonFile() {
         this.setShouldInstallDevDeps()
         await this.run()
@@ -442,21 +325,6 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
                 options: { encoding: 'utf-8' },
             },
             'Did not install settings.json!'
-        )
-    }
-
-    @test()
-    protected static async thenCommitsInstallSettingsJsonFile() {
-        this.setShouldInstallDevDeps()
-        await this.run()
-
-        assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[8],
-            {
-                commitMessage: `patch: install settings.json (@neurodevs/meta-node: ${this.metaNodeVersion})`,
-                cwd: this.packageDir,
-            },
-            'Did not commit install settings.json changes!'
         )
     }
 
@@ -476,22 +344,17 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
-    protected static async thenCommitsFixEslintAndPrettier() {
-        setFakeExecResult('git status --porcelain', {
-            stdout: 'Some changes',
-            stderr: '',
-        } as unknown as ChildProcess)
-
+    protected static async thenCommitsChanges() {
         this.setShouldInstallDevDeps()
         await this.run()
 
         assert.isEqualDeep(
-            FakeAutocommit.callsToConstructor[9],
+            FakeAutocommit.callsToConstructor[0],
             {
-                commitMessage: `patch: fix eslint and prettier (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+                commitMessage: `patch: autopackage changes (@neurodevs/meta-node: ${this.metaNodeVersion})`,
                 cwd: this.packageDir,
             },
-            'Did not commit fix eslint and prettier changes!'
+            'Did not commit autopackage changes!'
         )
     }
 
@@ -542,7 +405,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToExec[11],
+            callsToExec[10],
             {
                 command: 'code . --reuse-window --reload-window',
                 options: { cwd: this.packageDir },
@@ -845,51 +708,6 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
             ).length,
             1,
             'Did not clone repo once!'
-        )
-    }
-
-    @test()
-    protected static async doesNotCommitUpdatePackageIfDone() {
-        await this.runTwice()
-
-        assert.isEqual(
-            FakeAutocommit.callsToConstructor.filter(
-                (call) =>
-                    call?.commitMessage ===
-                    `patch: update package.json (@neurodevs/meta-node: ${this.metaNodeVersion})`
-            ).length,
-            1,
-            'Did not commit update package changes once!'
-        )
-    }
-
-    @test()
-    protected static async doesNotCommitUpdateGitignoreIfDone() {
-        await this.runTwice()
-
-        assert.isEqual(
-            FakeAutocommit.callsToConstructor.filter(
-                (call) =>
-                    call?.commitMessage ===
-                    `patch: add build dir to gitignore (@neurodevs/meta-node: ${this.metaNodeVersion})`
-            ).length,
-            1,
-            'Did not commit gitignore changes once!'
-        )
-    }
-
-    @test()
-    protected static async doesNotCommitUpdateTsconfigIfDone() {
-        await this.runTwice()
-
-        assert.isEqual(
-            FakeAutocommit.callsToConstructor.filter(
-                (call) =>
-                    call?.commitMessage ===
-                    `patch: update tsconfig (@neurodevs/meta-node: ${this.metaNodeVersion})`
-            ).length,
-            1,
-            'Did not commit tsconfig changes once!'
         )
     }
 
