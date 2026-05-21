@@ -420,6 +420,7 @@ export default prettierConfigNdx
                 'dependencies',
                 'devDependencies',
                 'peerDependencies',
+                'resolutions',
                 'jest',
             ]
         )

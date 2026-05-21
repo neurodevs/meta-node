@@ -107,6 +107,7 @@ export default class AbstractAutopackageTest extends AbstractPackageTest {
         peerDependencies: {
             customPeerDependency: '^1.0.0',
         },
+        resolutions: {},
         jest: {
             ['customOption']: this.customJestOption,
         },
@@ -129,6 +130,7 @@ export default class AbstractAutopackageTest extends AbstractPackageTest {
                 ...this.packageJsonCustom.devDependencies,
             },
             peerDependencies: this.packageJsonCustom.peerDependencies,
+            resolutions: {},
             jest: {
                 ...this.packageJsonTemplate.jest,
                 ...this.packageJsonCustom.jest,
@@ -152,6 +154,7 @@ export default class AbstractAutopackageTest extends AbstractPackageTest {
             'dependencies',
             'devDependencies',
             'peerDependencies',
+            'resolutions',
             'jest',
         ]
     )
