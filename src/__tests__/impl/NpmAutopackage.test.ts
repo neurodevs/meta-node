@@ -816,6 +816,23 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
+    protected static async doesNotInstallSettingsJsonFileIfContentsEqual() {
+        setFakeReadFileResult(this.settingsJsonPath, this.settingsJsonFile)
+
+        await this.run()
+
+        const calls = callsToWriteFile.filter(
+            (call) => call.file === this.settingsJsonPath
+        )
+
+        assert.isEqual(
+            calls.length,
+            0,
+            'Should not install settings.json if contents are equal!'
+        )
+    }
+
+    @test()
     protected static async doesNotCommitIfNoChanges() {
         setFakeExecResult('git status --porcelain', {
             stdout: '',
@@ -1016,19 +1033,18 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
-    protected static async doesNotInstallSettingsJsonFileIfContentsEqual() {
-        setFakeReadFileResult(this.settingsJsonPath, this.settingsJsonFile)
+    protected static async doesNotInstallNvmrcFileIfInstalled() {
+        const nvmrcPath = path.join(this.packageDir, '.nvmrc')
+        setFakeReadFileResult(nvmrcPath, this.nvmrcFile)
 
         await this.run()
 
-        const calls = callsToWriteFile.filter(
-            (call) => call.file === this.settingsJsonPath
-        )
+        const calls = callsToWriteFile.filter((call) => call.file === nvmrcPath)
 
         assert.isEqual(
             calls.length,
             0,
-            'Should not install settings.json if contents are equal!'
+            'Should not install .nvmrc if already installed!'
         )
     }
 

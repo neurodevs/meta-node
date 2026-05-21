@@ -24,19 +24,14 @@ export default class NpmAutopackage implements Autopackage {
 
     private originalPackageJson?: Record<string, unknown>
     private originalGitignore?: string
-
     private originalTsconfig?: TsConfig
-    private metaNodeVersion?: string
-
+    private originalTasksJson?: TasksJson
+    private originalSettingsJson?: string
     private originalEslintConfig?: string
     private originalPrettierConfig?: string
-    private originalSettingsJson?: string
+    private originalNvmrc?: string
 
-    private originalTasksJson?: {
-        tasks: unknown[]
-        inputs: unknown[]
-        [key: string]: unknown
-    }
+    private metaNodeVersion?: string
 
     private shouldOpenVscode = false
 
@@ -978,10 +973,19 @@ export default prettierConfigNdx
 
     private async installNvmrcFile() {
         const nvmrcPath = path.join(this.packageDir, '.nvmrc')
+        this.originalNvmrc = await this.readUtf8(nvmrcPath)
 
-        await this.writeFile(nvmrcPath, 'lts/*\n', {
-            encoding: 'utf-8',
-        })
+        if (this.originalNvmrc?.trim() !== this.nvmrcFile.trim()) {
+            console.info('Installing .nvmrc...')
+
+            await this.writeFile(nvmrcPath, this.nvmrcFile, {
+                encoding: 'utf-8',
+            })
+        }
+    }
+
+    private get nvmrcFile() {
+        return 'lts/*\n'
     }
 
     private async fixEslintAndPrettier() {
@@ -1074,5 +1078,11 @@ export interface TsConfig {
         [key: string]: unknown
     }
     include?: string[]
+    [key: string]: unknown
+}
+
+export interface TasksJson {
+    tasks: unknown[]
+    inputs: unknown[]
     [key: string]: unknown
 }
