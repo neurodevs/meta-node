@@ -46,6 +46,7 @@ export default class NpmAutopackage implements Autopackage {
     private readonly packageJsonPath: string
     private readonly gitignorePath: string
     private readonly tsconfigPath: string
+    private readonly vscodeDir: string
     private readonly tasksJsonPath: string
     private readonly testsDir: string
     private readonly abstractTestPath: string
@@ -161,7 +162,8 @@ export default prettierConfigNdx
         this.packageJsonPath = path.join(this.packageDir, 'package.json')
         this.gitignorePath = path.join(this.packageDir, '.gitignore')
         this.tsconfigPath = path.join(this.packageDir, 'tsconfig.json')
-        this.tasksJsonPath = path.join(this.packageDir, '.vscode/tasks.json')
+        this.vscodeDir = path.join(this.packageDir, '.vscode')
+        this.tasksJsonPath = path.join(this.vscodeDir, 'tasks.json')
         this.testsDir = path.join(this.packageDir, 'src', '__tests__')
 
         this.abstractTestPath = path.join(
@@ -198,12 +200,11 @@ export default prettierConfigNdx
         await this.updatePackageJson()
         await this.updateGitignore()
         await this.updateTsconfig()
-        await this.updateVscodeTasks()
+        await this.updateVscode()
         await this.installDefaultDevDependencies()
         await this.installAbstractPackageTest()
         await this.installEslintConfigFile()
         await this.installPrettierConfigFile()
-        await this.installSettingsJsonFile()
         await this.fixEslintAndPrettier()
         await this.commitChangesIfPresent()
         await this.openVscode()
@@ -602,6 +603,13 @@ export default prettierConfigNdx
         }
     }
 
+    private async updateVscode() {
+        await this.mkdir(this.vscodeDir, { recursive: true })
+
+        await this.updateVscodeTasks()
+        await this.installSettingsJsonFile()
+    }
+
     private async updateVscodeTasks() {
         this.originalTasksJson = await this.readJson(this.tasksJsonPath)
 
@@ -755,6 +763,30 @@ export default prettierConfigNdx
                 },
             ],
         }
+    }
+
+    private async installSettingsJsonFile() {
+        this.originalSettingsJson = await this.loadSettingsJsonFile()
+
+        if (!this.settingsJsonIsUpToDate) {
+            console.info('Installing .vscode/settings.json...')
+
+            await this.writeFile(this.settingsJsonPath, this.settingsJsonFile, {
+                encoding: 'utf-8',
+            })
+        }
+    }
+
+    private async loadSettingsJsonFile() {
+        return await this.readFile(this.settingsJsonPath, {
+            encoding: 'utf-8',
+        }).catch(() => undefined)
+    }
+
+    private get settingsJsonIsUpToDate() {
+        return (
+            this.originalSettingsJson?.trim() === this.settingsJsonFile.trim()
+        )
     }
 
     private async installDefaultDevDependencies() {
@@ -938,30 +970,6 @@ export default prettierConfigNdx
             this.originalPrettierConfig?.trim() !==
                 this.prettierConfigFile.trim() &&
             this.packageName !== 'prettier-config-ndx'
-        )
-    }
-
-    private async installSettingsJsonFile() {
-        this.originalSettingsJson = await this.loadSettingsJsonFile()
-
-        if (!this.settingsJsonIsUpToDate) {
-            console.info('Installing .vscode/settings.json...')
-
-            await this.writeFile(this.settingsJsonPath, this.settingsJsonFile, {
-                encoding: 'utf-8',
-            })
-        }
-    }
-
-    private async loadSettingsJsonFile() {
-        return await this.readFile(this.settingsJsonPath, {
-            encoding: 'utf-8',
-        }).catch(() => undefined)
-    }
-
-    private get settingsJsonIsUpToDate() {
-        return (
-            this.originalSettingsJson?.trim() === this.settingsJsonFile.trim()
         )
     }
 

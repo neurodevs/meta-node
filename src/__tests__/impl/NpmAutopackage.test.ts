@@ -203,14 +203,48 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
+    protected static async createsVscodeDirectory() {
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToMkdir[0],
+            {
+                path: path.join(this.packageDir, '.vscode'),
+                options: { recursive: true },
+            },
+            'Did not create .vscode directory!'
+        )
+    }
+
+    @test()
     protected static async thenUpdatesVscodeTasksJson() {
         await this.run()
 
-        assert.isEqualDeep(callsToWriteFile[3], {
-            file: this.tasksJsonPath,
-            data: this.updatedTasksJson,
-            options: { encoding: 'utf-8' },
-        })
+        assert.isEqualDeep(
+            callsToWriteFile[3],
+            {
+                file: this.tasksJsonPath,
+                data: this.updatedTasksJson,
+                options: { encoding: 'utf-8' },
+            },
+            'Did not update .vscode/tasks.json as expected!'
+        )
+    }
+
+    @test()
+    protected static async thenUpdatesSettingsJsonFile() {
+        this.setShouldInstallDevDeps()
+        await this.run()
+
+        assert.isEqualDeep(
+            callsToWriteFile[4],
+            {
+                file: this.settingsJsonPath,
+                data: this.settingsJsonFile,
+                options: { encoding: 'utf-8' },
+            },
+            'Did not update .vscode/settings.json!'
+        )
     }
 
     @test()
@@ -233,7 +267,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToMkdir[0],
+            callsToMkdir[1],
             {
                 path: this.testsDir,
                 options: { recursive: true },
@@ -248,7 +282,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToWriteFile[4],
+            callsToWriteFile[5],
             {
                 file: this.abstractTestPath,
                 data: this.abstractTestFile,
@@ -264,7 +298,7 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToWriteFile[5],
+            callsToWriteFile[6],
             {
                 file: this.eslintConfigPath,
                 data: this.eslintConfigFile,
@@ -280,29 +314,13 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
         await this.run()
 
         assert.isEqualDeep(
-            callsToWriteFile[6],
+            callsToWriteFile[7],
             {
                 file: this.prettierConfigPath,
                 data: this.prettierConfigFile,
                 options: { encoding: 'utf-8' },
             },
             'Did not install prettier.config.js!'
-        )
-    }
-
-    @test()
-    protected static async thenInstallsSettingsJsonFile() {
-        this.setShouldInstallDevDeps()
-        await this.run()
-
-        assert.isEqualDeep(
-            callsToWriteFile[7],
-            {
-                file: this.settingsJsonPath,
-                data: this.settingsJsonFile,
-                options: { encoding: 'utf-8' },
-            },
-            'Did not install settings.json!'
         )
     }
 
