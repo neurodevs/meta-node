@@ -1080,6 +1080,35 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
+    protected static async overridesOldBuildDevScriptWithTemplateValue() {
+        setFakeReadFileResult(
+            this.packageJsonPath,
+            JSON.stringify({
+                ...this.packageJsonCustom,
+                scripts: {
+                    ...this.packageJsonCustom.scripts,
+                    'build.dev':
+                        'yarn run build.tsc --sourceMap ; yarn run fix.lint ; prettier --write .',
+                },
+            })
+        )
+
+        await this.run()
+
+        const packageJsonWrites = callsToWriteFile.filter(
+            (call) => call.file === this.packageJsonPath
+        )
+
+        const json = JSON.parse(packageJsonWrites[0].data)
+
+        assert.isEqual(
+            json.scripts['build.dev'],
+            'yarn run build.tsc --sourceMap ; yarn run fix.lint ; prettier --write . --log-level warn',
+            'Did not override old build.dev script with updated template value!'
+        )
+    }
+
+    @test()
     protected static async doesNotDeleteModuleNameMapperIfOtherKeysPresent() {
         const moduleNameMapperKey = this.generateId()
 

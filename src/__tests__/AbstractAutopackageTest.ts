@@ -118,8 +118,8 @@ export default class AbstractAutopackageTest extends AbstractPackageTest {
             ...this.packageJsonTemplate,
             ...this.packageJsonCustom,
             scripts: {
-                ...this.packageJsonTemplate.scripts,
                 ...this.packageJsonCustom.scripts,
+                ...this.packageJsonTemplate.scripts,
             },
             dependencies: {
                 ...this.packageJsonTemplate.dependencies,

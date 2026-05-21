@@ -391,8 +391,8 @@ export default prettierConfigNdx
                 ...this.packageJsonTemplate,
                 ...this.originalPackageJson,
                 scripts: {
-                    ...this.packageJsonTemplate.scripts,
                     ...(this.originalPackageJson?.scripts || {}),
+                    ...this.packageJsonTemplate.scripts,
                 },
                 dependencies: {
                     ...this.packageJsonTemplate.dependencies,
