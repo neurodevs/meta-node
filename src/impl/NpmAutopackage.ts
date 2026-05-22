@@ -563,7 +563,9 @@ export default prettierConfigNdx
                 new Set([
                     './src/*.ts',
                     './src/**/*.ts',
-                    ...(this.originalTsconfig?.include ?? []),
+                    ...(this.originalTsconfig?.include ?? []).map((p) =>
+                        p.startsWith('./') ? p : `./${p}`
+                    ),
                 ])
             ),
         }

@@ -223,10 +223,14 @@ export default class AbstractAutopackageTest extends AbstractPackageTest {
                 ...(this.tsconfigCustom.compilerOptions?.types || []),
             ],
         },
-        include: [
-            ...(this.tsconfigTemplate.include || []),
-            ...(this.tsconfigCustom.include || []),
-        ],
+        include: Array.from(
+            new Set([
+                ...(this.tsconfigTemplate.include || []),
+                ...(this.tsconfigCustom.include || []).map((p) =>
+                    p.startsWith('./') ? p : `./${p}`
+                ),
+            ])
+        ),
     }
 
     protected static readonly tasksJsonPath = path.join(

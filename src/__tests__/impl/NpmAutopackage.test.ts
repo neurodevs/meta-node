@@ -618,6 +618,31 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
+    protected static async doesNotDuplicateTsconfigIncludesWhenExistingPathLacksLeadingDotSlash() {
+        setFakeReadFileResult(
+            this.tsconfigPath,
+            JSON.stringify({
+                ...this.tsconfigCustom,
+                include: ['src/*.ts', 'src/**/*.ts'],
+            })
+        )
+
+        await this.run()
+
+        const tsconfigWrites = callsToWriteFile.filter(
+            (call) => call.file === this.tsconfigPath
+        )
+
+        const json = JSON.parse(tsconfigWrites[0].data)
+
+        assert.isEqualDeep(
+            json.include,
+            ['./src/*.ts', './src/**/*.ts'],
+            'Should not duplicate include paths when existing tsconfig uses paths without leading ./'
+        )
+    }
+
+    @test()
     protected static async createsTsconfigFromTemplateWhenItDoesNotExist() {
         setFakeReadFileThrowsFor(this.tsconfigPath)
 
