@@ -1153,6 +1153,69 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
+    protected static async doesNotInstallSelfAsDevDependency() {
+        this.setShouldInstallDevDeps()
+
+        const nodeTddPackageDir = path.join(this.installDir, 'node-tdd')
+        const nodeTddPackageJsonPath = path.join(
+            nodeTddPackageDir,
+            'package.json'
+        )
+
+        setFakeFetchResponse(
+            `https://api.github.com/repos/${this.gitNamespace}/node-tdd`,
+            new Response(null, { status: 404, statusText: 'Not Found' })
+        )
+
+        setFakeReadFileResult(
+            nodeTddPackageJsonPath,
+            JSON.stringify(this.packageJsonCustom)
+        )
+
+        setFakeReadFileResult(
+            path.join(nodeTddPackageDir, 'tsconfig.json'),
+            JSON.stringify(this.tsconfigCustom)
+        )
+
+        setFakeReadFileResult(
+            path.join(nodeTddPackageDir, '.vscode', 'tasks.json'),
+            JSON.stringify(this.tasksJsonCustom)
+        )
+
+        setFakeReadFileResult(
+            path.join(nodeTddPackageDir, '.gitignore'),
+            this.gitignoreCustom
+        )
+
+        setPathShouldExist(
+            path.join(nodeTddPackageDir, 'src', '__tests__'),
+            true
+        )
+
+        const instance = this.NpmAutopackage({
+            name: 'node-tdd',
+            npmNamespace: 'neurodevs',
+        })
+
+        await instance.run()
+
+        const installCalls = callsToExec.filter((call) =>
+            call?.command?.startsWith('yarn add -D')
+        )
+
+        assert.isEqual(
+            installCalls.length,
+            1,
+            'Should have called yarn add -D!'
+        )
+
+        assert.isFalse(
+            installCalls[0].command.includes('@neurodevs/node-tdd'),
+            'Should not install self (@neurodevs/node-tdd) as a devDependency!'
+        )
+    }
+
+    @test()
     protected static async doesNotDeleteModuleNameMapperIfOtherKeysPresent() {
         const moduleNameMapperKey = this.generateId()
 

@@ -883,32 +883,57 @@ export default prettierConfigNdx
             return
         }
 
-        const generateIdVersion = await this.getLatestVersion(
-            '@neurodevs/generate-id'
+        const allDefaultDevDeps = [
+            '@neurodevs/generate-id',
+            '@neurodevs/node-tdd',
+            '@neurodevs/eslint-config-ndx',
+            '@neurodevs/prettier-config-ndx',
+            'prettier',
+        ]
+
+        const scopedName = this.npmNamespace
+            ? `@${this.npmNamespace}/${this.packageName}`
+            : this.packageName
+
+        const devDepsToInstall = allDefaultDevDeps.filter(
+            (dep) => dep !== scopedName
         )
 
-        const nodeTddVersion = await this.getLatestVersion(
-            '@neurodevs/node-tdd'
-        )
+        const [
+            generateIdVersion,
+            nodeTddVersion,
+            eslintConfigNdxVersion,
+            prettierConfigNdxVersion,
+        ] = await Promise.all([
+            devDepsToInstall.includes('@neurodevs/generate-id')
+                ? this.getLatestVersion('@neurodevs/generate-id')
+                : Promise.resolve(null),
+            devDepsToInstall.includes('@neurodevs/node-tdd')
+                ? this.getLatestVersion('@neurodevs/node-tdd')
+                : Promise.resolve(null),
+            devDepsToInstall.includes('@neurodevs/eslint-config-ndx')
+                ? this.getLatestVersion('@neurodevs/eslint-config-ndx')
+                : Promise.resolve(null),
+            devDepsToInstall.includes('@neurodevs/prettier-config-ndx')
+                ? this.getLatestVersion('@neurodevs/prettier-config-ndx')
+                : Promise.resolve(null),
+        ])
 
-        const eslintConfigNdxVersion = await this.getLatestVersion(
-            '@neurodevs/eslint-config-ndx'
-        )
+        const needsUpdate =
+            (generateIdVersion !== null &&
+                this.currentGenerateIdVersion != generateIdVersion) ||
+            (nodeTddVersion !== null &&
+                this.currentNodeTddVersion != nodeTddVersion) ||
+            (eslintConfigNdxVersion !== null &&
+                this.currentEslintConfigNdxVersion != eslintConfigNdxVersion) ||
+            (prettierConfigNdxVersion !== null &&
+                this.currentPrettierConfigNdxVersion != prettierConfigNdxVersion)
 
-        const prettierConfigNdxVersion = await this.getLatestVersion(
-            '@neurodevs/prettier-config-ndx'
-        )
-
-        if (
-            this.currentGenerateIdVersion != generateIdVersion ||
-            this.currentNodeTddVersion != nodeTddVersion ||
-            this.currentEslintConfigNdxVersion != eslintConfigNdxVersion ||
-            this.currentPrettierConfigNdxVersion != prettierConfigNdxVersion
-        ) {
+        if (needsUpdate) {
             console.info('Installing default devDependencies...')
 
             await this.exec(
-                'yarn add -D @neurodevs/generate-id @neurodevs/node-tdd @neurodevs/eslint-config-ndx @neurodevs/prettier-config-ndx prettier',
+                `yarn add -D ${devDepsToInstall.join(' ')}`,
                 { cwd: this.packageDir }
             )
         }
