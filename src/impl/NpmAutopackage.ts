@@ -927,15 +927,15 @@ export default prettierConfigNdx
             (eslintConfigNdxVersion !== null &&
                 this.currentEslintConfigNdxVersion != eslintConfigNdxVersion) ||
             (prettierConfigNdxVersion !== null &&
-                this.currentPrettierConfigNdxVersion != prettierConfigNdxVersion)
+                this.currentPrettierConfigNdxVersion !=
+                    prettierConfigNdxVersion)
 
         if (needsUpdate) {
             console.info('Installing default devDependencies...')
 
-            await this.exec(
-                `yarn add -D ${devDepsToInstall.join(' ')}`,
-                { cwd: this.packageDir }
-            )
+            await this.exec(`yarn add -D ${devDepsToInstall.join(' ')}`, {
+                cwd: this.packageDir,
+            })
         }
     }
 
