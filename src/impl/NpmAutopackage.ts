@@ -1,7 +1,8 @@
-import { exec as execSync } from 'child_process'
-import { mkdir, readFile, writeFile } from 'fs/promises'
-import path from 'path'
-import { promisify } from 'util'
+import { exec as execSync } from 'node:child_process'
+import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import path from 'node:path'
+import { promisify } from 'node:util'
+
 import { pathExists } from 'fs-extra'
 
 import GitAutocommit from './GitAutocommit.js'

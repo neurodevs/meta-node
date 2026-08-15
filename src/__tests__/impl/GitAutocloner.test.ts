@@ -1,4 +1,6 @@
-import { ChildProcess } from 'child_process'
+import { ChildProcess } from 'node:child_process'
+
+import { pathExists } from 'fs-extra'
 import {
     callsToExec,
     fakeExec,
@@ -8,7 +10,6 @@ import {
     setPathShouldExist,
 } from '@neurodevs/fake-node-core'
 import { test, assert } from '@neurodevs/node-tdd'
-import { pathExists } from 'fs-extra'
 
 import GitAutocloner, {
     Autocloner,

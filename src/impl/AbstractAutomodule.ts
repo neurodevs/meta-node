@@ -1,6 +1,7 @@
-import { exec as execSync } from 'child_process'
-import { readFile, writeFile } from 'fs/promises'
-import { promisify } from 'util'
+import { exec as execSync } from 'node:child_process'
+import { readFile, writeFile } from 'node:fs/promises'
+import { promisify } from 'node:util'
+
 import { pathExists } from 'fs-extra'
 
 import { Automodule, BaseAutomoduleOptions } from '../types.js'

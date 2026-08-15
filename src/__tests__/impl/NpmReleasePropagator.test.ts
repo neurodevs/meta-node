@@ -1,13 +1,17 @@
 import { ChildProcess } from 'node:child_process'
 import { readFile } from 'node:fs/promises'
 import { Readable } from 'node:stream'
+
 import {
+    callsToError,
     callsToExec,
+    fakeConsole,
     fakeExec,
     fakeReadFile,
     resetCallsToExec,
     resetCallsToReadFile,
     resetExecThrowsFor,
+    resetFakeConsole,
     setExecThrowsFor,
     setFakeExecResult,
     setFakeReadFileResult,
@@ -27,12 +31,18 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
 
     private static readonly repoPaths = [this.generateId(), this.generateId()]
 
+    private static readonly defaultConcurrency = 4
+
+    private static readonly typeErrorSummaryPrefix = 'Type errors detected'
+    private static readonly failureSummaryPrefix = 'Failed to propagate'
+
     protected static async beforeEach() {
         await super.beforeEach()
 
         this.setFakeExec()
         this.setFakeReadFile()
         this.setFakeAutocommit()
+        this.setFakeError()
 
         this.instance = this.NpmReleasePropagator()
     }
@@ -114,11 +124,7 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
     protected static async rollsBackInstallIfThereAreTypeErrors() {
         setExecThrowsFor(`npx tsc --noEmit`)
 
-        try {
-            await this.run()
-        } catch (_error) {
-            // Expected to throw
-        }
+        await this.run()
 
         const rollbackCall = callsToExec.find(
             (call) =>
@@ -159,6 +165,143 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
     }
 
     @test()
+    protected static async logsReposWithTypeErrorsOnceAllHaveSettled() {
+        setExecThrowsFor(`npx tsc --noEmit`)
+
+        await this.run()
+
+        const summary = this.findLoggedError(this.typeErrorSummaryPrefix)
+
+        assert.isTruthy(
+            summary,
+            'Did not log a summary of repos with type errors!'
+        )
+
+        for (const repoPath of this.repoPaths) {
+            assert.isTrue(
+                summary!.includes(repoPath),
+                `Did not include ${repoPath} in the type error summary!`
+            )
+        }
+    }
+
+    @test()
+    protected static async doesNotLogTypeErrorSummaryWhenAllSucceed() {
+        await this.run()
+
+        assert.isFalsy(
+            this.findLoggedError(this.typeErrorSummaryPrefix),
+            'Should not have logged a type error summary!'
+        )
+    }
+
+    @test()
+    protected static async failedRepoDoesNotInterruptOtherRepos() {
+        setExecThrowsFor(`yarn add ${this.packageName}@${this.packageVersion}`)
+
+        await this.run()
+
+        const installCall = callsToExec.find(
+            (call) =>
+                call.command ===
+                    `yarn add -D ${this.packageName}@${this.packageVersion}` &&
+                call.options?.cwd === this.repoPaths[1]
+        )
+
+        assert.isTruthy(
+            installCall,
+            'Failure in one repo should not interrupt the others!'
+        )
+
+        assert.isEqualDeep(
+            FakeAutocommit.callsToConstructor,
+            [
+                {
+                    commitMessage: `patch: propagate ${this.packageName}@${this.packageVersion} (@neurodevs/meta-node: ${this.metaNodeVersion})`,
+                    cwd: this.repoPaths[1],
+                },
+            ],
+            'Should still have committed the repo that succeeded!'
+        )
+    }
+
+    @test()
+    protected static async logsReposThatFailedToPropagate() {
+        setExecThrowsFor(`yarn add ${this.packageName}@${this.packageVersion}`)
+
+        await this.run()
+
+        const summary = this.findLoggedError(this.failureSummaryPrefix)
+
+        assert.isTruthy(summary, 'Did not log a summary of failed repos!')
+
+        assert.isTrue(
+            summary!.includes(this.repoPaths[0]),
+            `Did not include ${this.repoPaths[0]} in the failure summary!`
+        )
+
+        assert.isFalse(
+            summary!.includes(this.repoPaths[1]),
+            `Should not have included the repo that succeeded!`
+        )
+    }
+
+    @test()
+    protected static async boundsHowManyReposInstallAtOnce() {
+        const repoPaths = this.setFakeReposForConcurrency(6)
+
+        const instance = this.NpmReleasePropagator({
+            repoPaths,
+            concurrency: 2,
+        })
+
+        await instance.run()
+
+        assert.isEqual(
+            this.maxConcurrentInstalls,
+            2,
+            'Did not bound how many repos install at once!'
+        )
+    }
+
+    @test()
+    protected static async boundsConcurrencyByDefault() {
+        const repoPaths = this.setFakeReposForConcurrency(12)
+
+        const instance = this.NpmReleasePropagator({ repoPaths })
+
+        await instance.run()
+
+        assert.isEqual(
+            this.maxConcurrentInstalls,
+            this.defaultConcurrency,
+            'Did not bound concurrency by default!'
+        )
+    }
+
+    @test()
+    protected static async stillPropagatesToEveryRepoWhenBounded() {
+        const repoPaths = this.setFakeReposForConcurrency(6)
+
+        const instance = this.NpmReleasePropagator({
+            repoPaths,
+            concurrency: 2,
+        })
+
+        await instance.run()
+
+        const installCalls = callsToExec.filter((call) =>
+            call.command.includes('yarn add')
+        )
+
+        assert.isEqual(
+            installCalls.length,
+            repoPaths.length,
+            'Did not propagate to every repo path!'
+        )
+    }
+
+    @test()
     protected static async throwsIfRepoDoesNotHavePreviousRelease() {
         const missingPackageName = this.generateId()
 
@@ -193,6 +336,74 @@ Please commit or stash these changes before running propagation!
 
     private static async run() {
         await this.instance.run()
+    }
+
+    private static findLoggedError(prefix: string) {
+        const call = callsToError.find((call) =>
+            String(call.message).includes(prefix)
+        )
+
+        return call ? String(call.message) : undefined
+    }
+
+    private static maxConcurrentInstalls = 0
+
+    private static setFakeReposForConcurrency(count: number) {
+        const repoPaths = Array.from({ length: count }, () => this.generateId())
+
+        for (const repoPath of repoPaths) {
+            setFakeReadFileResult(
+                `${repoPath}/package.json`,
+                JSON.stringify(
+                    this.generatePackageJson({
+                        devDependencies: {
+                            [this.packageName]: '2.0.0',
+                        },
+                    })
+                )
+            )
+        }
+
+        this.setFakeExecThatTracksConcurrency()
+
+        return repoPaths
+    }
+
+    private static setFakeExecThatTracksConcurrency() {
+        let numInFlight = 0
+        this.maxConcurrentInstalls = 0
+
+        NpmReleasePropagator.exec = (async (
+            command: string,
+            options?: Record<string, unknown>
+        ) => {
+            if (!command.startsWith('yarn add')) {
+                return fakeExec(command, options)
+            }
+
+            numInFlight++
+
+            this.maxConcurrentInstalls = Math.max(
+                this.maxConcurrentInstalls,
+                numInFlight
+            )
+
+            try {
+                await this.waitForOtherInstallsToStart()
+                return await fakeExec(command, options)
+            } finally {
+                numInFlight--
+            }
+        }) as unknown as typeof this.exec
+    }
+
+    private static async waitForOtherInstallsToStart() {
+        await new Promise((resolve) => setTimeout(resolve, 10))
+    }
+
+    private static setFakeError() {
+        NpmReleasePropagator.log = fakeConsole
+        resetFakeConsole()
     }
 
     private static setFakeExec() {

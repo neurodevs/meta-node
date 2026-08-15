@@ -11,13 +11,19 @@ export default class NpmReleasePropagator implements ReleasePropagator {
     public static Class?: ReleasePropagatorConstructor
     public static exec = promisify(execSync)
     public static readFile = readFile
+    public static log = console
+
+    private readonly defaultConcurrency = 4
 
     private packageName: string
     private packageVersion: string
     private repoPaths: string[]
     private shouldGitCommit: boolean
+    private concurrency: number
 
     private metaNodeVersion!: string
+    private reposWithTypeErrors: string[] = []
+    private failures: PropagationFailure[] = []
 
     protected constructor(options: ReleasePropagatorOptions) {
         const {
@@ -25,12 +31,14 @@ export default class NpmReleasePropagator implements ReleasePropagator {
             packageVersion,
             repoPaths,
             shouldGitCommit = true,
+            concurrency,
         } = options
 
         this.packageName = packageName
         this.packageVersion = packageVersion
         this.repoPaths = repoPaths
         this.shouldGitCommit = shouldGitCommit
+        this.concurrency = concurrency ?? this.defaultConcurrency
     }
 
     public static Create(options: ReleasePropagatorOptions) {
@@ -39,15 +47,20 @@ export default class NpmReleasePropagator implements ReleasePropagator {
 
     public async run() {
         await this.throwIfUncommittedGitChanges()
+        await this.throwIfMissingPreviousRelease()
         await this.setCurrentMetaNodeVersion()
 
-        console.info('Starting propagation...\n')
+        this.log.info('Starting propagation...\n')
 
-        await Promise.all(
-            this.repoPaths.map((repoPath) => this.runFor(repoPath))
-        )
+        this.reposWithTypeErrors = []
+        this.failures = []
 
-        console.info('\nPropagation complete!\n')
+        await this.runWithBoundedConcurrency()
+
+        this.logReposWithTypeErrors()
+        this.logReposThatFailed()
+
+        this.log.info('\nPropagation complete!\n')
     }
 
     private async throwIfUncommittedGitChanges() {
@@ -78,6 +91,31 @@ Please commit or stash these changes before running propagation!
         `
     }
 
+    private async throwIfMissingPreviousRelease() {
+        for (const repoPath of this.repoPaths) {
+            const pkg = await this.loadPackageJsonFor(repoPath)
+            this.throwIfNoPreviousReleaseFor(pkg)
+        }
+    }
+
+    private async loadPackageJsonFor(repoPath: string) {
+        const raw = await this.readFile(`${repoPath}/package.json`, 'utf-8')
+        return JSON.parse(raw)
+    }
+
+    private throwIfNoPreviousReleaseFor(pkg: PackageJson) {
+        const { dependencies, devDependencies } = pkg
+
+        const isDependency = Boolean(dependencies?.[this.packageName])
+        const isDevDependency = Boolean(devDependencies?.[this.packageName])
+
+        if (!(isDependency || isDevDependency)) {
+            throw new Error(
+                `Cannot propagate release for ${this.packageName} because it is not listed in either dependencies or devDependencies! Please install it in the target repository before running propagation.`
+            )
+        }
+    }
+
     private async setCurrentMetaNodeVersion() {
         const globalRoot = await this.exec('yarn global dir')
 
@@ -95,46 +133,59 @@ Please commit or stash these changes before running propagation!
         this.metaNodeVersion = pkg.version
     }
 
+    private async runWithBoundedConcurrency() {
+        const queue = [...this.repoPaths]
+        const numWorkers = Math.min(this.concurrency, queue.length)
+
+        await Promise.all(
+            Array.from({ length: numWorkers }, () =>
+                this.runUntilQueueIsEmpty(queue)
+            )
+        )
+    }
+
+    private async runUntilQueueIsEmpty(queue: string[]) {
+        while (queue.length > 0) {
+            const repoPath = queue.shift()!
+            await this.tryRunFor(repoPath)
+        }
+    }
+
+    private async tryRunFor(repoPath: string) {
+        try {
+            await this.runFor(repoPath)
+        } catch (err) {
+            this.failures.push({
+                repoPath,
+                message: (err as Error).message,
+            })
+        }
+    }
+
     private async runFor(repoPath: string) {
         const pkg = await this.loadPackageJsonFor(repoPath)
-        this.throwIfNoPreviousReleaseFor(pkg)
 
         const isUpToDate = this.isUpToDateFor(pkg)
 
         if (isUpToDate) {
-            console.info(`Already up to date, skipping ${repoPath}...`)
+            this.log.info(`Already up to date, skipping ${repoPath}...`)
             return
         }
 
-        console.info(`Propagating to ${repoPath}...`)
+        this.log.info(`Propagating to ${repoPath}...`)
         await this.installReleaseFor(repoPath, pkg)
 
         const hasTypeErrors = await this.checkTypeErrorsFor(repoPath)
 
         if (hasTypeErrors) {
-            console.warn(`Type errors detected! Rolling back ${repoPath}...`)
+            this.log.warn(`Rolling back ${repoPath} due to type errors...`)
+            this.reposWithTypeErrors.push(repoPath)
             await this.rollbackInstallationFor(repoPath)
             return
         }
 
         if (this.shouldGitCommit) {
             await this.gitCommitChangesFor(repoPath)
-        }
-    }
-
-    private async loadPackageJsonFor(repoPath: string) {
-        const raw = await this.readFile(`${repoPath}/package.json`, 'utf-8')
-        return JSON.parse(raw)
-    }
-
-    private throwIfNoPreviousReleaseFor(pkg: PackageJson) {
-        const isDependency = Boolean(pkg.dependencies?.[this.packageName])
-        const isDevDependency = Boolean(pkg.devDependencies?.[this.packageName])
-
-        if (!(isDependency || isDevDependency)) {
-            throw new Error(
-                `Cannot propagate release for ${this.packageName} because it is not listed in either dependencies or devDependencies! Please install it in the target repository before running propagation.`
-            )
         }
     }
 
@@ -190,12 +241,40 @@ Please commit or stash these changes before running propagation!
         )
     }
 
+    private logReposWithTypeErrors() {
+        if (this.reposWithTypeErrors.length === 0) {
+            return
+        }
+
+        this.log.error(
+            `\nType errors detected in the following repositor${this.reposWithTypeErrors.length > 1 ? 'ies' : 'y'}, so their changes were rolled back:\n\n\t - ${this.reposWithTypeErrors.join('\n\t - ')}\n`
+        )
+    }
+
+    private logReposThatFailed() {
+        if (this.failures.length === 0) {
+            return
+        }
+
+        const details = this.failures.map(
+            ({ repoPath, message }) => `${repoPath}: ${message}`
+        )
+
+        this.log.error(
+            `\nFailed to propagate to the following repositor${this.failures.length > 1 ? 'ies' : 'y'}:\n\n\t - ${details.join('\n\t - ')}\n`
+        )
+    }
+
     private get exec() {
         return NpmReleasePropagator.exec
     }
 
     private get readFile() {
         return NpmReleasePropagator.readFile
+    }
+
+    private get log() {
+        return NpmReleasePropagator.log
     }
 
     private GitAutocommit(commitMessage: string, repoPath: string) {
@@ -216,6 +295,12 @@ export interface ReleasePropagatorOptions {
     packageVersion: string
     repoPaths: string[]
     shouldGitCommit?: boolean
+    concurrency?: number
+}
+
+export interface PropagationFailure {
+    repoPath: string
+    message: string
 }
 
 export interface PackageJson {

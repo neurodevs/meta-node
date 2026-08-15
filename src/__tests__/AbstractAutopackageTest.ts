@@ -1,4 +1,4 @@
-import path from 'path'
+import path from 'node:path'
 
 import AbstractPackageTest from './AbstractPackageTest.js'
 import { TsConfig } from '../impl/NpmAutopackage.js'

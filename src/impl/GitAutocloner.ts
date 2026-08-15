@@ -1,5 +1,6 @@
-import { exec as execSync } from 'child_process'
-import { promisify } from 'util'
+import { exec as execSync } from 'node:child_process'
+import { promisify } from 'node:util'
+
 import { pathExists } from 'fs-extra'
 
 export default class GitAutocloner implements Autocloner {

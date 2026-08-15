@@ -1,7 +1,8 @@
-import { ChildProcess } from 'child_process'
-import { readFile, writeFile } from 'fs/promises'
-import { mkdir } from 'fs/promises'
-import path from 'path'
+import { ChildProcess } from 'node:child_process'
+import { readFile, writeFile } from 'node:fs/promises'
+import { mkdir } from 'node:fs/promises'
+import path from 'node:path'
+
 import {
     callsToExec,
     callsToFetch,
