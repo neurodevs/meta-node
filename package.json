@@ -48,7 +48,7 @@
     "semver": "^7.7.3"
   },
   "devDependencies": {
-    "@neurodevs/eslint-config-ndx": "2.0.0",
+    "@neurodevs/eslint-config-ndx": "2.0.1",
     "@neurodevs/fake-node-core": "^0.13.0",
     "@neurodevs/generate-id": "^1.1.2",
     "@neurodevs/node-tdd": "^1.1.2",
