@@ -1,3 +1,5 @@
+export * from './types.js'
+
 // Autocloner
 
 export { default as GitAutocloner } from './impl/GitAutocloner.js'
