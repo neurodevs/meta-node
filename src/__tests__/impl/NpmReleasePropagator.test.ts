@@ -5,6 +5,7 @@ import { Readable } from 'node:stream'
 import {
     callsToError,
     callsToExec,
+    callsToWarn,
     fakeConsole,
     fakeExec,
     fakeReadFile,
@@ -121,21 +122,74 @@ export default class NpmReleasePropagatorTest extends AbstractPackageTest {
     }
 
     @test()
-    protected static async rollsBackInstallIfThereAreTypeErrors() {
+    protected static async buildsBeforeCheckingTypeErrors() {
+        await this.run()
+
+        for (const repoPath of this.repoPaths) {
+            const commands = callsToExec
+                .filter((call) => call.options?.cwd === repoPath)
+                .map((call) => call.command)
+
+            const buildIdx = commands.indexOf('yarn build.dev')
+            const typeCheckIdx = commands.indexOf('npx tsc --noEmit')
+
+            assert.isTrue(
+                buildIdx > -1,
+                `Did not run yarn build.dev for ${repoPath}!`
+            )
+
+            assert.isTrue(
+                buildIdx < typeCheckIdx,
+                `Did not run yarn build.dev before checking type errors for ${repoPath}!`
+            )
+        }
+    }
+
+    @test()
+    protected static async keepsChangesIfThereAreTypeErrors() {
         setExecThrowsFor(`npx tsc --noEmit`)
 
         await this.run()
 
-        const rollbackCall = callsToExec.find(
-            (call) =>
-                call.command === 'git reset --hard && git clean -fd' &&
-                call.options?.cwd === this.repoPaths[0]
+        const rollbackCall = callsToExec.find((call) =>
+            call.command.includes('git reset --hard')
         )
 
-        assert.isTruthy(
+        assert.isFalsy(
             rollbackCall,
-            'Expected rollback command to be called with correct cwd'
+            'Should not have rolled back changes with type errors!'
         )
+    }
+
+    @test()
+    protected static async doesNotCommitIfBuildFails() {
+        setExecThrowsFor('yarn build.dev')
+
+        await this.run()
+
+        assert.isEqual(
+            FakeAutocommit.callsToConstructor.length,
+            0,
+            'Should not have committed changes!'
+        )
+    }
+
+    @test()
+    protected static async warnsForEachRepoWithTypeErrors() {
+        setExecThrowsFor(`npx tsc --noEmit`)
+
+        await this.run()
+
+        const messages = callsToWarn.map((call) => String(call.message))
+
+        for (const repoPath of this.repoPaths) {
+            assert.isTrue(
+                messages.includes(
+                    `Skipping commit for ${repoPath} due to type errors...`
+                ),
+                `Did not warn that the commit was skipped for ${repoPath}!`
+            )
+        }
     }
 
     @test()

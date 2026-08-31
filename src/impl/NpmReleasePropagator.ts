@@ -175,12 +175,13 @@ Please commit or stash these changes before running propagation!
         this.log.info(`Propagating to ${repoPath}...`)
         await this.installReleaseFor(repoPath, pkg)
 
-        const hasTypeErrors = await this.checkTypeErrorsFor(repoPath)
+        const hasTypeErrors = await this.buildAndCheckTypeErrorsFor(repoPath)
 
         if (hasTypeErrors) {
-            this.log.warn(`Rolling back ${repoPath} due to type errors...`)
+            this.log.warn(
+                `Skipping commit for ${repoPath} due to type errors...`
+            )
             this.reposWithTypeErrors.push(repoPath)
-            await this.rollbackInstallationFor(repoPath)
             return
         }
 
@@ -217,8 +218,9 @@ Please commit or stash these changes before running propagation!
         )
     }
 
-    private async checkTypeErrorsFor(repoPath: string) {
+    private async buildAndCheckTypeErrorsFor(repoPath: string) {
         try {
+            await this.buildFor(repoPath)
             await this.exec(`npx tsc --noEmit`, {
                 cwd: repoPath,
             })
@@ -228,8 +230,8 @@ Please commit or stash these changes before running propagation!
         }
     }
 
-    private async rollbackInstallationFor(repoPath: string) {
-        await this.exec(`git reset --hard && git clean -fd`, {
+    private async buildFor(repoPath: string) {
+        await this.exec(`yarn build.dev`, {
             cwd: repoPath,
         })
     }
@@ -247,7 +249,7 @@ Please commit or stash these changes before running propagation!
         }
 
         this.log.error(
-            `\nType errors detected in the following repositor${this.reposWithTypeErrors.length > 1 ? 'ies' : 'y'}, so their changes were rolled back:\n\n\t - ${this.reposWithTypeErrors.join('\n\t - ')}\n`
+            `\nType errors detected in the following repositor${this.reposWithTypeErrors.length > 1 ? 'ies' : 'y'}, so their changes were left uncommitted for you to fix:\n\n\t - ${this.reposWithTypeErrors.join('\n\t - ')}\n`
         )
     }
 
