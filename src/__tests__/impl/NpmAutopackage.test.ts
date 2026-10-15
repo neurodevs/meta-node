@@ -701,6 +701,30 @@ export default class NpmAutopackageTest extends AbstractAutopackageTest {
     }
 
     @test()
+    protected static async removesHomepageFromExistingPackageJson() {
+        setFakeReadFileResult(
+            this.packageJsonPath,
+            JSON.stringify({
+                ...this.packageJsonCustom,
+                homepage: `https://github.com/${this.gitNamespace}/${this.packageName}`,
+            })
+        )
+
+        await this.run()
+
+        const packageJsonWrites = callsToWriteFile.filter(
+            (call) => call.file === this.packageJsonPath
+        )
+
+        const json = JSON.parse(packageJsonWrites[0].data)
+
+        assert.isUndefined(
+            json.homepage,
+            'Did not remove homepage from package.json!'
+        )
+    }
+
+    @test()
     protected static async createsPackageJsonFromTemplateWhenItDoesNotExist() {
         setFakeReadFileThrowsFor(this.packageJsonPath)
 

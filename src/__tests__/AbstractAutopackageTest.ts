@@ -56,7 +56,6 @@ export default class AbstractAutopackageTest extends AbstractPackageTest {
         license: this.license,
         author: this.author,
         main: 'build/index.js',
-        homepage: `https://github.com/${this.gitNamespace}/${this.packageName}`,
         repository: {
             type: 'git',
             url: `git+https://github.com/${this.gitNamespace}/${this.packageName}.git`,
@@ -144,7 +143,6 @@ export default class AbstractAutopackageTest extends AbstractPackageTest {
             'keywords',
             'license',
             'author',
-            'homepage',
             'repository',
             'bugs',
             'main',

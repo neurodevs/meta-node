@@ -347,6 +347,7 @@ export default prettierConfigNdx
 
     private removeOldKeysFromPackageJson() {
         const keysToRemove = [
+            'homepage',
             'jest.testPathIgnorePatterns',
             'scripts.build.resolve-paths',
             'scripts.lint.tsc',
@@ -405,7 +406,6 @@ export default prettierConfigNdx
                 'keywords',
                 'license',
                 'author',
-                'homepage',
                 'repository',
                 'bugs',
                 'main',
@@ -432,7 +432,6 @@ export default prettierConfigNdx
             license: this.license,
             author: this.author,
             main: 'build/index.js',
-            homepage: `https://github.com/${this.gitNamespace}/${this.packageName}`,
             repository: {
                 type: 'git',
                 url: `git+https://github.com/${this.gitNamespace}/${this.packageName}.git`,
